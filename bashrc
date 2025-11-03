@@ -92,6 +92,23 @@ fi
 #alias la='ls -A'
 #alias l='ls -CF'
 
+# --- Colorize 'man' pages (Dracula Theme) ---
+
+# This flag tells 'less' to interpret ANSI color codes
+export LESS="-R"
+
+# This tells 'groff' (the formatter for 'man') to not use old-style formatting
+export GROFF_NO_SGR=1
+
+# These variables tell 'less' what color codes to use for text attributes
+export LESS_TERMCAP_mb=$'\e[1;35m'    # Start "blinking" -> Bright Pink
+export LESS_TERMCAP_md=$'\e[1;36m'    # Start "bold" (headings) -> Bright Cyan
+export LESS_TERMCAP_me=$'\e[0m'       # End "blinking/bold"
+export LESS_TERMCAP_so=$'\e[1;45;33m' # Start "standout" (search) -> Yellow on Purple
+export LESS_TERMCAP_se=$'\e[0m'       # End "standout"
+export LESS_TERMCAP_us=$'\e[1;32m'    # Start "underline" (flags) -> Bright Green
+export LESS_TERMCAP_ue=$'\e[0m'       # End "underline"
+
 # --- New 'eza' Aliases (Recommended) ---
 
 # Replace 'ls' with 'eza'
