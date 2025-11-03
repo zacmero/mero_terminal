@@ -75,7 +75,7 @@ esac
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
   test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-  alias ls='ls --color=auto'
+  #alias ls='ls --color=auto' -> using eza now
   #alias dir='dir --color=auto'
   #alias vdir='vdir --color=auto'
 
@@ -88,9 +88,33 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
+#alias ll='ls -alF'
+#alias la='ls -A'
+#alias l='ls -CF'
+
+# --- New 'eza' Aliases (Recommended) ---
+
+# Replace 'ls' with 'eza'
+# --icons: Adds icons (requires a Nerd Font)
+# --git: Adds git status
+alias ls='eza --icons --git'
+
+# 'll' -> Long list, all files, with header
+# -l: long format
+# -a: all files (including hidden)
+# -h: header (adds column titles)
+alias ll='eza -la -h --icons --git'
+
+# 'la' -> List all files (grid view)
+alias la='eza -a --icons --git'
+
+# 'l' -> Long list, no hidden files
+# (This is a common and useful one)
+alias l='eza -l -h --icons --git'
+
+# 'lt' -> Tree view
+# -T: tree
+alias lt='eza -T'
 
 #fzf folder navigation + lazyvin fast open:
 alias v='fzf | xargs -r nvim'
@@ -268,3 +292,5 @@ cd() {
 # Alias 'cat' to 'batcat' (the command for 'bat' on Ubuntu/Debian)
 # This provides syntax highlighting and other features.
 alias cat='batcat'
+
+source /home/zacmero/.config/broot/launcher/bash/br
