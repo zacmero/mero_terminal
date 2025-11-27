@@ -311,3 +311,6 @@ cd() {
 alias cat='batcat'
 
 source /home/zacmero/.config/broot/launcher/bash/br
+
+# opencode
+export PATH=/home/zacmero/.opencode/bin:$PATH
