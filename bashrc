@@ -160,22 +160,22 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+# --- PATHS & EXPORTS (Universal) ---
 
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Default Browser (WSL Friendly)
 export BROWSER=explorer.exe
 
-# pnpm
-export PNPM_HOME="/home/zacmero/.local/share/pnpm"
+# PNPM
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
-*":$PNPM_HOME:"*) ;;
-*) export PATH="$PNPM_HOME:$PATH" ;;
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-# pnpm end
-export PATH="$HOME/.bun/bin:$PATH"
-eval "$(starship init bash)"
-eval "$(zoxide init bash)"
 
 # FZF Manual Setup (Corrected Path)
 # Load FZF key bindings
@@ -188,9 +188,29 @@ if [ -f /usr/share/bash-completion/completions/fzf ]; then
   source /usr/share/bash-completion/completions/fzf
 fi
 
+# BUN
+export PATH="$HOME/.bun/bin:$PATH"
+
+# ATUIN
 export ATUIN_BIN_DIR="$HOME/.atuin/bin"
 export PATH="$ATUIN_BIN_DIR:$PATH"
+
+# CARGO (Rust - often needed for eza/bat alternatives)
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+# LOCAL BIN (Your personal scripts)
+if [ -d "$HOME/.local/bin" ]; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+# OPENCODE
+export PATH="$HOME/.opencode/bin:$PATH"
+
+# Starship & Zoxide
+eval "$(starship init bash)"
+eval "$(zoxide init bash)"
 eval "$(atuin init bash)"
+
 
 export PATH="/home/zacmero/.local/bin:$PATH"
 fastfetch
@@ -312,5 +332,4 @@ alias cat='batcat'
 
 source /home/zacmero/.config/broot/launcher/bash/br
 
-# opencode
-export PATH=/home/zacmero/.opencode/bin:$PATH
+
