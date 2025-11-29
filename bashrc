@@ -212,7 +212,7 @@ eval "$(zoxide init bash)"
 eval "$(atuin init bash)"
 
 
-export PATH="/home/zacmero/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 fastfetch
 
 #################################################################
@@ -330,6 +330,9 @@ cd() {
 # This provides syntax highlighting and other features.
 alias cat='batcat'
 
-source /home/zacmero/.config/broot/launcher/bash/br
+# Only source it if the file actually exists (prevents errors on new machines)
+if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
+    source "$HOME/.config/broot/launcher/bash/br"
+fi
 
 
