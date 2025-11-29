@@ -107,6 +107,35 @@ if ! command -v trash >/dev/null 2>&1; then
     run_sudo apt-get install -y trash-cli
 fi
 
+# --- LazyGit Installation (Universal) ---
+if ! command -v lazygit >/dev/null 2>&1; then
+    echo "Installing LazyGit..."
+    
+    # Get the latest version tag from GitHub
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    
+    # Detect architecture for the download URL
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)  LAZYGIT_ARCH="x86_64" ;;
+        aarch64) LAZYGIT_ARCH="arm64" ;;
+        armv7l)  LAZYGIT_ARCH="armv6" ;; # Raspberry Pi Zero/Old models
+        *)       echo "Unsupported architecture for LazyGit: $ARCH"; exit 1 ;;
+    esac
+
+    echo "Downloading LazyGit v${LAZYGIT_VERSION} for ${LAZYGIT_ARCH}..."
+    
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_${LAZYGIT_ARCH}.tar.gz"
+    
+    tar xf lazygit.tar.gz lazygit
+    sudo install lazygit /usr/local/bin
+    rm lazygit lazygit.tar.gz
+    
+    echo "LazyGit installed successfully!"
+fi
+
+
+
 # --- 3. COMPLEX INSTALLS (Eza, Fastfetch, Neovim) ---
 
 # Fastfetch
