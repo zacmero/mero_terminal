@@ -5,14 +5,43 @@ set -e # Exit immediately if a command exits with a non-zero status
 
 echo "--- Mero Terminal Setup ---"
 
-# Detect Architecture
+# 1.1 Detect Architecture (x86 vs ARM)
 ARCH=$(uname -m)
 case $ARCH in
-    x86_64)  ARCH_TYPE="x64" ;;
-    aarch64) ARCH_TYPE="arm64" ;;
-    *)       echo "Unsupported architecture: $ARCH"; exit 1 ;;
+    x86_64)  
+        ARCH_TYPE="x64" 
+        LAZYGIT_ARCH="x86_64"
+        ;;
+    aarch64) 
+        ARCH_TYPE="arm64" 
+        LAZYGIT_ARCH="arm64"
+        ;;
+    *)       
+        echo "Unsupported architecture: $ARCH"
+        exit 1 
+        ;;
 esac
 echo "Detected Architecture: $ARCH_TYPE"
+
+# 1.2 Detect Distribution (Ubuntu/Debian vs Arch)
+if [ -f /etc/arch-release ]; then
+    DISTRO="Arch"
+    # Arch commands
+    INSTALL_CMD="sudo pacman -S --noconfirm"
+    UPDATE_CMD="sudo pacman -Syu"
+elif [ -f /etc/debian_version ]; then
+    DISTRO="Debian"
+    # Ubuntu/Debian commands
+    INSTALL_CMD="sudo apt-get install -y"
+    UPDATE_CMD="sudo apt-get update"
+else
+    echo "Unsupported OS. Only Arch and Debian/Ubuntu are supported."
+    exit 1
+fi
+
+echo "Detected Distribution: $DISTRO"
+
+# --- END OF CHECKS ---
 
 # Function to run commands with sudo if not root
 run_sudo() {
