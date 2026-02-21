@@ -358,7 +358,7 @@ yazi() {
   command yazi --cwd-file "$tmp" "$@"
   if [ -f "$tmp" ]; then
     local cwd="$(cat "$tmp")"
-    rm -f "$tmp"
+    command rm -f "$tmp"
     if [ -n "$cwd" ] && [ -d "$cwd" ]; then
       cd "$cwd"
     fi
