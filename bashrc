@@ -173,8 +173,8 @@ export BROWSER=explorer.exe
 # PNPM
 export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+*":$PNPM_HOME:"*) ;;
+*) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
 # FZF Manual Setup (Corrected Path)
@@ -200,7 +200,7 @@ export PATH="$ATUIN_BIN_DIR:$PATH"
 
 # LOCAL BIN (Your personal scripts)
 if [ -d "$HOME/.local/bin" ]; then
-    PATH="$HOME/.local/bin:$PATH"
+  PATH="$HOME/.local/bin:$PATH"
 fi
 
 # OPENCODE
@@ -210,7 +210,6 @@ export PATH="$HOME/.opencode/bin:$PATH"
 eval "$(starship init bash)"
 eval "$(zoxide init bash)"
 eval "$(atuin init bash)"
-
 
 export PATH="$HOME/.local/bin:$PATH"
 fastfetch
@@ -332,7 +331,18 @@ alias cat='batcat'
 
 # Only source it if the file actually exists (prevents errors on new machines)
 if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
-    source "$HOME/.config/broot/launcher/bash/br"
+  source "$HOME/.config/broot/launcher/bash/br"
 fi
 
+# OpenClaw Completion
+# source <(openclaw completion --shell bash)
+export PATH="$HOME/bin:$PATH"
+# OpenClaw - Auto-load NVM and run
+openclaw() {
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  nvm use 22 >/dev/null
+  command openclaw "$@"
+}
 
+alias claw="openclaw"
