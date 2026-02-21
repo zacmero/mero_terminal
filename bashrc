@@ -214,6 +214,9 @@ eval "$(atuin init bash)"
 export PATH="$HOME/.local/bin:$PATH"
 fastfetch
 
+# Ensure /usr/local/bin is in PATH for globally installed tools like Yazi
+export PATH="/usr/local/bin:$PATH"
+
 #################################################################
 # ADDITIONS FROM CHRIS TITUS'S BASHRC
 #################################################################
@@ -345,4 +348,20 @@ openclaw() {
   command openclaw "$@"
 }
 
+
 alias claw="openclaw"
+
+# --- Yazi Shell Integration (cd on exit) ---
+# This function allows Yazi to change the shell's current directory upon exit.
+yazi() {
+  local tmp="$(mktemp -u)"
+  command yazi --cwd-file "$tmp" "$@"
+  if [ -f "$tmp" ]; then
+    local cwd="$(cat "$tmp")"
+    rm -f "$tmp"
+    if [ -n "$cwd" ] && [ -d "$cwd" ]; then
+      cd "$cwd"
+    fi
+  fi
+}
+

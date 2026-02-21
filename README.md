@@ -6,8 +6,19 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 -   **Shell:** Bash with `starship` prompt and `zoxide` navigation.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration.
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `lazygit`, `trash-cli`.
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `lazygit`, `trash-cli`, `yazi` (terminal file manager).
 -   **Universal:** Single script setup for different Linux distributions and architectures.
+
+---
+
+## Yazi (Terminal File Manager)
+
+Yazi is an advanced, fast terminal file manager. This setup automatically installs `yazi` and its companion `ya` utility.
+
+### Features:
+*   **Automatic `cd` on exit:** When you quit `yazi`, your shell's current directory will automatically change to the last directory you were browsing in `yazi`.
+*   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
+*   **File operations:** Easily copy, move, delete, and manage files.
 
 ---
 

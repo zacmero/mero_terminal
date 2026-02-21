@@ -163,6 +163,88 @@ if ! command -v lazygit >/dev/null 2>&1; then
     echo "LazyGit installed successfully!"
 fi
 
+# --- Yazi Installation ---
+install_yazi() {
+    echo "Installing Yazi..."
+    local YAZI_INSTALL_DIR="/usr/local/bin"
+    local TEMP_DIR=$(mktemp -d)
+    local YAZI_ARCH_DL="" # Architecture for Yazi download URL
+
+    case "$ARCH" in # Using the previously detected ARCH (uname -m)
+        x86_64)
+            YAZI_ARCH_DL="x86_64"
+            ;;
+        aarch64)
+            YAZI_ARCH_DL="aarch64"
+            ;;
+        *)
+            echo "Error: Unsupported architecture for Yazi: $ARCH. Skipping Yazi installation."
+            rm -rf "$TEMP_DIR"
+            return 1
+            ;;
+    esac
+
+    local github_api_url="https://api.github.com/repos/sxyazi/yazi/releases/latest"
+    local release_info=$(curl -s "$github_api_url")
+    local YAZI_ZIP_URL=""
+    local BUILD_TYPE="gnu"
+
+    if [ -z "$release_info" ]; then
+        echo "Error: Could not fetch Yazi release information from GitHub. Skipping Yazi installation."
+        rm -rf "$TEMP_DIR"
+        return 1
+    fi
+
+    YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/v\d+\.\d+\.\d+/yazi-${YAZI_ARCH_DL}-unknown-linux-gnu\.zip")
+
+    if [ -z "$YAZI_ZIP_URL" ]; then
+        echo "Warning: No 'gnu' build found for $YAZI_ARCH_DL. Trying 'musl' build."
+        BUILD_TYPE="musl"
+        YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/v\d+\.\d+\.\d+/yazi-${YAZI_ARCH_DL}-unknown-linux-musl\.zip")
+    fi
+
+    if [ -z "$YAZI_ZIP_URL" ]; then
+        echo "Error: Could not find a suitable Yazi binary for $YAZI_ARCH_DL. Skipping Yazi installation."
+        rm -rf "$TEMP_DIR"
+        return 1
+    fi
+
+    echo "Downloading Yazi from $YAZI_ZIP_URL..."
+    curl -L -o "$TEMP_DIR/yazi.zip" "$YAZI_ZIP_URL"
+
+    echo "Extracting Yazi..."
+    unzip -q "$TEMP_DIR/yazi.zip" -d "$TEMP_DIR"
+    local EXTRACTED_DIR="$TEMP_DIR/yazi-${YAZI_ARCH_DL}-unknown-linux-${BUILD_TYPE}"
+
+    echo "Moving yazi and ya binaries to $YAZI_INSTALL_DIR..."
+    run_sudo mv "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/"
+    run_sudo mv "$EXTRACTED_DIR/ya" "$YAZI_INSTALL_DIR/"
+
+    echo "Setting permissions for yazi and ya..."
+    run_sudo chmod +x "$YAZI_INSTALL_DIR/yazi"
+    run_sudo chmod +x "$YAZI_INSTALL_DIR/ya"
+
+    echo "Cleaning up temporary Yazi files..."
+    rm -rf "$TEMP_DIR"
+
+    echo "Installing optional Yazi dependencies..."
+    case "$DISTRO" in
+        "Arch")
+            $INSTALL_CMD file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick xclip
+            ;;
+        "Debian")
+            $INSTALL_CMD file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep resvg imagemagick xclip
+            ;;
+    esac
+    echo "Yazi and its dependencies installed."
+}
+
+# Call Yazi installation function
+if ! command -v yazi >/dev/null 2>&1; then
+    install_yazi
+fi
+
+
 
 
 # --- 3. COMPLEX INSTALLS (Eza, Fastfetch, Neovim) ---
