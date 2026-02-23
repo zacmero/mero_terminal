@@ -136,6 +136,12 @@ if ! command -v trash >/dev/null 2>&1; then
     run_sudo apt-get install -y trash-cli
 fi
 
+# GitHub CLI
+if ! command -v gh >/dev/null 2>&1; then
+    echo "Installing GitHub CLI..."
+    run_sudo apt-get install -y gh
+fi
+
 # --- LazyGit Installation (Universal) ---
 if ! command -v lazygit >/dev/null 2>&1; then
     echo "Installing LazyGit..."

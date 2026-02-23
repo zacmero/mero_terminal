@@ -82,7 +82,13 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
     source ~/.bashrc
     ```
 
-2.  **Install a Nerd Font:**
+2.  **Authenticate with GitHub CLI:**
+    Run the following command to log in to GitHub CLI for easier repository manipulation:
+    ```bash
+    gh auth login
+    ```
+
+3.  **Install a Nerd Font:**
     For icons to appear correctly in the prompt (`starship`) and file listing (`eza`), you must install a **Nerd Font** on your host machine (the computer you are viewing the terminal from, e.g., Windows, macOS).
     
     *   **Recommended:** [JetBrainsMono Nerd Font](https://www.nerdfonts.com/font-downloads)
