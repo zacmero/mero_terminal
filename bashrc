@@ -177,16 +177,42 @@ case ":$PATH:" in
 *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-# FZF Manual Setup (Corrected Path)
-# Load FZF key bindings
-if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
+# --- FZF SUPERCHARGED SETUP ---
+# 1. Base Configuration (Colors & Backends)
+# Use ripgrep instead of find for lightning-fast searches that respect .gitignore
+export FZF_DEFAULT_COMMAND="rg --files --hidden --glob '!.git' --glob '!node_modules' --glob '!/mnt/*'"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# FZF_ALT_C: Find directories (falling back to find, but pruning WSL mounts and hidden dirs)
+export FZF_ALT_C_COMMAND="find . -mindepth 1 -maxdepth 5 -type d \( -name .git -o -name node_modules -o -path '/mnt/*' \) -prune -o -print"
+
+# 2. Previews
+# Press CTRL-T to see file previews with bat syntax highlighting
+export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}' --preview-window=right:60% --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+# Press ALT-C to see directory tree previews with eza
+export FZF_ALT_C_OPTS="--preview 'eza -T -L 2 --icons {}' --preview-window=right:40% --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+
+# 3. Fuzzy Autocompletion (**<TAB>) Overrides
+# Make **<TAB> use ripgrep for path completions
+_fzf_compgen_path() {
+  rg --files --hidden --glob '!.git' --glob '!node_modules' --glob '!/mnt/*' "$1" 2> /dev/null
+}
+_fzf_compgen_dir() {
+  find "$1" -mindepth 1 -maxdepth 5 -type d \( -name .git -o -name node_modules -o -path '/mnt/*' \) -prune -o -print 2> /dev/null
+}
+
+# 4. Load System Scripts (Supports both APT and GitHub installs)
+if [ -f ~/.fzf/shell/key-bindings.bash ]; then
+  source ~/.fzf/shell/key-bindings.bash
+elif [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
   source /usr/share/doc/fzf/examples/key-bindings.bash
 fi
 
-# Load FZF auto-completion
-if [ -f /usr/share/bash-completion/completions/fzf ]; then
+if [ -f ~/.fzf/shell/completion.bash ]; then
+  source ~/.fzf/shell/completion.bash
+elif [ -f /usr/share/bash-completion/completions/fzf ]; then
   source /usr/share/bash-completion/completions/fzf
 fi
+# ------------------------------
 
 # BUN
 export PATH="$HOME/.bun/bin:$PATH"

@@ -23,6 +23,17 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 
 ---
 
+## FZF (Fuzzy Finder)
+
+FZF is deeply integrated into this terminal setup, utilizing `ripgrep` for blazing-fast searches that respect `.gitignore` files, and `bat`/`eza` for live syntax and directory previews.
+
+### Shortcuts:
+*   **`CTRL-T`**: Search for files in the current directory tree with a live syntax-highlighted preview. Pressing Enter pastes the file path into your command line.
+*   **`ALT-C`**: Search for directories with a live tree-view preview. Pressing Enter instantly `cd`s into that directory.
+*   **`**<TAB>`**: Fuzzy auto-completion for any command. Type `cd **` or `vim **` and press `<TAB>` to open the fuzzy finder for paths.
+
+---
+
 ## ⚠️ Prerequisites (Read First)
 
 ### Setting a Sudo Password (Cloud/VPS Users)
