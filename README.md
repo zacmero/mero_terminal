@@ -4,9 +4,10 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 ## Features
 
--   **Shell:** Bash with `starship` prompt and `zoxide` navigation.
+-   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration.
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `lazygit`, `trash-cli`, `yazi` (terminal file manager).
+-   **Image Viewers:** `chafa` and `ueberzugpp` for robust terminal image previews.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
 ---
@@ -70,7 +71,8 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, etc.
-*   **Installs Tools:** Sets up Starship, Zoxide, Eza, Neovim, LazyGit (fetching the latest binaries compatible with your system).
+*   **Installs Tools:** Sets up Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (fetching the latest binaries compatible with your system where applicable).
+*   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
 *   **Backups & Symlinks:** Automatically backs up your existing `.bashrc` and `.profile` to `~/dotfiles_backup` and links the new ones.
 
 ---

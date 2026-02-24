@@ -169,6 +169,43 @@ if ! command -v lazygit >/dev/null 2>&1; then
     echo "LazyGit installed successfully!"
 fi
 
+# --- Image Viewers (chafa, ueberzugpp) ---
+install_image_viewers() {
+    echo "Installing Image Viewers (chafa, ueberzugpp)..."
+    case "$DISTRO" in
+        "Arch")
+            if ! command -v chafa >/dev/null 2>&1 || ! command -v ueberzugpp >/dev/null 2>&1; then
+                $INSTALL_CMD chafa ueberzugpp
+            fi
+            ;;
+        "Debian")
+            if ! command -v chafa >/dev/null 2>&1; then
+                $INSTALL_CMD chafa
+            fi
+            
+            if ! command -v ueberzugpp >/dev/null 2>&1; then
+                local UBUNTU_VERSION
+                if command -v lsb_release >/dev/null 2>&1; then
+                    UBUNTU_VERSION=$(lsb_release -rs)
+                else
+                    UBUNTU_VERSION="22.04" # Fallback
+                fi
+                
+                local OBS_REPO="xUbuntu_$UBUNTU_VERSION"
+                echo "Adding OBS repo for ueberzugpp ($OBS_REPO)..."
+                echo "deb http://download.opensuse.org/repositories/home:/justkidding/${OBS_REPO}/ /" | run_sudo tee /etc/apt/sources.list.d/home:justkidding.list
+                curl -fsSL "https://download.opensuse.org/repositories/home:justkidding/${OBS_REPO}/Release.key" | gpg --dearmor | run_sudo tee /etc/apt/trusted.gpg.d/home_justkidding.gpg > /dev/null
+                
+                # We ignore apt update errors here as github cli repo might be broken on user's machine
+                run_sudo apt-get update || true
+                run_sudo apt-get install -y ueberzugpp
+            fi
+            ;;
+    esac
+}
+
+install_image_viewers
+
 # --- Yazi Installation ---
 install_yazi() {
     echo "Installing Yazi..."
