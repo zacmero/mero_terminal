@@ -5,6 +5,10 @@ set -e # Exit immediately if a command exits with a non-zero status
 
 echo "--- Mero Terminal Setup ---"
 
+# Clear any previous failed installation logs
+rm -f "$HOME/failed-installations.txt"
+touch "$HOME/failed-installations.txt"
+
 # 1.1 Detect Architecture (x86 vs ARM)
 ARCH=$(uname -m)
 case $ARCH in
@@ -198,7 +202,13 @@ install_image_viewers() {
                 
                 # We ignore apt update errors here as github cli repo might be broken on user's machine
                 run_sudo apt-get update || true
-                run_sudo apt-get install -y ueberzugpp
+                
+                # We also ignore apt install errors here because this mirror is notoriously flaky
+                # If it fails, we log it and continue instead of crashing the whole install script
+                run_sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ueberzugpp || {
+                    echo "WARNING: Failed to install ueberzugpp. The OBS mirror might be down."
+                    echo "ueberzugpp (Image Viewer)" >> "$HOME/failed-installations.txt"
+                }
             fi
             ;;
     esac
@@ -310,10 +320,13 @@ if ! command -v fastfetch >/dev/null 2>&1; then
     echo "Installing Fastfetch..."
     if run_sudo add-apt-repository --yes ppa:zhangsongcui3371/fastfetch; then
         run_sudo apt-get update
-        run_sudo apt-get install -y fastfetch
+        run_sudo DEBIAN_FRONTEND=noninteractive apt-get install -y fastfetch || {
+            echo "WARNING: Failed to install fastfetch."
+            echo "fastfetch (System Info)" >> "$HOME/failed-installations.txt"
+        }
     else
-        echo "PPA failed (likely Debian/WSL). Downloading binary..."
-        # Fallback logic here if needed, or skip
+        echo "PPA failed (likely Debian/WSL). Logging error and continuing..."
+        echo "fastfetch (System Info)" >> "$HOME/failed-installations.txt"
     fi
 fi
 
@@ -416,3 +429,10 @@ else
 fi
 
 echo "--- Setup Complete! Restart your terminal. ---"
+
+if [ -s "$HOME/failed-installations.txt" ]; then
+    echo ""
+    echo "⚠️  WARNING: Some non-essential packages failed to install:"
+    cat "$HOME/failed-installations.txt"
+    echo "Check your network or mirrors and try installing them manually later."
+fi
