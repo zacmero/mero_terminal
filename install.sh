@@ -308,7 +308,7 @@ if [ ! -f "$FONT_DIR/CaskaydiaCoveNerdFont-Regular.ttf" ]; then
     echo "Installing Cascadia Code Nerd Font..."
     mkdir -p "$FONT_DIR"
     curl -fLo "$FONT_DIR/CascadiaCode.zip" https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip
-    unzip -o "$FONT_DIR/CascadiaCode.zip" -d "$FONT_DIR"
+    unzip -qo "$FONT_DIR/CascadiaCode.zip" -d "$FONT_DIR"
     rm "$FONT_DIR/CascadiaCode.zip"
     if command -v fc-cache >/dev/null 2>&1; then
         fc-cache -fv "$FONT_DIR"
@@ -346,22 +346,28 @@ fi
 
 # Neovim (Latest Stable)
 echo "Installing/Updating Neovim..."
-# Detect if we should use AppImage (simpler) or Tarball
-# Most modern distros support FUSE, so AppImage is best. If not, Tarball.
 NVIM_DIR="/opt/nvim"
+NVIM_TAR=""
 
-if [ "$ARCH_TYPE" == "x64" ]; then
-    echo "Downloading Neovim for x64..."
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-    run_sudo rm -rf $NVIM_DIR
-    run_sudo tar -C /opt -xzf nvim-linux64.tar.gz
-    run_sudo mv /opt/nvim-linux64 $NVIM_DIR
-    rm nvim-linux64.tar.gz
+if [ "$ARCH_TYPE" = "x64" ]; then
+    NVIM_TAR="nvim-linux-x86_64.tar.gz"
+elif [ "$ARCH_TYPE" = "arm64" ]; then
+    NVIM_TAR="nvim-linux-arm64.tar.gz"
+fi
+
+if [ -n "$NVIM_TAR" ]; then
+    echo "Downloading Neovim ($NVIM_TAR)..."
+    if curl -fLO "https://github.com/neovim/neovim/releases/latest/download/$NVIM_TAR"; then
+        run_sudo rm -rf $NVIM_DIR
+        run_sudo tar -C /opt -xzf "$NVIM_TAR"
+        run_sudo mv /opt/${NVIM_TAR%.tar.gz} $NVIM_DIR
+        rm "$NVIM_TAR"
+    else
+        echo "WARNING: Failed to download Neovim. Check your internet connection or GitHub status."
+        echo "Neovim (Editor)" >> "$HOME/failed-installations.txt"
+    fi
 else
-    # ARM logic (building from source is often safer, but lets try binary)
-    # Neovim doesn't always provide official ARM binaries in the main release tag usually.
-    # Fallback to apt for ARM if binary not found, or use snap
-    echo "ARM Detected. Using APT for Neovim (Warning: might be older) or Snap."
+    echo "ARM or Unknown Detected without binary. Using APT for Neovim (Warning: might be older)."
     run_sudo apt-get install -y neovim
 fi
 
