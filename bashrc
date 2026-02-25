@@ -214,6 +214,15 @@ elif [ -f /usr/share/bash-completion/completions/fzf ]; then
 fi
 # ------------------------------
 
+# --- TMUX SETUP ---
+# Force UTF-8 drawing for icons (especially for themes like Dracula)
+alias tmux='tmux -u'
+# Helper aliases
+alias ta='tmux attach -t'
+alias tn='tmux new -s'
+alias tl='tmux ls'
+# ------------------
+
 # BUN
 export PATH="$HOME/.bun/bin:$PATH"
 

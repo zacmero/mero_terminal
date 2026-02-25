@@ -292,6 +292,19 @@ fi
 
 # --- 3. COMPLEX INSTALLS (Eza, Fastfetch, Neovim) ---
 
+# Cascadia Code Nerd Font
+FONT_DIR="$HOME/.local/share/fonts"
+if [ ! -f "$FONT_DIR/CaskaydiaCoveNerdFont-Regular.ttf" ]; then
+    echo "Installing Cascadia Code Nerd Font..."
+    mkdir -p "$FONT_DIR"
+    curl -fLo "$FONT_DIR/CascadiaCode.zip" https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip
+    unzip -o "$FONT_DIR/CascadiaCode.zip" -d "$FONT_DIR"
+    rm "$FONT_DIR/CascadiaCode.zip"
+    if command -v fc-cache >/dev/null 2>&1; then
+        fc-cache -fv "$FONT_DIR"
+    fi
+fi
+
 # Fastfetch
 if ! command -v fastfetch >/dev/null 2>&1; then
     echo "Installing Fastfetch..."
@@ -344,10 +357,21 @@ if [ -f "$NVIM_DIR/bin/nvim" ]; then
     run_sudo ln -sf "$NVIM_DIR/bin/nvim" /usr/local/bin/nvim
 fi
 
-# LazyVim
+# LazyVim (Symlink from dotfiles)
 if [ ! -d "$HOME/.config/nvim" ]; then
-    echo "Installing LazyVim..."
-    git clone https://github.com/LazyVim/starter "$HOME/.config/nvim"
+    echo "Setting up Neovim configuration..."
+    ln -s "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
+fi
+
+# TMUX Package Manager (TPM)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+    echo "Installing TMUX Package Manager (TPM)..."
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+# Apply a quick patch to tmux-resurrect to hide the annoying "file not found" message on new installs
+if [ -f "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" ]; then
+    sed -i 's/display_message "Tmux resurrect file not found!"//g' "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
 fi
 
 # --- 4. SYMLINKING DOTFILES ---
@@ -385,7 +409,8 @@ if [ -d "$DOTFILES_DIR" ]; then
     # List of files to symlink (Add exactly the filenames you have in the repo)
     link_file "bashrc"
     link_file "profile"
-    link_file "bash-preexec.sh" 
+    link_file "bash-preexec.sh"
+    link_file "tmux.conf"
 else
     echo "Error: Dotfiles directory not found at $DOTFILES_DIR"
 fi

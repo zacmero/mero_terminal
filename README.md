@@ -5,8 +5,8 @@ This repository contains my personal dotfiles for a portable, universal terminal
 ## Features
 
 -   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
--   **Editor:** Neovim (Latest Stable) with LazyVim configuration.
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `lazygit`, `trash-cli`, `yazi` (terminal file manager).
+-   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager).
 -   **Image Viewers:** `chafa` and `ueberzugpp` for robust terminal image previews.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -31,6 +31,22 @@ FZF is deeply integrated into this terminal setup, utilizing `ripgrep` for blazi
 *   **`CTRL-T`**: Search for files in the current directory tree with a live syntax-highlighted preview. Pressing Enter pastes the file path into your command line.
 *   **`ALT-C`**: Search for directories with a live tree-view preview. Pressing Enter instantly `cd`s into that directory.
 *   **`**<TAB>`**: Fuzzy auto-completion for any command. Type `cd **` or `vim **` and press `<TAB>` to open the fuzzy finder for paths.
+
+---
+
+## Tmux
+
+Tmux is configured for a robust multiplexing experience with plugins managed by TPM.
+
+### Features:
+*   **Prefix:** Set to `CTRL+Space` for better ergonomics.
+*   **Splits:** Use `prefix + /` for vertical splits and `prefix + -` for horizontal splits.
+*   **Theme:** Dracula theme for a clean aesthetic with True Color support.
+*   **Navigation:** Seamless `vim-tmux-navigator` integration (use `CTRL+h/j/k/l` to move between Vim splits and Tmux panes).
+*   **Index & Mouse:** Windows and panes start at index `1`. Full mouse support enabled.
+*   **Yanking:** `tmux-yank` is set up with vi-mode keybindings.
+*   **Auto-Save & Restore:** Uses `tmux-resurrect` and `tmux-continuum` to continuously auto-save your environment every 15 minutes and automatically restore it on startup.
+*   **Plugins:** All plugins are automatically installed/updated using TPM (`prefix + I` to install).
 
 ---
 
@@ -102,9 +118,9 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
     ```
 
 3.  **Install a Nerd Font:**
-    For icons to appear correctly in the prompt (`starship`) and file listing (`eza`), you must install a **Nerd Font** on your host machine (the computer you are viewing the terminal from, e.g., Windows, macOS).
+    For icons to appear correctly in the prompt (`starship`) and file listing (`eza`), you must install a **Nerd Font** on your host machine (the computer you are viewing the terminal from, e.g., Windows, macOS). The `install.sh` script automatically downloads **Cascadia Code Nerd Font** on Linux systems, but you should install it on your local client as well.
     
-    *   **Recommended:** [JetBrainsMono Nerd Font](https://www.nerdfonts.com/font-downloads)
+    *   **Recommended:** [Cascadia Code Nerd Font](https://www.nerdfonts.com/font-downloads)
     *   **VS Code / Terminal Users:** Remember to configure your terminal emulator to use the downloaded font.
 
 ---
