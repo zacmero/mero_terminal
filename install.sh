@@ -62,6 +62,27 @@ run_sudo() {
     fi
 }
 
+# Function to detect if the machine has a GUI / Desktop Environment installed
+has_gui() {
+    # Check active display variables
+    if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+        return 0
+    fi
+    # Check for installed display managers / sessions
+    if [ -d "/usr/share/xsessions" ] && [ "$(ls -A /usr/share/xsessions 2>/dev/null)" ]; then
+        return 0
+    fi
+    if [ -d "/usr/share/wayland-sessions" ] && [ "$(ls -A /usr/share/wayland-sessions 2>/dev/null)" ]; then
+        return 0
+    fi
+    # Check for WSLg (Windows Subsystem for Linux GUI)
+    if [ -d "/mnt/wslg" ]; then
+        return 0
+    fi
+    
+    return 1
+}
+
 # Check for essential tools
 echo "Checking prerequisites..."
 if ! command -v git >/dev/null 2>&1; then
@@ -175,43 +196,60 @@ fi
 
 # --- Image Viewers (chafa, ueberzugpp) ---
 install_image_viewers() {
-    echo "Installing Image Viewers (chafa, ueberzugpp)..."
+    echo "Installing Image Viewer (chafa)..."
     case "$DISTRO" in
         "Arch")
-            if ! command -v chafa >/dev/null 2>&1 || ! command -v ueberzugpp >/dev/null 2>&1; then
-                $INSTALL_CMD chafa ueberzugpp
+            if ! command -v chafa >/dev/null 2>&1; then
+                $INSTALL_CMD chafa
             fi
             ;;
         "Debian")
             if ! command -v chafa >/dev/null 2>&1; then
                 $INSTALL_CMD chafa
             fi
-            
-            if ! command -v ueberzugpp >/dev/null 2>&1; then
-                local UBUNTU_VERSION
-                if command -v lsb_release >/dev/null 2>&1; then
-                    UBUNTU_VERSION=$(lsb_release -rs)
-                else
-                    UBUNTU_VERSION="22.04" # Fallback
-                fi
-                
-                local OBS_REPO="xUbuntu_$UBUNTU_VERSION"
-                echo "Adding OBS repo for ueberzugpp ($OBS_REPO)..."
-                echo "deb http://download.opensuse.org/repositories/home:/justkidding/${OBS_REPO}/ /" | run_sudo tee /etc/apt/sources.list.d/home:justkidding.list
-                curl -fsSL "https://download.opensuse.org/repositories/home:justkidding/${OBS_REPO}/Release.key" | gpg --dearmor | run_sudo tee /etc/apt/trusted.gpg.d/home_justkidding.gpg > /dev/null
-                
-                # We ignore apt update errors here as github cli repo might be broken on user's machine
-                run_sudo apt-get update || true
-                
-                # We also ignore apt install errors here because this mirror is notoriously flaky
-                # If it fails, we log it and continue instead of crashing the whole install script
-                run_sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ueberzugpp || {
-                    echo "WARNING: Failed to install ueberzugpp. The OBS mirror might be down."
-                    echo "ueberzugpp (Image Viewer)" >> "$HOME/failed-installations.txt"
-                }
-            fi
             ;;
     esac
+
+    if has_gui; then
+        echo "GUI Detected! Attempting to install ueberzugpp (Advanced Image Viewer)..."
+        case "$DISTRO" in
+            "Arch")
+                if ! command -v ueberzugpp >/dev/null 2>&1; then
+                    $INSTALL_CMD ueberzugpp || {
+                        echo "WARNING: Failed to install ueberzugpp."
+                        echo "ueberzugpp (GUI Image Viewer)" >> "$HOME/failed-installations.txt"
+                    }
+                fi
+                ;;
+            "Debian")
+                if ! command -v ueberzugpp >/dev/null 2>&1; then
+                    local UBUNTU_VERSION
+                    if command -v lsb_release >/dev/null 2>&1; then
+                        UBUNTU_VERSION=$(lsb_release -rs)
+                    else
+                        UBUNTU_VERSION="22.04" # Fallback
+                    fi
+                    
+                    local OBS_REPO="xUbuntu_$UBUNTU_VERSION"
+                    echo "Adding OBS repo for ueberzugpp ($OBS_REPO)..."
+                    echo "deb http://download.opensuse.org/repositories/home:/justkidding/${OBS_REPO}/ /" | run_sudo tee /etc/apt/sources.list.d/home:justkidding.list
+                    curl -fsSL "https://download.opensuse.org/repositories/home:justkidding/${OBS_REPO}/Release.key" | gpg --dearmor | run_sudo tee /etc/apt/trusted.gpg.d/home_justkidding.gpg > /dev/null
+                    
+                    # We ignore apt update errors here as github cli repo might be broken on user's machine
+                    run_sudo apt-get update || true
+                    
+                    # We also ignore apt install errors here because this mirror is notoriously flaky
+                    # If it fails, we log it and continue instead of crashing the whole install script
+                    run_sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ueberzugpp || {
+                        echo "WARNING: Failed to install ueberzugpp. The OBS mirror might be down."
+                        echo "ueberzugpp (GUI Image Viewer)" >> "$HOME/failed-installations.txt"
+                    }
+                fi
+                ;;
+        esac
+    else
+        echo "No GUI detected (Headless Server). Skipping ueberzugpp installation."
+    fi
 }
 
 install_image_viewers
