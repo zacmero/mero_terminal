@@ -25,3 +25,7 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+# Set default editor to Neovim
+export VISUAL="nvim"
+export EDITOR="$VISUAL"
