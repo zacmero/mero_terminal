@@ -6,7 +6,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 -   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -20,6 +20,18 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Automatic `cd` on exit:** When you quit `yazi`, your shell's current directory will automatically change to the last directory you were browsing in `yazi`.
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
 *   **File operations:** Easily copy, move, delete, and manage files.
+*   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
+
+---
+
+## Croc (File Transfer)
+
+Croc is a tool that allows any two computers to simply and securely transfer files and folders without port-forwarding or setting up a server.
+
+### Features:
+*   **Simple Sending:** Run `croc send <file>` to generate a random code.
+*   **Simple Receiving:** On the receiving computer, run `croc <code>` to download the file.
+*   **Secure & Fast:** Uses relay servers but encrypts end-to-end using PAKE (Password-Authenticated Key Exchange).
 
 ---
 

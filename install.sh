@@ -161,6 +161,12 @@ if ! command -v trash >/dev/null 2>&1; then
     run_sudo apt-get install -y trash-cli
 fi
 
+# Croc (Universal File Transfer)
+if ! command -v croc >/dev/null 2>&1; then
+    echo "Installing Croc..."
+    curl -fsSL https://getcroc.schollz.com | bash
+fi
+
 # GitHub CLI
 if ! command -v gh >/dev/null 2>&1; then
     echo "Installing GitHub CLI..."
@@ -418,6 +424,20 @@ fi
 if [ ! -d "$HOME/.config/nvim" ]; then
     echo "Setting up Neovim configuration..."
     ln -s "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
+fi
+
+# Yazi (Symlink from dotfiles)
+if [ ! -d "$HOME/.config/yazi" ]; then
+    echo "Setting up Yazi configuration..."
+    mkdir -p "$HOME/.config"
+    ln -s "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
+fi
+
+# Starship (Symlink from dotfiles)
+if [ ! -f "$HOME/.config/starship.toml" ]; then
+    echo "Setting up Starship configuration..."
+    mkdir -p "$HOME/.config"
+    ln -s "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
 fi
 
 # TMUX Package Manager (TPM)

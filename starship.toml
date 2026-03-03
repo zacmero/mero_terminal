@@ -1,0 +1,56 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+
+
+# Disable the newline at the start of the prompt
+add_newline = false
+
+# --- Module Configurations ---
+
+[directory]
+style = "blue"
+truncation_length = 4
+truncate_to_repo = true # Shortens path to the repo root
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[localip]
+disabled = false
+
+
+[bun] 
+disabled = true
+
+# Shows the current git branch
+[git_branch]
+symbol = " "
+style = "bold yellow"
+ignore_branches = ["my-personal-work"]
+
+# Shows the status of the git branch (the [✘!?] part)
+[git_status]
+style = "red"
+conflicted = "✘"
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+# Shows the version of your project from package.json, etc.
+[package]
+symbol = "📦 "
+disabled = true
+
+# Only show these if a command takes more than 2 seconds
+[cmd_duration]
+min_time = 2000
+show_milliseconds = true
+style = "yellow"
