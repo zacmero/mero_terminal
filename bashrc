@@ -400,3 +400,4 @@ yazi() {
   fi
 }
 
+eval "$(/home/zacmero/.local/bin/mise activate bash)"
