@@ -6,7 +6,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 -   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -32,6 +32,17 @@ Croc is a tool that allows any two computers to simply and securely transfer fil
 *   **Simple Sending:** Run `croc send <file>` to generate a random code.
 *   **Simple Receiving:** On the receiving computer, run `croc <code>` to download the file.
 *   **Secure & Fast:** Uses relay servers but encrypts end-to-end using PAKE (Password-Authenticated Key Exchange).
+
+---
+
+## Mise-en-place (Environment Manager)
+
+Mise (formerly `rtx`) is a blazing-fast polyglot tool version manager (like `asdf`) and environment variable manager. It is installed automatically and hooked into Bash.
+
+### Features:
+*   **Drop-in Replacement:** Replaces `asdf`, `nvm`, `pyenv`, and more in a single tool.
+*   **Fast:** Written in Rust, it activates environments significantly faster than traditional shell scripts.
+*   **Auto-Activation:** When you enter a directory with a `.mise.toml` or `.tool-versions` file, `mise` automatically activates the required tool versions.
 
 ---
 

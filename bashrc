@@ -400,4 +400,9 @@ yazi() {
   fi
 }
 
-eval "$(/home/zacmero/.local/bin/mise activate bash)"
+# Mise-en-place (Environment & Tool Manager)
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate bash)"
+elif [ -f "$HOME/.local/bin/mise" ]; then
+  eval "$("$HOME/.local/bin/mise" activate bash)"
+fi

@@ -104,6 +104,12 @@ run_sudo apt-get install -y build-essential unzip tar gzip python3-venv tmux
 
 # Install specific tools based on logic
 
+# Mise-en-place (Environment & Tool Manager)
+if [ ! -f "$HOME/.local/bin/mise" ] && ! command -v mise >/dev/null 2>&1; then
+    echo "Installing Mise..."
+    curl https://mise.run | sh
+fi
+
 # NVM
 if [ ! -d "$HOME/.nvm" ]; then
     echo "Installing NVM..."
