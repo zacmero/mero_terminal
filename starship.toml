@@ -18,7 +18,7 @@ success_symbol = "[❯](bold green)"
 error_symbol = "[❯](bold red)"
 
 [localip]
-disabled = false
+disabled = true
 
 
 [bun] 
