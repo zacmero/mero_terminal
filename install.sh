@@ -98,7 +98,7 @@ fi
 # Update System
 echo "Updating package lists..."
 run_sudo apt-get update
-run_sudo apt-get install -y build-essential unzip tar gzip python3-venv tmux
+run_sudo apt-get install -y build-essential unzip tar gzip python3-venv tmux file
 
 # --- 2. TOOLS INSTALLATION ---
 
@@ -329,23 +329,23 @@ install_yazi() {
 
     echo "Cleaning up temporary Yazi files..."
     rm -rf "$TEMP_DIR"
-
-    echo "Installing optional Yazi dependencies..."
-    case "$DISTRO" in
-        "Arch")
-            $INSTALL_CMD file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick xclip
-            ;;
-        "Debian")
-            $INSTALL_CMD file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep resvg imagemagick xclip
-            ;;
-    esac
-    echo "Yazi and its dependencies installed."
+    echo "Yazi installed."
 }
 
 # Call Yazi installation function
 if ! command -v yazi >/dev/null 2>&1; then
     install_yazi
 fi
+
+echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
+case "$DISTRO" in
+    "Arch")
+        $INSTALL_CMD file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick xclip
+        ;;
+    "Debian")
+        $INSTALL_CMD file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep imagemagick xclip
+        ;;
+esac
 
 
 
