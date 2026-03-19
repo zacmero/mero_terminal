@@ -399,15 +399,25 @@ alias claw="openclaw"
 # --- Yazi Shell Integration (cd on exit) ---
 # This function allows Yazi to change the shell's current directory upon exit.
 yazi() {
-  local tmp="$(mktemp -u)"
+  local tmp="$(mktemp)"
+  local start_dir="$(pwd -P)"
+  local target_dir="$start_dir"
+  local exit_status=0
+
   command yazi --cwd-file "$tmp" "$@"
-  if [ -f "$tmp" ]; then
+  exit_status=$?
+
+  if [ "$exit_status" -eq 0 ] && [ -f "$tmp" ]; then
     local cwd="$(cat "$tmp")"
-    command rm -f "$tmp"
     if [ -n "$cwd" ] && [ -d "$cwd" ]; then
-      cd "$cwd"
+      target_dir="$cwd"
     fi
   fi
+
+  command rm -f "$tmp"
+  builtin cd "$target_dir" || return "$exit_status"
+  command ls -A
+  return "$exit_status"
 }
 
 # Mise-en-place (Environment & Tool Manager)
