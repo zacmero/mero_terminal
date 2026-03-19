@@ -173,6 +173,7 @@ export BROWSER=explorer.exe
 # Default editor for interactive shells and tools like Yazi.
 export VISUAL="nvim"
 export EDITOR="$VISUAL"
+export TERMINAL="wezterm"
 
 # PNPM
 export PNPM_HOME="$HOME/.local/share/pnpm"
@@ -251,7 +252,10 @@ eval "$(zoxide init bash)"
 eval "$(atuin init bash)"
 
 export PATH="$HOME/.local/bin:$PATH"
-fastfetch
+if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
+  export MERO_FASTFETCH_SHOWN=1
+  fastfetch
+fi
 
 # Ensure /usr/local/bin is in PATH for globally installed tools like Yazi
 export PATH="/usr/local/bin:$PATH"

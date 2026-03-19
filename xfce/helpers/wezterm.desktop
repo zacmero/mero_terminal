@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=X-XFCE-Helper
+Icon=org.wezfurlong.wezterm
+Name=WezTerm
+StartupNotify=false
+X-XFCE-Binaries=wezterm;wezterm-gui;
+X-XFCE-Category=TerminalEmulator
+X-XFCE-Commands=%B start --always-new-process;
+X-XFCE-CommandsWithParameter=%B start --always-new-process -- %s;

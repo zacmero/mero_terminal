@@ -5,6 +5,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 ## Features
 
 -   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
+-   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
@@ -22,6 +23,19 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
+
+---
+
+## WezTerm
+
+WezTerm is now the default terminal installed by `mero_terminal`, with its config tracked in this repo under `wezterm/`.
+
+### Features:
+*   **Repo-managed config:** The installer symlinks `wezterm/` into `~/.config/wezterm`.
+*   **Default-terminal handoff:** The installer sets `TERMINAL=wezterm`, registers a desktop entry, and configures XFCE helper integration so new sessions prefer WezTerm.
+*   **XFCE shortcut repair:** On XFCE systems with an existing shortcut config, `Ctrl+Alt+T` is rewritten to launch WezTerm directly instead of relying on the previous terminal helper path.
+*   **Cross-distro install path:** Arch uses the native package, while Debian/Ubuntu falls back to an official WezTerm release if needed.
+*   **Pane shortcuts:** `Ctrl+Shift+/` splits vertically and `Ctrl+Shift+-` splits horizontally.
 
 ---
 
@@ -134,9 +148,9 @@ The installer now detects existing managed files and directories, backs them up 
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, and related packages using the correct package manager for the host (`pacman` on Arch, `apt` on Debian/Ubuntu).
-*   **Installs Tools:** Sets up Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
+*   **Installs Tools:** Sets up WezTerm, Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/wezterm`, `~/.config/yazi`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
 ---
@@ -170,4 +184,6 @@ To update your dotfiles on any machine to the latest version from the repository
 cd ~/mero_terminal
 git pull origin master
 ./install.sh
+```
+
 Commands prefixed with a leading space are intentionally excluded from shell history, and the tracked Atuin config also filters those commands so they are not recorded there either.

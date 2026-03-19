@@ -120,6 +120,12 @@ install_package_group() {
                 "Debian") install_packages gh ;;
             esac
             ;;
+        wezterm)
+            case "$DISTRO" in
+                "Arch") install_packages wezterm ;;
+                "Debian") install_packages libegl1-mesa libxkbcommon0 ;;
+            esac
+            ;;
         yazi-optional)
             case "$DISTRO" in
                 "Arch")
@@ -171,6 +177,159 @@ install_package_group() {
             return 1
             ;;
     esac
+}
+
+set_xfce_helper() {
+    local helpers_file="$HOME/.config/xfce4/helpers.rc"
+
+    mkdir -p "$(dirname "$helpers_file")"
+
+    if [ ! -f "$helpers_file" ]; then
+        printf 'TerminalEmulator=wezterm\n' > "$helpers_file"
+        return
+    fi
+
+    if grep -q '^TerminalEmulator=' "$helpers_file"; then
+        sed -i 's/^TerminalEmulator=.*/TerminalEmulator=wezterm/' "$helpers_file"
+    else
+        printf '\nTerminalEmulator=wezterm\n' >> "$helpers_file"
+    fi
+}
+
+set_xfce_terminal_shortcut() {
+    local wezterm_bin=$1
+    local shortcut_file="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml"
+
+    [ -n "$wezterm_bin" ] || return 0
+    [ -f "$shortcut_file" ] || return 0
+
+    if grep -q 'name="&lt;Primary&gt;&lt;Alt&gt;t"' "$shortcut_file"; then
+        perl -0pi -e 's{^[ \t]*<property name="&lt;Primary&gt;&lt;Alt&gt;t" type="string" value="[^"]*"/>}{      <property name="&lt;Primary&gt;&lt;Alt&gt;t" type="string" value="'"$wezterm_bin"' start --always-new-process"/>}m' "$shortcut_file"
+    fi
+}
+
+install_wezterm_release_fallback() {
+    local temp_dir release_info asset_url asset_name binary_path
+    temp_dir=$(mktemp -d)
+
+    release_info=$(curl -fsSL "https://api.github.com/repos/wez/wezterm/releases/latest") || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    case "$ARCH_TYPE" in
+        x64)
+            asset_url=$(printf '%s' "$release_info" \
+                | grep -oP '"browser_download_url": "\K[^"]+' \
+                | grep -E '/(WezTerm|wezterm)-.*((Ubuntu|Debian).*(AppImage|\.deb)|linux.*x86_64.*\.(tar\.xz|tar\.gz)|x86_64.*\.(AppImage|deb))$' \
+                | head -n1)
+            ;;
+        arm64)
+            asset_url=$(printf '%s' "$release_info" \
+                | grep -oP '"browser_download_url": "\K[^"]+' \
+                | grep -iE '/(WezTerm|wezterm)-.*((Ubuntu|Debian|linux).*(aarch64|arm64).*(AppImage|\.deb|tar\.xz|tar\.gz)|(aarch64|arm64).*\.(AppImage|deb|tar\.xz|tar\.gz))$' \
+                | head -n1)
+            ;;
+    esac
+
+    if [ -z "$asset_url" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    asset_name=$(basename "$asset_url")
+    if ! curl -fL "$asset_url" -o "$temp_dir/$asset_name"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    case "$asset_name" in
+        *.AppImage)
+            run_sudo install -Dm755 "$temp_dir/$asset_name" /usr/local/bin/wezterm || {
+                rm -rf "$temp_dir"
+                return 1
+            }
+            run_sudo ln -sf /usr/local/bin/wezterm /usr/local/bin/wezterm-gui || true
+            ;;
+        *.deb)
+            run_sudo dpkg -i "$temp_dir/$asset_name" || {
+                run_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -f -y || {
+                    rm -rf "$temp_dir"
+                    return 1
+                }
+                run_sudo dpkg -i "$temp_dir/$asset_name" || {
+                    rm -rf "$temp_dir"
+                    return 1
+                }
+            }
+            ;;
+        *.tar.xz|*.tar.gz)
+            mkdir -p "$temp_dir/extract"
+            tar -xf "$temp_dir/$asset_name" -C "$temp_dir/extract" || {
+                rm -rf "$temp_dir"
+                return 1
+            }
+            binary_path=$(find "$temp_dir/extract" -type f \( -name wezterm -o -name wezterm-gui \) | head -n1)
+            if [ -z "$binary_path" ]; then
+                rm -rf "$temp_dir"
+                return 1
+            fi
+            run_sudo install -Dm755 "$binary_path" /usr/local/bin/wezterm || {
+                rm -rf "$temp_dir"
+                return 1
+            }
+            run_sudo ln -sf /usr/local/bin/wezterm /usr/local/bin/wezterm-gui || true
+            ;;
+        *)
+            rm -rf "$temp_dir"
+            return 1
+            ;;
+    esac
+
+    rm -rf "$temp_dir"
+}
+
+install_wezterm() {
+    echo "Installing WezTerm..."
+
+    case "$DISTRO" in
+        "Arch")
+            install_package_group wezterm
+            ;;
+        "Debian")
+            install_package_group wezterm || true
+            if ! command -v wezterm >/dev/null 2>&1; then
+                install_wezterm_release_fallback
+            fi
+            ;;
+    esac
+}
+
+set_default_terminal() {
+    local wezterm_bin=""
+
+    wezterm_bin=$(command -v wezterm 2>/dev/null || true)
+    if [ -z "$wezterm_bin" ]; then
+        echo "WezTerm binary not found. Skipping default terminal configuration."
+        return
+    fi
+
+    if command -v update-alternatives >/dev/null 2>&1; then
+        run_sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator "$wezterm_bin" 70 || true
+        run_sudo update-alternatives --set x-terminal-emulator "$wezterm_bin" || true
+    fi
+
+    mkdir -p "$HOME/.local/share/xfce4/helpers"
+    link_path "$MERO_TERMINAL_DIR/xfce/helpers/wezterm.desktop" "$HOME/.local/share/xfce4/helpers/wezterm.desktop" "XFCE WezTerm helper"
+    set_xfce_helper
+    set_xfce_terminal_shortcut "$wezterm_bin"
+
+    mkdir -p "$HOME/.local/share/applications"
+    link_path "$MERO_TERMINAL_DIR/applications/org.wezfurlong.wezterm.desktop" "$HOME/.local/share/applications/org.wezfurlong.wezterm.desktop" "WezTerm desktop entry"
+
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true
+    fi
 }
 
 ensure_backup_dir() {
@@ -334,6 +493,11 @@ fi
 if ! command -v gh >/dev/null 2>&1; then
     echo "Installing GitHub CLI..."
     install_package_group github-cli || log_optional_failure "GitHub CLI"
+fi
+
+# WezTerm
+if ! command -v wezterm >/dev/null 2>&1; then
+    install_wezterm || log_optional_failure "WezTerm"
 fi
 
 # --- LazyGit Installation (Universal) ---
@@ -572,10 +736,12 @@ fi
 
 # Managed config symlinks
 link_path "$MERO_TERMINAL_DIR/nvim" "$HOME/.config/nvim" "Neovim configuration"
+link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.local/bin"
+set_default_terminal
 
 # TMUX Package Manager (TPM)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
