@@ -29,4 +29,6 @@ fi
 # Set default editor to Neovim
 export VISUAL="nvim"
 export EDITOR="$VISUAL"
-export TERMINAL="wezterm"
+if command -v wezterm >/dev/null 2>&1; then
+    export TERMINAL="wezterm"
+fi

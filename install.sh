@@ -1,9 +1,53 @@
 #!/bin/bash
 set -e # Exit immediately if a command exits with a non-zero status
 
+INSTALL_WEZTERM="${MERO_INSTALL_WEZTERM:-}"
+
+prompt_yes_no() {
+    local prompt_text=$1
+    local default_answer=${2:-y}
+    local answer=""
+
+    while true; do
+        if [ "$default_answer" = "y" ]; then
+            read -r -p "$prompt_text [Y/n] " answer
+            answer=${answer:-y}
+        else
+            read -r -p "$prompt_text [y/N] " answer
+            answer=${answer:-n}
+        fi
+
+        case "$answer" in
+            y|Y|yes|YES)
+                return 0
+                ;;
+            n|N|no|NO)
+                return 1
+                ;;
+            *)
+                echo "Please answer y or n."
+                ;;
+        esac
+    done
+}
+
 # --- 1. PRE-FLIGHT CHECKS ---
 
 echo "--- Mero Terminal Setup ---"
+
+if [ -z "$INSTALL_WEZTERM" ]; then
+    if [ -t 0 ]; then
+        if prompt_yes_no "Install custom terminal (WezTerm)?" "y"; then
+            INSTALL_WEZTERM=1
+        else
+            INSTALL_WEZTERM=0
+        fi
+    else
+        INSTALL_WEZTERM=1
+    fi
+fi
+
+echo "WezTerm installation: $([ "$INSTALL_WEZTERM" = "1" ] && echo enabled || echo skipped)"
 
 # Clear any previous failed installation logs
 rm -f "$HOME/failed-installations.txt"
@@ -496,7 +540,7 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 # WezTerm
-if ! command -v wezterm >/dev/null 2>&1; then
+if [ "$INSTALL_WEZTERM" = "1" ] && ! command -v wezterm >/dev/null 2>&1; then
     install_wezterm || log_optional_failure "WezTerm"
 fi
 
@@ -736,12 +780,16 @@ fi
 
 # Managed config symlinks
 link_path "$MERO_TERMINAL_DIR/nvim" "$HOME/.config/nvim" "Neovim configuration"
-link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
+if [ "$INSTALL_WEZTERM" = "1" ]; then
+    link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
+fi
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.local/bin"
-set_default_terminal
+if [ "$INSTALL_WEZTERM" = "1" ]; then
+    set_default_terminal
+fi
 
 # TMUX Package Manager (TPM)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then

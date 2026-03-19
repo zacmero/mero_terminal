@@ -173,7 +173,9 @@ export BROWSER=explorer.exe
 # Default editor for interactive shells and tools like Yazi.
 export VISUAL="nvim"
 export EDITOR="$VISUAL"
-export TERMINAL="wezterm"
+if command -v wezterm >/dev/null 2>&1; then
+  export TERMINAL="wezterm"
+fi
 
 # PNPM
 export PNPM_HOME="$HOME/.local/share/pnpm"
