@@ -107,13 +107,13 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/zacmero/mero_terminal.git ~/dotfiles
+    git clone https://github.com/zacmero/mero_terminal.git ~/mero_terminal
     ```
 
 2.  **Run the installation script:**
 
     ```bash
-    cd ~/dotfiles
+    cd ~/mero_terminal
     chmod +x install.sh
     ./install.sh
     ```
@@ -123,7 +123,7 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, etc.
 *   **Installs Tools:** Sets up Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up your existing `.bashrc` and `.profile` to `~/dotfiles_backup` and links the new ones.
+*   **Backups & Symlinks:** Automatically backs up your existing `.bashrc` and `.profile` to `~/mero_terminal_backup` and links the new ones.
 
 ---
 
@@ -153,6 +153,6 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
 To update your dotfiles on any machine to the latest version from the repository:
 
 ```bash
-cd ~/dotfiles
+cd ~/mero_terminal
 git pull origin master
 ./install.sh

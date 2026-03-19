@@ -426,24 +426,24 @@ if [ -f "$NVIM_DIR/bin/nvim" ]; then
     run_sudo ln -sf "$NVIM_DIR/bin/nvim" /usr/local/bin/nvim
 fi
 
-# LazyVim (Symlink from dotfiles)
+# LazyVim (Symlink from mero_terminal)
 if [ ! -d "$HOME/.config/nvim" ]; then
     echo "Setting up Neovim configuration..."
-    ln -s "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
+    ln -s "$HOME/mero_terminal/nvim" "$HOME/.config/nvim"
 fi
 
-# Yazi (Symlink from dotfiles)
+# Yazi (Symlink from mero_terminal)
 if [ ! -d "$HOME/.config/yazi" ]; then
     echo "Setting up Yazi configuration..."
     mkdir -p "$HOME/.config"
-    ln -s "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
+    ln -s "$HOME/mero_terminal/yazi" "$HOME/.config/yazi"
 fi
 
-# Starship (Symlink from dotfiles)
+# Starship (Symlink from mero_terminal)
 if [ ! -f "$HOME/.config/starship.toml" ]; then
     echo "Setting up Starship configuration..."
     mkdir -p "$HOME/.config"
-    ln -s "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
+    ln -s "$HOME/mero_terminal/starship.toml" "$HOME/.config/starship.toml"
 fi
 
 # TMUX Package Manager (TPM)
@@ -457,22 +457,22 @@ if [ -f "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" ]; then
     sed -i 's/display_message "Tmux resurrect file not found!"//g' "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
 fi
 
-# --- 4. SYMLINKING DOTFILES ---
+# --- 4. SYMLINKING MERO_TERMINAL ---
 
-DOTFILES_DIR="$HOME/dotfiles"
-BACKUP_DIR="$HOME/dotfiles_backup/$(date +%Y%m%d_%H%M%S)"
+MERO_TERMINAL_DIR="$HOME/mero_terminal"
+BACKUP_DIR="$HOME/mero_terminal_backup/$(date +%Y%m%d_%H%M%S)"
 
 echo "Creating backup directory at $BACKUP_DIR..."
 mkdir -p "$BACKUP_DIR"
 
 link_file() {
     local filename=$1
-    local source_path="$DOTFILES_DIR/$filename"
+    local source_path="$MERO_TERMINAL_DIR/$filename"
     local dest_path="$HOME/.$filename"
 
     # Verify source file exists in the repo
     if [ ! -f "$source_path" ]; then
-        echo "Warning: Source file '$filename' not found in $DOTFILES_DIR. Skipping."
+        echo "Warning: Source file '$filename' not found in $MERO_TERMINAL_DIR. Skipping."
         return
     fi
 
@@ -488,14 +488,14 @@ link_file() {
 }
 
 # Ensure we are in the right directory
-if [ -d "$DOTFILES_DIR" ]; then
+if [ -d "$MERO_TERMINAL_DIR" ]; then
     # List of files to symlink (Add exactly the filenames you have in the repo)
     link_file "bashrc"
     link_file "profile"
     link_file "bash-preexec.sh"
     link_file "tmux.conf"
 else
-    echo "Error: Dotfiles directory not found at $DOTFILES_DIR"
+    echo "Error: Mero_terminal directory not found at $MERO_TERMINAL_DIR"
 fi
 
 echo "--- Setup Complete! Restart your terminal. ---"
