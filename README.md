@@ -35,7 +35,8 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Default-terminal handoff:** The installer sets `TERMINAL=wezterm`, registers a desktop entry, and configures XFCE helper integration so new sessions prefer WezTerm.
 *   **XFCE shortcut repair:** On XFCE systems with an existing shortcut config, `Ctrl+Alt+T` is rewritten to launch WezTerm directly instead of relying on the previous terminal helper path.
 *   **Cross-distro install path:** Arch uses the native package, while Debian/Ubuntu falls back to an official WezTerm release if needed.
-*   **Pane shortcuts:** `Ctrl+Shift+/` splits vertically and `Ctrl+Shift+-` splits horizontally.
+*   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
+*   **More legible defaults:** Starts larger and uses a slightly heavier Cascadia Nerd Mono setup to match the native XFCE terminal more closely.
 
 ---
 

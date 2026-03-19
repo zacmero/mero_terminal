@@ -6,14 +6,29 @@ config.automatically_reload_config = true
 config.check_for_updates = false
 config.default_prog = { os.getenv("SHELL") or "/bin/bash", "-l" }
 
-config.font = wezterm.font_with_fallback({
-  "CaskaydiaCove Nerd Font Mono",
-  "CaskaydiaCove Nerd Font",
-  "JetBrainsMono Nerd Font",
-  "Noto Color Emoji",
-})
-config.font_size = 12.5
-config.line_height = 1.05
+config.font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Regular" })
+config.font_rules = {
+  {
+    intensity = "Bold",
+    italic = false,
+    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Bold" }),
+  },
+  {
+    intensity = "Normal",
+    italic = true,
+    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { style = "Italic" }),
+  },
+  {
+    intensity = "Bold",
+    italic = true,
+    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Bold", style = "Italic" }),
+  },
+}
+config.font_size = 13.0
+config.line_height = 1.0
+config.cell_width = 1.0
+config.initial_cols = 140
+config.initial_rows = 40
 
 config.window_decorations = "RESIZE"
 config.window_padding = {
@@ -37,22 +52,22 @@ config.keys = {
   {
     key = "/",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "?",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "-",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "_",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
   },
 }
 
