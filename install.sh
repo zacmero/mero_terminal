@@ -716,7 +716,7 @@ install_package_group yazi-optional || log_optional_failure "Yazi optional depen
 
 # --- 3. COMPLEX INSTALLS (Eza, Fastfetch, Neovim) ---
 
-# Cascadia Code Nerd Font
+# Nerd Fonts for terminal UI
 FONT_DIR="$HOME/.local/share/fonts"
 if [ ! -f "$FONT_DIR/CaskaydiaCoveNerdFont-Regular.ttf" ]; then
     echo "Installing Cascadia Code Nerd Font..."
@@ -797,11 +797,6 @@ if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm || log_optional_failure "TPM"
 fi
 
-# Apply a quick patch to tmux-resurrect to hide the annoying "file not found" message on new installs
-if [ -f "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" ]; then
-    sed -i 's/display_message "Tmux resurrect file not found!"//g' "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
-fi
-
 # --- 4. SYMLINKING MERO_TERMINAL ---
 
 if [ -d "$MERO_TERMINAL_DIR" ]; then
@@ -811,6 +806,16 @@ if [ -d "$MERO_TERMINAL_DIR" ]; then
     link_path "$MERO_TERMINAL_DIR/tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 else
     echo "Error: Mero_terminal directory not found at $MERO_TERMINAL_DIR"
+fi
+
+if [ -x "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]; then
+    echo "Installing tmux plugins via TPM..."
+    "$HOME/.tmux/plugins/tpm/bin/install_plugins" || log_optional_failure "tmux plugins"
+fi
+
+# Apply a quick patch to tmux-resurrect to hide the annoying "file not found" message on new installs
+if [ -f "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" ]; then
+    sed -i '/display_message "Tmux resurrect file not found!"/d' "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
 fi
 
 echo "--- Setup Complete! Restart your terminal. ---"

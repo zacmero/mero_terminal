@@ -6,25 +6,11 @@ config.automatically_reload_config = true
 config.check_for_updates = false
 config.default_prog = { os.getenv("SHELL") or "/bin/bash", "-l" }
 
-config.font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Regular" })
-config.font_rules = {
-  {
-    intensity = "Bold",
-    italic = false,
-    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Bold" }),
-  },
-  {
-    intensity = "Normal",
-    italic = true,
-    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { style = "Italic" }),
-  },
-  {
-    intensity = "Bold",
-    italic = true,
-    font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "Bold", style = "Italic" }),
-  },
-}
-config.font_size = 13.0
+config.font = wezterm.font_with_fallback({
+  "CaskaydiaCove Nerd Font Mono",
+  "Noto Color Emoji",
+})
+config.font_size = 19.0
 config.line_height = 1.0
 config.cell_width = 1.0
 config.initial_cols = 140
@@ -40,8 +26,7 @@ config.window_padding = {
 config.window_background_opacity = 0.96
 config.adjust_window_size_when_changing_font_size = false
 
-config.enable_tab_bar = true
-config.hide_tab_bar_if_only_one_tab = true
+config.enable_tab_bar = false
 config.use_fancy_tab_bar = false
 config.tab_max_width = 32
 
@@ -72,56 +57,32 @@ config.keys = {
 }
 
 config.colors = {
-  foreground = "#f8f8f2",
-  background = "#10131a",
-  cursor_bg = "#8be9fd",
-  cursor_fg = "#10131a",
-  cursor_border = "#8be9fd",
-  selection_fg = "#10131a",
-  selection_bg = "#50fa7b",
+  foreground = "#CBE0F0",
+  background = "#011423",
+  cursor_bg = "#47FF9C",
+  cursor_fg = "#011423",
+  cursor_border = "#47FF9C",
+  selection_fg = "#CBE0F0",
+  selection_bg = "#033259",
   ansi = {
-    "#1b1f2a",
-    "#ff5c8a",
-    "#58f6a4",
-    "#ffd866",
-    "#76c7ff",
-    "#ff79c6",
-    "#8be9fd",
-    "#e6edf3",
+    "#214969",
+    "#E52E2E",
+    "#44FFB1",
+    "#FFE073",
+    "#0FC5ED",
+    "#a277ff",
+    "#24EAF7",
+    "#24EAF7",
   },
   brights = {
-    "#4b5263",
-    "#ff7aa2",
-    "#7dfcc4",
-    "#ffe38a",
-    "#93d7ff",
-    "#ff92d0",
-    "#a8f0ff",
-    "#ffffff",
-  },
-  tab_bar = {
-    background = "#0a0d14",
-    active_tab = {
-      bg_color = "#1c2333",
-      fg_color = "#8be9fd",
-      intensity = "Bold",
-    },
-    inactive_tab = {
-      bg_color = "#10131a",
-      fg_color = "#8a93a5",
-    },
-    inactive_tab_hover = {
-      bg_color = "#151b26",
-      fg_color = "#f8f8f2",
-    },
-    new_tab = {
-      bg_color = "#10131a",
-      fg_color = "#8a93a5",
-    },
-    new_tab_hover = {
-      bg_color = "#151b26",
-      fg_color = "#f8f8f2",
-    },
+    "#214969",
+    "#E52E2E",
+    "#44FFB1",
+    "#FFE073",
+    "#A277FF",
+    "#a277ff",
+    "#24EAF7",
+    "#24EAF7",
   },
 }
 

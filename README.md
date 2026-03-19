@@ -36,7 +36,8 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **XFCE shortcut repair:** On XFCE systems with an existing shortcut config, `Ctrl+Alt+T` is rewritten to launch WezTerm directly instead of relying on the previous terminal helper path.
 *   **Cross-distro install path:** Arch uses the native package, while Debian/Ubuntu falls back to an official WezTerm release if needed.
 *   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
-*   **More legible defaults:** Starts larger and uses a slightly heavier Cascadia Nerd Mono setup to match the native XFCE terminal more closely.
+*   **Lean surface:** The internal tab bar is disabled so the terminal stays visually minimal and relies on the window manager and shell context instead.
+*   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` to stay aligned with the rest of this setup.
 
 ---
 
@@ -85,7 +86,7 @@ Tmux is configured for a robust multiplexing experience with plugins managed by 
 *   **Index & Mouse:** Windows and panes start at index `1`. Full mouse support enabled.
 *   **Yanking:** `tmux-yank` is set up with vi-mode keybindings.
 *   **Auto-Save & Restore:** Uses `tmux-resurrect` and `tmux-continuum` to continuously auto-save your environment every 15 minutes and automatically restore it on startup.
-*   **Plugins:** All plugins are automatically installed/updated using TPM (`prefix + I` to install).
+*   **Plugins:** TPM is installed automatically, and the repo installer now installs the declared tmux plugins for you as part of setup.
 
 ---
 
