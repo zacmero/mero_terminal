@@ -118,12 +118,25 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
     ./install.sh
     ```
 
+### Migrating from the old `~/dotfiles` layout
+
+If a VM still uses the previous `~/dotfiles` repo layout, you do **not** need to manually delete old symlinks first.
+
+```bash
+git clone https://github.com/zacmero/mero_terminal.git ~/mero_terminal
+cd ~/mero_terminal
+./install.sh
+```
+
+The installer now detects existing managed files and directories, backs them up to `~/mero_terminal_backup`, and relinks them to the current repo automatically.
+
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, etc.
 *   **Installs Tools:** Sets up Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up your existing `.bashrc` and `.profile` to `~/mero_terminal_backup` and links the new ones.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, and `~/.config/starship.toml`.
+*   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
 ---
 

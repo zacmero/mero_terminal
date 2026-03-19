@@ -47,6 +47,11 @@ echo "Detected Distribution: $DISTRO"
 
 # --- END OF CHECKS ---
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MERO_TERMINAL_DIR="${MERO_TERMINAL_DIR:-$SCRIPT_DIR}"
+BACKUP_DIR="$HOME/mero_terminal_backup/$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR_INITIALIZED=0
+
 # Function to run commands with sudo if not root
 run_sudo() {
     if [ "$EUID" -eq 0 ]; then
@@ -60,6 +65,45 @@ run_sudo() {
             exit 1
         fi
     fi
+}
+
+ensure_backup_dir() {
+    if [ "$BACKUP_DIR_INITIALIZED" -eq 0 ]; then
+        echo "Creating backup directory at $BACKUP_DIR..."
+        mkdir -p "$BACKUP_DIR"
+        BACKUP_DIR_INITIALIZED=1
+    fi
+}
+
+link_path() {
+    local source_path=$1
+    local dest_path=$2
+    local label=${3:-$(basename "$dest_path")}
+    local desired_target=""
+    local current_target=""
+
+    if [ ! -e "$source_path" ] && [ ! -L "$source_path" ]; then
+        echo "Warning: Source for $label not found at $source_path. Skipping."
+        return
+    fi
+
+    mkdir -p "$(dirname "$dest_path")"
+    desired_target=$(readlink -f "$source_path" 2>/dev/null || printf '%s' "$source_path")
+
+    if [ -L "$dest_path" ] || [ -e "$dest_path" ]; then
+        current_target=$(readlink -f "$dest_path" 2>/dev/null || true)
+        if [ -n "$current_target" ] && [ "$current_target" = "$desired_target" ]; then
+            echo "$label already linked correctly."
+            return
+        fi
+
+        ensure_backup_dir
+        echo "Backing up existing $label..."
+        mv "$dest_path" "$BACKUP_DIR/"
+    fi
+
+    echo "Linking $label -> $source_path"
+    ln -s "$source_path" "$dest_path"
 }
 
 # Function to detect if the machine has a GUI / Desktop Environment installed
@@ -426,25 +470,10 @@ if [ -f "$NVIM_DIR/bin/nvim" ]; then
     run_sudo ln -sf "$NVIM_DIR/bin/nvim" /usr/local/bin/nvim
 fi
 
-# LazyVim (Symlink from mero_terminal)
-if [ ! -d "$HOME/.config/nvim" ]; then
-    echo "Setting up Neovim configuration..."
-    ln -s "$HOME/mero_terminal/nvim" "$HOME/.config/nvim"
-fi
-
-# Yazi (Symlink from mero_terminal)
-if [ ! -d "$HOME/.config/yazi" ]; then
-    echo "Setting up Yazi configuration..."
-    mkdir -p "$HOME/.config"
-    ln -s "$HOME/mero_terminal/yazi" "$HOME/.config/yazi"
-fi
-
-# Starship (Symlink from mero_terminal)
-if [ ! -f "$HOME/.config/starship.toml" ]; then
-    echo "Setting up Starship configuration..."
-    mkdir -p "$HOME/.config"
-    ln -s "$HOME/mero_terminal/starship.toml" "$HOME/.config/starship.toml"
-fi
+# Managed config symlinks
+link_path "$MERO_TERMINAL_DIR/nvim" "$HOME/.config/nvim" "Neovim configuration"
+link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
+link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 
 # TMUX Package Manager (TPM)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
@@ -459,41 +488,11 @@ fi
 
 # --- 4. SYMLINKING MERO_TERMINAL ---
 
-MERO_TERMINAL_DIR="$HOME/mero_terminal"
-BACKUP_DIR="$HOME/mero_terminal_backup/$(date +%Y%m%d_%H%M%S)"
-
-echo "Creating backup directory at $BACKUP_DIR..."
-mkdir -p "$BACKUP_DIR"
-
-link_file() {
-    local filename=$1
-    local source_path="$MERO_TERMINAL_DIR/$filename"
-    local dest_path="$HOME/.$filename"
-
-    # Verify source file exists in the repo
-    if [ ! -f "$source_path" ]; then
-        echo "Warning: Source file '$filename' not found in $MERO_TERMINAL_DIR. Skipping."
-        return
-    fi
-
-    # Backup existing file or symlink if it exists
-    if [ -e "$dest_path" ] || [ -L "$dest_path" ]; then
-        echo "Backing up existing .$filename..."
-        mv "$dest_path" "$BACKUP_DIR/"
-    fi
-
-    # Create the symbolic link
-    echo "Linking $filename -> .$filename"
-    ln -s "$source_path" "$dest_path"
-}
-
-# Ensure we are in the right directory
 if [ -d "$MERO_TERMINAL_DIR" ]; then
-    # List of files to symlink (Add exactly the filenames you have in the repo)
-    link_file "bashrc"
-    link_file "profile"
-    link_file "bash-preexec.sh"
-    link_file "tmux.conf"
+    link_path "$MERO_TERMINAL_DIR/bashrc" "$HOME/.bashrc" ".bashrc"
+    link_path "$MERO_TERMINAL_DIR/profile" "$HOME/.profile" ".profile"
+    link_path "$MERO_TERMINAL_DIR/bash-preexec.sh" "$HOME/.bash-preexec.sh" ".bash-preexec.sh"
+    link_path "$MERO_TERMINAL_DIR/tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 else
     echo "Error: Mero_terminal directory not found at $MERO_TERMINAL_DIR"
 fi
