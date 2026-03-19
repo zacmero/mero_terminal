@@ -309,10 +309,25 @@ distribution() {
 
 # Show the current version of the operating system (Corrected to use batcat)
 ver() {
+  local bat_cmd=""
+  if command -v bat >/dev/null 2>&1; then
+    bat_cmd="bat"
+  elif command -v batcat >/dev/null 2>&1; then
+    bat_cmd="batcat"
+  fi
+
   if [ -r /etc/os-release ]; then
-    batcat /etc/os-release
+    if [ -n "$bat_cmd" ]; then
+      "$bat_cmd" /etc/os-release
+    else
+      command cat /etc/os-release
+    fi
   elif [ -r /etc/issue ]; then
-    batcat /etc/issue
+    if [ -n "$bat_cmd" ]; then
+      "$bat_cmd" /etc/issue
+    else
+      command cat /etc/issue
+    fi
   else
     echo "Error: Cannot determine OS version."
   fi
@@ -373,9 +388,12 @@ cd() {
   fi
 }
 
-# Alias 'cat' to 'batcat' (the command for 'bat' on Ubuntu/Debian)
-# This provides syntax highlighting and other features.
-alias cat='batcat'
+# Alias 'cat' to whichever bat binary exists on the current distro.
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+elif command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+fi
 
 # Only source it if the file actually exists (prevents errors on new machines)
 if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
@@ -416,7 +434,7 @@ yazi() {
 
   command rm -f "$tmp"
   builtin cd "$target_dir" || return "$exit_status"
-  command ls -A
+  ls
   return "$exit_status"
 }
 
