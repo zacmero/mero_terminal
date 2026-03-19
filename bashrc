@@ -170,6 +170,10 @@ export NVM_DIR="$HOME/.nvm"
 # Default Browser (WSL Friendly)
 export BROWSER=explorer.exe
 
+# Default editor for interactive shells and tools like Yazi.
+export VISUAL="nvim"
+export EDITOR="$VISUAL"
+
 # PNPM
 export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in

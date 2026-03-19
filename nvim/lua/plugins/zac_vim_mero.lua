@@ -28,21 +28,41 @@ return {
   -- 4. Add the Dendron/Obsidian plugin
   {
     "epwalsh/obsidian.nvim",
-    -- This is an example of a more complex setup
     version = "*", -- Use the latest stable release
     lazy = true,
     ft = "markdown", -- Only load when you open a markdown file
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
-    opts = {
-      -- This is where you would tell it where your notes are
-      workspaces = {
-        {
-          name = "my-notes",
-          path = "~/Documents/MyNotes", -- Change this to your notes folder
+    opts = function()
+      local workspaces = {}
+
+      local configured_vault = vim.env.OBSIDIAN_VAULT_DIR
+      if configured_vault and configured_vault ~= "" then
+        table.insert(workspaces, {
+          name = "vault",
+          path = configured_vault,
+        })
+      end
+
+      table.insert(workspaces, {
+        name = "current-markdown-dir",
+        path = function()
+          return assert(vim.fs.dirname(vim.api.nvim_buf_get_name(0)))
+        end,
+        overrides = {
+          notes_subdir = vim.NIL,
+          new_notes_location = "current_dir",
+          templates = {
+            folder = vim.NIL,
+          },
+          disable_frontmatter = true,
         },
-      },
-    },
+      })
+
+      return {
+        workspaces = workspaces,
+      }
+    end,
   },
 }

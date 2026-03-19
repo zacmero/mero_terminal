@@ -1,6 +1,5 @@
 fd --> tool for make "find" better
-stow --> tool for managin mero_terminal: https://www.youtube.com/watch?v=y6XCebnB9gs
-croc --> amazing file transfer tool
+stow --> tool for managin mero_terminal: https://www.youtube.com/watch?v=y6XCebnB9g
 figlet/toilet --> nice text to display
 lolcat --> You can pipe anything into this to make it rainbow.
 mapscii --> A literal world map made of ASCII characters that you can zoom into.

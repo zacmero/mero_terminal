@@ -1,0 +1,1 @@
+When finishing work in mero_terminal, at minimum run `bash -n install.sh` for installer edits and syntax-check any new Python modules with `python3 -m py_compile`. If gh-home is touched, run its launcher once to verify either a rendered dashboard or a friendly auth/network error path. Update README.md when adding a new tool or changing installation behavior.
