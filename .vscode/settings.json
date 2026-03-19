@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "bashrc": "shellscript",
+    "profile": "shellscript",
+    "bash-preexec.sh": "shellscript",
+    "install.sh": "shellscript"
+  }
+}

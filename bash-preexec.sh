@@ -85,18 +85,10 @@ __bp_require_not_readonly() {
     done
 }
 
-# Remove ignorespace and or replace ignoreboth from HISTCONTROL
-# so we can accurately invoke preexec with a command from our
-# history even if it starts with a space.
+# Preserve HISTCONTROL so commands intentionally prefixed with a space stay out
+# of history for security-sensitive terminal usage.
 __bp_adjust_histcontrol() {
-    local histcontrol
-    histcontrol="${HISTCONTROL:-}"
-    histcontrol="${histcontrol//ignorespace}"
-    # Replace ignoreboth with ignoredups
-    if [[ "$histcontrol" == *"ignoreboth"* ]]; then
-        histcontrol="ignoredups:${histcontrol//ignoreboth}"
-    fi
-    export HISTCONTROL="$histcontrol"
+    export HISTCONTROL="${HISTCONTROL:-ignoreboth}"
 }
 
 # This variable describes whether we are currently in "interactive mode";

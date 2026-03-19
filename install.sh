@@ -574,6 +574,7 @@ fi
 link_path "$MERO_TERMINAL_DIR/nvim" "$HOME/.config/nvim" "Neovim configuration"
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
+link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.local/bin"
 
 # TMUX Package Manager (TPM)
