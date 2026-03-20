@@ -248,12 +248,28 @@ fi
 # OPENCODE
 export PATH="$HOME/.opencode/bin:$PATH"
 
-# Starship & Zoxide
-eval "$(starship init bash)"
+# LOCAL BIN needs to be available before prompt init so shells can see
+# repo-installed tools like oh-my-posh on fresh login sessions.
+if [ -d "$HOME/.local/bin" ]; then
+  PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Oh My Posh (P10K-style), with Starship kept only as a fallback.
+if command -v oh-my-posh >/dev/null 2>&1; then
+  POSH_THEME="$HOME/.config/oh-my-posh/mero-rainbow-lean.omp.json"
+
+  if [ -f "$POSH_THEME" ]; then
+    export POSH_THEME
+    eval "$(oh-my-posh init bash --config "$POSH_THEME")"
+  else
+    eval "$(oh-my-posh init bash --config powerlevel10k_rainbow)"
+  fi
+elif command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
+
 eval "$(zoxide init bash)"
 eval "$(atuin init bash)"
-
-export PATH="$HOME/.local/bin:$PATH"
 if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
   export MERO_FASTFETCH_SHOWN=1
   fastfetch

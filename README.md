@@ -4,7 +4,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 ## Features
 
--   **Shell:** Bash with `starship` prompt, `zoxide` navigation, and `atuin` shell history.
+-   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager).
@@ -24,7 +24,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
-*   **Post-exit listing:** After `yazi` exits, the shell prints a plain `ls -A` listing of the resulting directory.
+*   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.
 
 ---
 
@@ -39,7 +39,7 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Cross-distro install path:** Arch uses the native package, while Debian/Ubuntu falls back to an official WezTerm release if needed.
 *   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
 *   **Lean surface:** The internal tab bar is disabled so the terminal stays visually minimal and relies on the window manager and shell context instead.
-*   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` to stay aligned with the rest of this setup.
+*   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
 
 ---
 
@@ -160,9 +160,9 @@ The installer now detects existing managed files and directories, backs them up 
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, and related packages using the correct package manager for the host (`pacman` on Arch, `apt` on Debian/Ubuntu).
-*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Starship, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
+*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
 ---
@@ -181,7 +181,7 @@ The installer now detects existing managed files and directories, backs them up 
     ```
 
 3.  **Install a Nerd Font:**
-    For icons to appear correctly in the prompt (`starship`) and file listing (`eza`), you must install a **Nerd Font** on your host machine (the computer you are viewing the terminal from, e.g., Windows, macOS). The `install.sh` script automatically downloads **Cascadia Code Nerd Font** on Linux systems, but you should install it on your local client as well.
+    For icons to appear correctly in the prompt (`oh-my-posh`) and file listing (`eza`), you must install a **Nerd Font** on your host machine (the computer you are viewing the terminal from, e.g., Windows, macOS). The `install.sh` script automatically downloads **Cascadia Code Nerd Font** on Linux systems, but you should install the matching font on your local client as well.
     
     *   **Recommended:** [Cascadia Code Nerd Font](https://www.nerdfonts.com/font-downloads)
     *   **VS Code / Terminal Users:** Remember to configure your terminal emulator to use the downloaded font.

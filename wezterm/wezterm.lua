@@ -10,7 +10,7 @@ config.font = wezterm.font_with_fallback({
   "CaskaydiaCove Nerd Font Mono",
   "Noto Color Emoji",
 })
-config.font_size = 19.0
+config.font_size = 17.0
 config.line_height = 1.0
 config.cell_width = 1.0
 config.initial_cols = 140

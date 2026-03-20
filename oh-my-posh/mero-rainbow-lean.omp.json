@@ -1,0 +1,145 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "console_title_template": "{{ .Shell }} in {{ .Folder }}",
+  "final_space": true,
+  "version": 4,
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "foreground": "#1a5f7a",
+          "style": "plain",
+          "template": "╭─",
+          "type": "text"
+        },
+        {
+          "foreground": "#3c82f6",
+          "properties": {
+            "fetch_version": false,
+            "missing_command_text": "BUN"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "bun"
+        },
+        {
+          "foreground": "#42e66c",
+          "properties": {
+            "fetch_package_manager": true,
+            "fetch_version": false,
+            "missing_command_text": "JS"
+          },
+          "style": "plain",
+          "template": "{{ if .PackageManagerIcon }}{{ .PackageManagerIcon }}{{ else }}{{ end }} ",
+          "type": "node"
+        },
+        {
+          "foreground": "#ffe073",
+          "properties": {
+            "display_mode": "files",
+            "fetch_virtual_env": false,
+            "missing_command_text": "PY"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "python"
+        },
+        {
+          "foreground": "#7fd5ea",
+          "properties": {
+            "fetch_version": false,
+            "missing_command_text": "GO"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "go"
+        },
+        {
+          "foreground": "#f74c00",
+          "properties": {
+            "fetch_version": false,
+            "missing_command_text": "RS"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "rust"
+        },
+        {
+          "foreground": "#e64747",
+          "properties": {
+            "fetch_version": false,
+            "missing_command_text": "RB"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "ruby"
+        },
+        {
+          "foreground": "#e26ee5",
+          "properties": {
+            "fetch_version": false,
+            "missing_command_text": "JV"
+          },
+          "style": "plain",
+          "template": " ",
+          "type": "java"
+        },
+        {
+          "foreground": "#19e5ff",
+          "properties": {
+            "home_icon": "~",
+            "style": "full"
+          },
+          "style": "plain",
+          "template": "{{ if eq .PWD \"/\" }} {{ end }}{{ .Path }} ",
+          "type": "path"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "right",
+      "filler": "<#16384c>·</>",
+      "overflow": "hide",
+      "segments": [
+        {
+          "foreground": "#a277ff",
+          "properties": {
+            "branch_ahead_icon": "⇡",
+            "branch_behind_icon": "⇣",
+            "branch_icon": "",
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "plain",
+          "template": " <#a277ff> {{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}</>{{ if .Working.Changed }}{{ if regexMatch \"\\\\?[0-9]+\" .Working.String }} <#42e66c>{{ regexFind \"\\\\?[0-9]+\" .Working.String }}</>{{ end }}{{ if regexMatch \"~[0-9]+\" .Working.String }} <#ffe073>{{ regexFind \"~[0-9]+\" .Working.String | replace \"~\" \"!\" }}</>{{ end }}{{ if regexMatch \"-[0-9]+\" .Working.String }} <#ff5f5f>{{ regexFind \"-[0-9]+\" .Working.String | replace \"-\" \"✘\" }}</>{{ end }}{{ if regexMatch \">[0-9]+\" .Working.String }} <#a277ff>{{ regexFind \">[0-9]+\" .Working.String | replace \">\" \"»\" }}</>{{ end }}{{ end }}{{ if .Staging.Changed }}{{ if regexMatch \"\\\\+[0-9]+\" .Staging.String }} <#42e66c>{{ regexFind \"\\\\+[0-9]+\" .Staging.String }}</>{{ end }}{{ if regexMatch \">[0-9]+\" .Staging.String }} <#a277ff>{{ regexFind \">[0-9]+\" .Staging.String | replace \">\" \"»\" }}</>{{ end }}{{ end }}{{ if gt .StashCount 0 }} <#a277ff>${{ .StashCount }}</>{{ end }} ",
+          "type": "git"
+        },
+        {
+          "foreground": "#19e5ff",
+          "properties": {
+            "time_format": "03:04:05 PM"
+          },
+          "style": "plain",
+          "template": "{{ if not .Segments.Git.RepoName }}  {{ .CurrentDate | date .Format }} {{ end }}",
+          "type": "time"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "#19e5ff",
+          "style": "plain",
+          "template": "╰─❯ ",
+          "type": "text"
+        }
+      ],
+      "type": "prompt"
+    }
+  ]
+}

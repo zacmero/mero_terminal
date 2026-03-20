@@ -223,6 +223,37 @@ install_package_group() {
     esac
 }
 
+install_oh_my_posh() {
+    echo "Installing Oh My Posh..."
+
+    if command -v oh-my-posh >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if command -v brew >/dev/null 2>&1; then
+        if brew install jandedobbeleer/oh-my-posh/oh-my-posh; then
+            return 0
+        fi
+    fi
+
+    if [ "$DISTRO" = "Arch" ]; then
+        if install_packages oh-my-posh; then
+            return 0
+        fi
+    fi
+
+    curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
+}
+
+download_font_file() {
+    local destination=$1
+    local url=$2
+
+    [ -f "$destination" ] && return 0
+
+    curl -fLo "$destination" "$url"
+}
+
 set_xfce_helper() {
     local helpers_file="$HOME/.config/xfce4/helpers.rc"
 
@@ -484,10 +515,9 @@ if [ ! -d "$HOME/.bun" ]; then
     curl -fsSL https://bun.sh/install | bash || log_optional_failure "Bun"
 fi
 
-# Starship
-if ! command -v starship >/dev/null 2>&1; then
-    echo "Installing Starship..."
-    curl -fsSL https://starship.rs/install.sh | sh -s -- -y || log_optional_failure "Starship"
+# Oh My Posh
+if ! command -v oh-my-posh >/dev/null 2>&1; then
+    install_oh_my_posh || log_optional_failure "Oh My Posh"
 fi
 
 # Zoxide
@@ -784,6 +814,7 @@ if [ "$INSTALL_WEZTERM" = "1" ]; then
     link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
 fi
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
+link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.local/bin"
