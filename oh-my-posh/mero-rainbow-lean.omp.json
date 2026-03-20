@@ -20,7 +20,7 @@
             "missing_command_text": "BUN"
           },
           "style": "plain",
-          "template": " ",
+          "template": "🥟 ",
           "type": "bun"
         },
         {
@@ -31,7 +31,7 @@
             "missing_command_text": "JS"
           },
           "style": "plain",
-          "template": "{{ if .PackageManagerIcon }}{{ .PackageManagerIcon }}{{ else }}{{ end }} ",
+          "template": "{{ if not .Segments.Bun }}{{ if .PackageManagerIcon }}{{ .PackageManagerIcon }}{{ else }}⬢{{ end }} {{ end }}",
           "type": "node"
         },
         {
@@ -42,7 +42,7 @@
             "missing_command_text": "PY"
           },
           "style": "plain",
-          "template": " ",
+          "template": "🐍 ",
           "type": "python"
         },
         {
@@ -62,7 +62,7 @@
             "missing_command_text": "RS"
           },
           "style": "plain",
-          "template": " ",
+          "template": "🦀 ",
           "type": "rust"
         },
         {
@@ -72,7 +72,7 @@
             "missing_command_text": "RB"
           },
           "style": "plain",
-          "template": " ",
+          "template": "💎 ",
           "type": "ruby"
         },
         {
@@ -82,7 +82,7 @@
             "missing_command_text": "JV"
           },
           "style": "plain",
-          "template": " ",
+          "template": "☕ ",
           "type": "java"
         },
         {
@@ -135,7 +135,13 @@
         {
           "foreground": "#19e5ff",
           "style": "plain",
-          "template": "╰─❯ ",
+          "template": "╰─",
+          "type": "text"
+        },
+        {
+          "foreground": "#24eaff",
+          "style": "plain",
+          "template": "❯ ",
           "type": "text"
         }
       ],

@@ -33,6 +33,7 @@ config.tab_max_width = 32
 config.scrollback_lines = 10000
 config.audible_bell = "Disabled"
 config.default_cursor_style = "BlinkingBar"
+config.bypass_mouse_reporting_modifiers = "SHIFT"
 config.keys = {
   {
     key = "/",

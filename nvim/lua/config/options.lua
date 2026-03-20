@@ -4,6 +4,8 @@
 
 local opt = vim.opt
 
--- Keep the terminal in charge of text selection.
--- This makes mouse drag selection work consistently in terminal Neovim sessions.
-opt.mouse = ""
+-- Let Neovim own mouse input again so normal mode actions and right-click
+-- behavior remain consistent. Hold Shift in the terminal when you want raw
+-- terminal selection/paste behavior instead of editor mouse handling.
+opt.mouse = "a"
+vim.o.mousemodel = "extend"
