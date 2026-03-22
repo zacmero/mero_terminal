@@ -2,6 +2,7 @@
 set -e # Exit immediately if a command exits with a non-zero status
 
 INSTALL_WEZTERM="${MERO_INSTALL_WEZTERM:-}"
+WEZTERM_CHANNEL="${MERO_WEZTERM_CHANNEL:-auto}"
 
 prompt_yes_no() {
     local prompt_text=$1
@@ -48,6 +49,7 @@ if [ -z "$INSTALL_WEZTERM" ]; then
 fi
 
 echo "WezTerm installation: $([ "$INSTALL_WEZTERM" = "1" ] && echo enabled || echo skipped)"
+echo "WezTerm channel: $WEZTERM_CHANNEL"
 
 # Clear any previous failed installation logs
 rm -f "$HOME/failed-installations.txt"
@@ -130,6 +132,31 @@ install_packages() {
             run_sudo apt-get install -y "$@"
             ;;
     esac
+}
+
+install_aur_package() {
+    local package_name=$1
+
+    if [ "$DISTRO" != "Arch" ]; then
+        return 1
+    fi
+
+    if [ "$EUID" -eq 0 ]; then
+        echo "AUR installs are skipped when running the installer as root."
+        return 1
+    fi
+
+    if command -v yay >/dev/null 2>&1; then
+        yay -S --noconfirm --needed "$package_name"
+        return $?
+    fi
+
+    if command -v paru >/dev/null 2>&1; then
+        paru -S --noconfirm --needed "$package_name"
+        return $?
+    fi
+
+    return 1
 }
 
 install_package_group() {
@@ -369,7 +396,17 @@ install_wezterm() {
 
     case "$DISTRO" in
         "Arch")
-            install_package_group wezterm
+            case "$WEZTERM_CHANNEL" in
+                nightly)
+                    install_aur_package wezterm-nightly-bin || install_package_group wezterm
+                    ;;
+                stable)
+                    install_package_group wezterm
+                    ;;
+                auto|*)
+                    install_aur_package wezterm-nightly-bin || install_package_group wezterm
+                    ;;
+            esac
             ;;
         "Debian")
             install_package_group wezterm || true

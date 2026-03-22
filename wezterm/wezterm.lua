@@ -1,4 +1,5 @@
 local wezterm = require("wezterm")
+local act = wezterm.action
 
 local config = wezterm.config_builder()
 
@@ -34,26 +35,47 @@ config.scrollback_lines = 10000
 config.audible_bell = "Disabled"
 config.default_cursor_style = "BlinkingBar"
 config.bypass_mouse_reporting_modifiers = "SHIFT"
+local function foreground_is_nvim(pane)
+  local process = pane:get_foreground_process_name() or ""
+  process = process:gsub("\\", "/")
+  return process:match("(^|/)n?vim$") ~= nil
+end
+
+local function send_if_nvim(sequence, fallback)
+  return wezterm.action_callback(function(window, pane)
+    if foreground_is_nvim(pane) then
+      window:perform_action(act.SendString(sequence), pane)
+    elseif fallback then
+      window:perform_action(fallback, pane)
+    end
+  end)
+end
+
 config.keys = {
   {
     key = "/",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "?",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "-",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
   },
   {
     key = "_",
     mods = "CTRL|SHIFT",
-    action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
+  },
+  {
+    key = "s",
+    mods = "CTRL|SHIFT",
+    action = send_if_nvim("\x1b[9002u", act.SendKey({ key = "s", mods = "CTRL|SHIFT" })),
   },
 }
 

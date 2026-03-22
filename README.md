@@ -36,7 +36,7 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Repo-managed config:** The installer symlinks `wezterm/` into `~/.config/wezterm`.
 *   **Default-terminal handoff:** The installer sets `TERMINAL=wezterm`, registers a desktop entry, and configures XFCE helper integration so new sessions prefer WezTerm.
 *   **XFCE shortcut repair:** On XFCE systems with an existing shortcut config, `Ctrl+Alt+T` is rewritten to launch WezTerm directly instead of relying on the previous terminal helper path.
-*   **Cross-distro install path:** Arch uses the native package, while Debian/Ubuntu falls back to an official WezTerm release if needed.
+*   **Channel-aware install path:** `MERO_WEZTERM_CHANNEL=auto|stable|nightly` controls how WezTerm is installed. On Arch, `auto` prefers `wezterm-nightly-bin` when `yay`/`paru` is available and falls back to the native package otherwise. Debian/Ubuntu still falls back to an official WezTerm release if needed.
 *   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
 *   **Lean surface:** The internal tab bar is disabled so the terminal stays visually minimal and relies on the window manager and shell context instead.
 *   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
@@ -146,6 +146,17 @@ If you are running this on a fresh Cloud VM (AWS, Oracle, DigitalOcean, etc.) wh
 
     Answer `n` on VMs or Termius-based hosts if you do not want WezTerm installed or set as the default terminal.
 
+    To force a specific WezTerm channel during install:
+
+    ```bash
+    MERO_WEZTERM_CHANNEL=nightly ./install.sh
+    ```
+
+    Valid values are:
+    - `auto`
+    - `stable`
+    - `nightly`
+
 ### Migrating from the old `~/dotfiles` layout
 
 If a VM still uses the previous `~/dotfiles` repo layout, you do **not** need to manually delete old symlinks first.
@@ -200,3 +211,12 @@ git pull origin master
 ```
 
 Commands prefixed with a leading space are intentionally excluded from shell history, and the tracked Atuin config also filters those commands so they are not recorded there either.
+
+## Neovim Save Flow
+
+The tracked Neovim setup now includes:
+
+*   **`Ctrl+S`**: Save the current file. If the buffer has no path yet, it falls back to the Save As flow.
+*   **`Ctrl+Shift+S`**: Opens a picker-backed Save As flow. First you pick a file or directory, then you get a path prompt with completion for the final target.
+
+These mappings are tuned for terminal Neovim usage in `wezterm`. The shell config also disables XON/XOFF flow control so `Ctrl+S` reaches Neovim instead of freezing the terminal.

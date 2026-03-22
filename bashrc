@@ -9,6 +9,12 @@ case $- in
 *) return ;;
 esac
 
+# Allow Ctrl+S / Ctrl+Q to reach terminal apps like Neovim instead of
+# triggering terminal flow control.
+if tty -s; then
+  stty -ixon -ixoff 2>/dev/null || true
+fi
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 export HISTCONTROL=ignoreboth
