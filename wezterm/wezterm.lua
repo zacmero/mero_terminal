@@ -23,7 +23,7 @@ config.window_padding = {
   top = 10,
   bottom = 10,
 }
-config.window_background_opacity = 0.90
+config.window_background_opacity = 0.96
 config.adjust_window_size_when_changing_font_size = false
 
 config.enable_tab_bar = false
@@ -58,13 +58,13 @@ config.keys = {
 }
 
 config.colors = {
-  foreground = "#CBE0F0",
-  background = "#0f1317",
-  cursor_bg = "#d747ff",
-  cursor_fg = "#011423",
-cursor_border = "#9a5aaa",
-  selection_fg = "#CBE0F0",
-  selection_bg = "#033259",
+  foreground = "#e8e8e8",
+  background = "#161a1f",
+  cursor_bg = "#7cb8ff",
+  cursor_fg = "#0f1317",
+cursor_border = "#7cb8ff",
+  selection_fg = "#0f1317",
+  selection_bg = "#4a86d9",
 ansi = {
     "#214969",
     "#E52E2E",
