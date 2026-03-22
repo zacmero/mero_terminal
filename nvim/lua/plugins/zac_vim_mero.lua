@@ -1,36 +1,147 @@
--- This is your new file: ~/.config/nvim/lua/plugins/custom.lua
 return {
-
-  -- 1. Override the width of neo-tree (your first question)
   {
-    "nvim-neo-tree/neo-tree.nvim",
-    opts = {
-      window = {
-        width = 25, -- Set the width you want
-      },
+    "folke/snacks.nvim",
+    opts = function(_, opts)
+      opts.dashboard = vim.tbl_deep_extend("force", opts.dashboard or {}, {
+        enabled = vim.env.MERO_IDE_TARGET == nil or vim.env.MERO_IDE_TARGET == "",
+      })
+      opts.explorer = vim.tbl_deep_extend("force", opts.explorer or {}, {
+        enabled = false,
+        replace_netrw = false,
+      })
+    end,
+    keys = {
+      { "<leader>e", false },
+      { "<leader>E", false },
+      { "<leader>fe", false },
+      { "<leader>fE", false },
     },
   },
-
-  -- 2. Add the Todo Tree plugin
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    lazy = false,
+    keys = {
+      {
+        "<leader>e",
+        function()
+          require("neo-tree.command").execute({
+            toggle = true,
+            dir = vim.uv.cwd(),
+            position = "left",
+            reveal = true,
+          })
+        end,
+        desc = "Explorer NeoTree (cwd)",
+      },
+      {
+        "<leader>ge",
+        function()
+          require("neo-tree.command").execute({ source = "git_status", toggle = true })
+        end,
+        desc = "Git Explorer",
+      },
+      {
+        "<leader>fi",
+        function()
+          require("neo-tree.command").execute({
+            action = "show",
+            source = "filesystem",
+            position = "left",
+            dir = vim.uv.cwd(),
+            reveal = true,
+          })
+        end,
+        desc = "Mero IDE Explorer",
+      },
+    },
+    opts = function(_, opts)
+      opts.sources = { "filesystem", "buffers", "git_status" }
+      opts.open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" }
+      opts.filesystem = vim.tbl_deep_extend("force", opts.filesystem or {}, {
+        bind_to_cwd = false,
+        follow_current_file = { enabled = true },
+        hijack_netrw_behavior = "disabled",
+        use_libuv_file_watcher = true,
+      })
+      opts.window = vim.tbl_deep_extend("force", opts.window or {}, {
+        width = 32,
+        mappings = {
+          ["l"] = "open",
+          ["h"] = "close_node",
+          ["<space>"] = "none",
+          ["P"] = { "toggle_preview", config = { use_float = false } },
+        },
+      })
+      opts.default_component_configs = vim.tbl_deep_extend("force", opts.default_component_configs or {}, {
+        indent = {
+          with_expanders = true,
+          expander_collapsed = "",
+          expander_expanded = "",
+          expander_highlight = "NeoTreeExpander",
+        },
+        git_status = {
+          symbols = {
+            added = "A",
+            deleted = "D",
+            modified = "M",
+            renamed = "R",
+            unstaged = "󰄱",
+            staged = "󰱒",
+            untracked = "?",
+            ignored = "",
+            conflict = "",
+          },
+        },
+      })
+    end,
+  },
+  {
+    "sudo-tee/opencode.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "folke/snacks.nvim",
+      "MeanderingProgrammer/render-markdown.nvim",
+    },
+    cmd = { "Opencode" },
+    opts = {},
+    keys = {
+      { "<leader>oa", "<cmd>Opencode<cr>", desc = "Opencode" },
+    },
+  },
   {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
-    opts = {}, -- You can add configuration here later
+    opts = {},
   },
-
-  -- 3. Add the Neogit (GitLens) plugin
   {
     "NeogitOrg/neogit",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = true,
+    dependencies = { "nvim-lua/plenary.nvim", "sindrets/diffview.nvim" },
+    cmd = { "Neogit" },
+    opts = {},
+    keys = {
+      {
+        "<leader>gn",
+        function()
+          require("neogit").open({ kind = "split" })
+        end,
+        desc = "Neogit",
+      },
+    },
   },
-
-  -- 4. Add the Dendron/Obsidian plugin
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Diffview" },
+      { "<leader>gD", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "File History" },
+    },
+  },
   {
     "epwalsh/obsidian.nvim",
-    version = "*", -- Use the latest stable release
+    version = "*",
     lazy = true,
-    ft = "markdown", -- Only load when you open a markdown file
+    ft = "markdown",
     dependencies = {
       "nvim-lua/plenary.nvim",
     },

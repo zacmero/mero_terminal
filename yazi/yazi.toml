@@ -1,5 +1,5 @@
 [manager]
-linemode = "none"
+linemode = "size_and_mtime"
 
 [opener]
 edit = [
@@ -16,3 +16,13 @@ prepend_rules = [
     { mime = "application/javascript", use = "edit" },
     { mime = "application/x-shellscript", use = "edit" },
 ]
+
+[[plugin.prepend_fetchers]]
+id = "git"
+url = "*"
+run = "git"
+
+[[plugin.prepend_fetchers]]
+id = "git"
+url = "*/"
+run = "git"

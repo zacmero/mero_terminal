@@ -142,6 +142,15 @@ alias lt='eza -T'
 #fzf folder navigation + lazyvin fast open:
 alias v='fzf | xargs -r nvim'
 
+ide() {
+  local target="${1:-.}"
+  local resolved
+  resolved="$(realpath "$target" 2>/dev/null || printf '%s' "$target")"
+  MERO_IDE_TARGET="$resolved" nvim "+MeroIde"
+}
+
+alias nvide='ide'
+
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\[0-9\]\+\s*//;s/[;&|]\s*alert$//'\'')"'

@@ -854,6 +854,16 @@ link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
 link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
+if command -v nvim >/dev/null 2>&1; then
+    echo "Syncing Neovim plugins..."
+    nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"
+fi
+
+if command -v ya >/dev/null 2>&1; then
+    echo "Installing Yazi plugins..."
+    ya pkg install || log_optional_failure "Yazi plugins"
+fi
+
 mkdir -p "$HOME/.local/bin"
 if [ "$INSTALL_WEZTERM" = "1" ]; then
     set_default_terminal

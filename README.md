@@ -21,6 +21,8 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Automatic `cd` on exit:** When you quit `yazi`, your shell's current directory will automatically change to the last directory you were browsing in `yazi`.
 *   **Predictable `Ctrl+C` exit:** If you abort `yazi` with `Ctrl+C`, the shell stays in the directory where you launched it instead of jumping somewhere unexpected.
 *   **Neovim-first editing:** `nvim` is exported as the default `EDITOR`/`VISUAL`, and pressing `Enter` on text/code files in `yazi` opens them in Neovim.
+*   **Git status in Yazi:** The official `git.yazi` plugin is installed and shows per-file Git state directly in the file list inside Git repositories.
+*   **IDE mode for Neovim:** Run `ide` (or `nvide`) inside any project folder to open the tracked `MeroIde` layout: one Neo-tree sidebar on the left and one real editor buffer in the center. It resumes a recent project file when possible, otherwise falls back to a smart starter file such as `README.md`, `main.*`, `index.*`, `app.*`, or `init.*`, then to the first tracked Git file. Snacks Explorer and netrw are disabled so Neo-tree remains the only explorer path.
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
@@ -175,6 +177,7 @@ The installer now detects existing managed files and directories, backs them up 
 *   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
 *   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
+*   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! sync` for Neovim and `ya pkg install` for Yazi so the explorer and Git-status plugins are present from the first install.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
 ---
@@ -212,6 +215,19 @@ git pull origin master
 
 Commands prefixed with a leading space are intentionally excluded from shell history, and the tracked Atuin config also filters those commands so they are not recorded there either.
 
+## IDE Navigation
+
+Inside the tracked LazyVim setup:
+
+*   **Open IDE mode:** `ide` or `nvide` in a folder. This calls the tracked `:MeroIde` command and skips the dashboard for project launches. Plain `nvim` still keeps the normal LazyVim dashboard.
+*   **Toggle Neo-tree:** `<leader>e`
+*   **Reopen the left explorer for the current folder:** `<leader>fi` or `<leader>ii`
+*   **Open OpenCode agent:** `<leader>oa`
+*   **Preview the selected file:** Neo-tree preview is manual in IDE mode. Use `P` to toggle preview and `Ctrl-f`/`Ctrl-b` to scroll it.
+*   **Move between left explorer, center file, and right agent split:** `Ctrl+h`, `Ctrl+j`, `Ctrl+k`, `Ctrl+l`
+
+The same `Ctrl+h/j/k/l` navigation also works when the right-side agent window is in terminal mode.
+
 ## Neovim Save Flow
 
 The tracked Neovim setup now includes:
@@ -220,3 +236,27 @@ The tracked Neovim setup now includes:
 *   **`Ctrl+Shift+S`**: Opens a picker-backed Save As flow. First you pick a file or directory, then you get a path prompt with completion for the final target.
 
 These mappings are tuned for terminal Neovim usage in `wezterm`. The shell config also disables XON/XOFF flow control so `Ctrl+S` reaches Neovim instead of freezing the terminal.
+
+## Neovim IDE Flow
+
+- `ide`: open Neovim on the current directory with Neo-tree on the left
+- `nvide`: alias for `ide`
+- `<leader>e`: toggle Neo-tree on the current working directory
+- `<leader>ge`: open Neo-tree Git status source
+- `<leader>fi`: reopen the current working directory in the left explorer
+- `<leader>oa`: open the `opencode.nvim` UI
+
+## Yazi Git Status
+
+- official plugin: `git.yazi`
+- package lock: `yazi/package.toml`
+- config files: `yazi/init.lua` and `yazi/yazi.toml`
+
+## Git Workflow
+
+- `<leader>ge`: open Neo-tree Git status source
+- `<leader>gn`: open Neogit in a split, similar to a source-control panel
+- `<leader>gd`: open Diffview for repository diff review
+- `<leader>gD`: close Diffview
+- `<leader>gh`: open file history in Diffview
+- `<leader>gg`: LazyGit remains available from LazyVim when `lazygit` is installed

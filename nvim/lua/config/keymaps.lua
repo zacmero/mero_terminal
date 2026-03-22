@@ -31,3 +31,13 @@ local ctrl_shift_s = vim.api.nvim_replace_termcodes("<Esc>[9002u", true, false, 
 vim.keymap.set({ "n", "i", "x" }, "<C-s>", save, { desc = "Save File" })
 vim.keymap.set({ "n", "i", "x" }, "<C-S-s>", save_as, { desc = "Save File As" })
 vim.keymap.set({ "n", "i", "x" }, ctrl_shift_s, save_as, { desc = "Save File As" })
+
+vim.keymap.set("n", "<leader>ii", function()
+  require("neo-tree.command").execute({
+    action = "show",
+    source = "filesystem",
+    position = "left",
+    dir = vim.uv.cwd(),
+    reveal = true,
+  })
+end, { desc = "Mero IDE (cwd)" })
