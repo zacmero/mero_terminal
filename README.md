@@ -265,5 +265,22 @@ These mappings are tuned for terminal Neovim usage in `wezterm`. The shell confi
 - Neo-tree file rows show explicit Git state symbols
 - Neo-tree folder rows do not behave like VS Code's richer mixed-state aggregate badges; use `<leader>ge` when you want the fuller repo change view
 - editor buffers now use stronger `gitsigns.nvim` markers with signcolumn + number highlights for faster change scanning
+
+## Minimap
+
+- the IDE now has a right-side minimap powered by `mini.map`
+- it highlights Git changes, diagnostics, and current search matches
+- it opens automatically for normal editing buffers
+- it stays out of Neo-tree, Trouble, terminals, and other utility panes
+
+Commands:
+
+- `<leader>mm`: toggle the minimap
+- `<leader>mM`: close the minimap
+
+If you want it off in the current session:
+
+- press `<leader>mm` to toggle it off
+- or `<leader>mM` to force-close it
 - `<leader>gh`: open file history in Diffview
 - `<leader>gg`: LazyGit remains available from LazyVim when `lazygit` is installed

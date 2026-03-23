@@ -120,6 +120,111 @@ return {
     end,
   },
   {
+    "nvim-mini/mini.map",
+    version = false,
+    keys = {
+      {
+        "<leader>mm",
+        function()
+          MiniMap.toggle()
+        end,
+        desc = "Toggle Minimap",
+      },
+      {
+        "<leader>mM",
+        function()
+          MiniMap.close()
+        end,
+        desc = "Close Minimap",
+      },
+    },
+    config = function()
+      local map = require("mini.map")
+
+      map.setup({
+        integrations = {
+          map.gen_integration.gitsigns({
+            add = "GitSignsAdd",
+            change = "GitSignsChange",
+            delete = "GitSignsDelete",
+          }),
+          map.gen_integration.diagnostic({
+            error = "DiagnosticFloatingError",
+            warn = "DiagnosticFloatingWarn",
+          }),
+          map.gen_integration.builtin_search({
+            search = "Search",
+          }),
+        },
+        symbols = {
+          encode = map.gen_encode_symbols.dot("4x2"),
+          scroll_line = "█",
+          scroll_view = "┃",
+        },
+        window = {
+          side = "right",
+          width = 10,
+          winblend = 18,
+          focusable = false,
+          show_integration_count = false,
+        },
+      })
+
+      local minimap_group = vim.api.nvim_create_augroup("MeroMiniMap", { clear = true })
+
+      vim.api.nvim_create_autocmd({ "BufWinEnter", "TabEnter" }, {
+        group = minimap_group,
+        callback = function(args)
+          if vim.g.minimap_disable or vim.b[args.buf].minimap_disable then
+            return
+          end
+
+          local bt = vim.bo[args.buf].buftype
+          local ft = vim.bo[args.buf].filetype
+
+          if bt ~= "" and bt ~= "help" then
+            return
+          end
+
+          if vim.tbl_contains({
+            "neo-tree",
+            "snacks_dashboard",
+            "snacks_picker_list",
+            "snacks_picker_input",
+            "Trouble",
+            "trouble",
+            "qf",
+            "opencode",
+            "terminal",
+          }, ft) then
+            return
+          end
+
+          map.open()
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = minimap_group,
+        pattern = {
+          "neo-tree",
+          "snacks_dashboard",
+          "snacks_picker_list",
+          "snacks_picker_input",
+          "Trouble",
+          "trouble",
+          "qf",
+          "opencode",
+          "terminal",
+        },
+        callback = function(args)
+          vim.b[args.buf].minimap_disable = true
+          pcall(MiniMap.close)
+        end,
+      })
+    end,
+  },
+  {
     "sudo-tee/opencode.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",
