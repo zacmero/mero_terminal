@@ -37,12 +37,12 @@
         {
           "foreground": "#ffe073",
           "properties": {
-            "display_mode": "files",
-            "fetch_virtual_env": false,
+            "display_mode": "context",
+            "fetch_virtual_env": true,
             "missing_command_text": "PY"
           },
           "style": "plain",
-          "template": "🐍 ",
+          "template": "🐍 {{ if .Venv }}{{ if eq .Venv .Folder }}venv{{ else }}{{ .Venv }}{{ end }} {{ end }}",
           "type": "python"
         },
         {
@@ -104,6 +104,15 @@
       "overflow": "hide",
       "segments": [
         {
+          "foreground": "#ffe073",
+          "properties": {
+            "threshold": 2000
+          },
+          "style": "plain",
+          "template": "  {{ .FormattedMs }} ",
+          "type": "executiontime"
+        },
+        {
           "foreground": "#a277ff",
           "properties": {
             "branch_ahead_icon": "⇡",
@@ -140,9 +149,15 @@
         },
         {
           "foreground": "#24eaff",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#ff5f5f{{ end }}"
+          ],
+          "options": {
+            "always_enabled": true
+          },
           "style": "plain",
           "template": "❯ ",
-          "type": "text"
+          "type": "status"
         }
       ],
       "type": "prompt"
