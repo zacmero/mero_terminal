@@ -4,6 +4,70 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 local forced_front_end = os.getenv("MERO_WEZTERM_FRONTEND")
 
+local function to_roman(value)
+  local numerals = {
+    { 1000, "M" },
+    { 900, "CM" },
+    { 500, "D" },
+    { 400, "CD" },
+    { 100, "C" },
+    { 90, "XC" },
+    { 50, "L" },
+    { 40, "XL" },
+    { 10, "X" },
+    { 9, "IX" },
+    { 5, "V" },
+    { 4, "IV" },
+    { 1, "I" },
+  }
+  local result = {}
+
+  for _, numeral in ipairs(numerals) do
+    while value >= numeral[1] do
+      result[#result + 1] = numeral[2]
+      value = value - numeral[1]
+    end
+  end
+
+  return table.concat(result)
+end
+
+wezterm.on("update-right-status", function(window, _pane)
+  local mux_window = window:mux_window()
+  if not mux_window then
+    return
+  end
+
+  local tabs = mux_window:tabs_with_info()
+  if #tabs <= 1 then
+    window:set_right_status("")
+    return
+  end
+
+  local cells = {}
+
+  for index, tab in ipairs(tabs) do
+    if index > 1 then
+      cells[#cells + 1] = { Text = " " }
+    end
+
+    cells[#cells + 1] = {
+      Foreground = {
+        Color = tab.is_active and "#24EAF7" or "#315c78",
+      },
+    }
+    cells[#cells + 1] = {
+      Attribute = {
+        Intensity = tab.is_active and "Bold" or "Normal",
+      },
+    }
+    cells[#cells + 1] = { Text = to_roman(index) }
+  end
+
+  cells[#cells + 1] = { Text = " " }
+  window:set_right_status(wezterm.format(cells))
+end)
+
 config.automatically_reload_config = true
 config.check_for_updates = false
 config.default_prog = { os.getenv("SHELL") or "/bin/bash", "-l" }
@@ -37,9 +101,22 @@ config.window_padding = {
 }
 config.window_background_opacity = 0.96
 config.adjust_window_size_when_changing_font_size = false
+config.window_frame = {
+  active_titlebar_bg = "#161a1f",
+  inactive_titlebar_bg = "#161a1f",
+  font = wezterm.font_with_fallback({
+    "CaskaydiaCove Nerd Font Mono",
+    "Noto Color Emoji",
+  }),
+  font_size = 9.0,
+}
 
-config.enable_tab_bar = false
+config.enable_tab_bar = true
+config.hide_tab_bar_if_only_one_tab = true
 config.use_fancy_tab_bar = false
+config.show_tabs_in_tab_bar = false
+config.show_new_tab_button_in_tab_bar = false
+config.tab_bar_at_bottom = true
 config.tab_max_width = 32
 
 config.scrollback_lines = 10000
@@ -140,6 +217,10 @@ ansi = {
     "#a277ff",
     "#24EAF7",
     "#24EAF7",
+  },
+  tab_bar = {
+    background = "rgba(0, 0, 0, 0)",
+    inactive_tab_edge = "rgba(0, 0, 0, 0)",
   },
 }
 

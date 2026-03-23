@@ -40,7 +40,7 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **XFCE shortcut repair:** On XFCE systems with an existing shortcut config, `Ctrl+Alt+T` is rewritten to launch WezTerm directly instead of relying on the previous terminal helper path.
 *   **Channel-aware install path:** `MERO_WEZTERM_CHANNEL=auto|stable|nightly` controls how WezTerm is installed. On Arch, `auto` prefers `wezterm-nightly-bin` when `yay`/`paru` is available and falls back to the native package otherwise. Debian/Ubuntu still falls back to an official WezTerm release if needed.
 *   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
-*   **Lean surface:** The internal tab bar is disabled so the terminal stays visually minimal and relies on the window manager and shell context instead.
+*   **Lean tab locator:** WezTerm keeps its normal tab labels hidden and instead renders a compact bottom-right Roman numeral tracker. It only appears when there is more than one tab, highlights the active tab in cyan, and keeps the strip itself transparent so the numbers feel like a floating HUD element instead of a full tab bar.
 *   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
 *   **Mouse bypass:** WezTerm keeps `Shift` as the mouse-reporting bypass modifier, so terminal-side selection and paste can still be forced when terminal apps capture the mouse.
 *   **Wheel tuning:** Plain mouse-wheel scroll in shell scrollback is intentionally slower, while `Ctrl + mouse wheel` is the fast-scroll path.
