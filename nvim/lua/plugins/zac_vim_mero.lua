@@ -137,6 +137,13 @@ return {
         end,
         desc = "Close Minimap",
       },
+      {
+        "<leader>mf",
+        function()
+          MiniMap.toggle_focus()
+        end,
+        desc = "Focus Minimap",
+      },
     },
     config = function()
       local map = require("mini.map")

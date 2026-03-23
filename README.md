@@ -277,10 +277,19 @@ Commands:
 
 - `<leader>mm`: toggle the minimap
 - `<leader>mM`: close the minimap
+- `<leader>mf`: focus the minimap for quick navigation
 
 If you want it off in the current session:
 
 - press `<leader>mm` to toggle it off
 - or `<leader>mM` to force-close it
+
+Minimap interaction note:
+
+- `mini.map` does not support mouse-dragging the scrollbar by design
+- use `<leader>mf` to focus the minimap instead
+- while focused, move to the area you want, then:
+- `<CR>` accepts the new position
+- `<Esc>` returns to the original position
 - `<leader>gh`: open file history in Diffview
 - `<leader>gg`: LazyGit remains available from LazyVim when `lazygit` is installed
