@@ -96,6 +96,30 @@ return {
     end,
   },
   {
+    "lewis6991/gitsigns.nvim",
+    opts = function(_, opts)
+      opts.signcolumn = true
+      opts.numhl = true
+      opts.linehl = false
+      opts.word_diff = false
+      opts.signs = vim.tbl_deep_extend("force", opts.signs or {}, {
+        add = { text = "│" },
+        change = { text = "│" },
+        delete = { text = "󰍵" },
+        topdelete = { text = "󰍵" },
+        changedelete = { text = "│" },
+        untracked = { text = "┆" },
+      })
+      opts.signs_staged = vim.tbl_deep_extend("force", opts.signs_staged or {}, {
+        add = { text = "│" },
+        change = { text = "│" },
+        delete = { text = "󰍵" },
+        topdelete = { text = "󰍵" },
+        changedelete = { text = "│" },
+      })
+    end,
+  },
+  {
     "sudo-tee/opencode.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",

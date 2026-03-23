@@ -35,6 +35,29 @@ config.scrollback_lines = 10000
 config.audible_bell = "Disabled"
 config.default_cursor_style = "BlinkingBar"
 config.bypass_mouse_reporting_modifiers = "SHIFT"
+config.mouse_bindings = {
+  {
+    event = { Down = { streak = 1, button = { WheelUp = 1 } } },
+    mods = "NONE",
+    action = act.ScrollByLine(-2),
+  },
+  {
+    event = { Down = { streak = 1, button = { WheelDown = 1 } } },
+    mods = "NONE",
+    action = act.ScrollByLine(2),
+  },
+  {
+    event = { Down = { streak = 1, button = { WheelUp = 1 } } },
+    mods = "CTRL",
+    action = act.ScrollByLine(-10),
+  },
+  {
+    event = { Down = { streak = 1, button = { WheelDown = 1 } } },
+    mods = "CTRL",
+    action = act.ScrollByLine(10),
+  },
+}
+
 local function foreground_is_nvim(pane)
   local process = pane:get_foreground_process_name() or ""
   process = process:gsub("\\", "/")

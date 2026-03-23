@@ -43,6 +43,7 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Lean surface:** The internal tab bar is disabled so the terminal stays visually minimal and relies on the window manager and shell context instead.
 *   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
 *   **Mouse bypass:** WezTerm keeps `Shift` as the mouse-reporting bypass modifier, so terminal-side selection and paste can still be forced when terminal apps capture the mouse.
+*   **Wheel tuning:** Plain mouse-wheel scroll in shell scrollback is intentionally slower, while `Ctrl + mouse wheel` is the fast-scroll path.
 
 ---
 
@@ -258,5 +259,11 @@ These mappings are tuned for terminal Neovim usage in `wezterm`. The shell confi
 - `<leader>gn`: open Neogit in a split, similar to a source-control panel
 - `<leader>gd`: open Diffview for repository diff review
 - `<leader>gD`: close Diffview
+
+## Git Visuals
+
+- Neo-tree file rows show explicit Git state symbols
+- Neo-tree folder rows do not behave like VS Code's richer mixed-state aggregate badges; use `<leader>ge` when you want the fuller repo change view
+- editor buffers now use stronger `gitsigns.nvim` markers with signcolumn + number highlights for faster change scanning
 - `<leader>gh`: open file history in Diffview
 - `<leader>gg`: LazyGit remains available from LazyVim when `lazygit` is installed
