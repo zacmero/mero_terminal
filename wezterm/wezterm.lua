@@ -2,10 +2,17 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 
 local config = wezterm.config_builder()
+local forced_front_end = os.getenv("MERO_WEZTERM_FRONTEND")
 
 config.automatically_reload_config = true
 config.check_for_updates = false
 config.default_prog = { os.getenv("SHELL") or "/bin/bash", "-l" }
+
+if forced_front_end and forced_front_end ~= "" then
+  config.front_end = forced_front_end
+elseif os.getenv("WAYLAND_DISPLAY") and os.getenv("HYPRLAND_INSTANCE_SIGNATURE") then
+  config.front_end = "OpenGL"
+end
 
 config.font = wezterm.font_with_fallback({
   "CaskaydiaCove Nerd Font Mono",
@@ -17,7 +24,11 @@ config.cell_width = 1.0
 config.initial_cols = 140
 config.initial_rows = 40
 
-config.window_decorations = "RESIZE"
+if os.getenv("WAYLAND_DISPLAY") and os.getenv("HYPRLAND_INSTANCE_SIGNATURE") then
+  config.window_decorations = "NONE"
+else
+  config.window_decorations = "RESIZE"
+end
 config.window_padding = {
   left = 12,
   right = 12,

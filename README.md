@@ -44,6 +44,8 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
 *   **Mouse bypass:** WezTerm keeps `Shift` as the mouse-reporting bypass modifier, so terminal-side selection and paste can still be forced when terminal apps capture the mouse.
 *   **Wheel tuning:** Plain mouse-wheel scroll in shell scrollback is intentionally slower, while `Ctrl + mouse wheel` is the fast-scroll path.
+*   **Wayland renderer override:** On Hyprland/Wayland, WezTerm now defaults to `front_end = "OpenGL"` on this setup because it behaved better than the software fallback during artifact testing. Override with `MERO_WEZTERM_FRONTEND=OpenGL`, `WebGpu`, or `Software` if you want to test another renderer.
+*   **Smart decorations:** On Hyprland/Wayland, WezTerm uses `window_decorations = "NONE"` so Hyprland owns the frame fully and WezTerm does not draw its own extra top strip/title area. On other systems, WezTerm falls back to normal `RESIZE` decorations.
 
 ---
 
