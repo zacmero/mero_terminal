@@ -55,13 +55,31 @@ return {
       },
     },
     opts = function(_, opts)
+      local function refresh_neotree_git()
+        local ok, manager = pcall(require, "neo-tree.sources.manager")
+        if not ok then
+          return
+        end
+
+        manager.refresh("filesystem")
+        manager.refresh("git_status")
+      end
+
+      local refresh_group = vim.api.nvim_create_augroup("MeroNeoTreeRefresh", { clear = true })
+      vim.api.nvim_create_autocmd({ "BufWritePost", "FocusGained", "FileChangedShellPost", "TermClose" }, {
+        group = refresh_group,
+        callback = function()
+          vim.schedule(refresh_neotree_git)
+        end,
+      })
+
       opts.sources = { "filesystem", "buffers", "git_status" }
       opts.open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" }
       opts.filesystem = vim.tbl_deep_extend("force", opts.filesystem or {}, {
         bind_to_cwd = false,
         follow_current_file = { enabled = true },
         hijack_netrw_behavior = "disabled",
-        use_libuv_file_watcher = true,
+        use_libuv_file_watcher = false,
       })
       opts.window = vim.tbl_deep_extend("force", opts.window or {}, {
         width = 32,
