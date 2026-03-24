@@ -200,10 +200,10 @@ install_package_group() {
         yazi-optional)
             case "$DISTRO" in
                 "Arch")
-                    install_packages file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick xclip
+                    install_packages file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick wl-clipboard xclip xsel
                     ;;
                 "Debian")
-                    install_packages file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep imagemagick xclip
+                    install_packages file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep imagemagick wl-clipboard xclip xsel
                     ;;
             esac
             ;;

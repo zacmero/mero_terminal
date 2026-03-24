@@ -9,3 +9,4 @@ local opt = vim.opt
 -- terminal selection/paste behavior instead of editor mouse handling.
 opt.mouse = "a"
 vim.o.mousemodel = "extend"
+opt.clipboard = "unnamedplus"

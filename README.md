@@ -92,7 +92,7 @@ Tmux is configured for a robust multiplexing experience with plugins managed by 
 *   **Theme:** Dracula theme for a clean aesthetic with True Color support.
 *   **Navigation:** Seamless `vim-tmux-navigator` integration (use `CTRL+h/j/k/l` to move between Vim splits and Tmux panes).
 *   **Index & Mouse:** Windows and panes start at index `1`. Full mouse support enabled.
-*   **Yanking:** `tmux-yank` is set up with vi-mode keybindings.
+*   **Yanking:** `tmux-yank` is set up with vi-mode keybindings, and tmux is configured to push copies into the host clipboard through `wl-copy`, `xclip`, or `xsel` when available. Neovim is also configured with `clipboard=unnamedplus`, so yanks inside Neovim sessions running under tmux follow the same system clipboard path by default.
 *   **Auto-Save & Restore:** Uses `tmux-resurrect` and `tmux-continuum` to continuously auto-save your environment every 15 minutes and automatically restore it on startup.
 *   **Plugins:** TPM is installed automatically, and the repo installer now installs the declared tmux plugins for you as part of setup.
 
