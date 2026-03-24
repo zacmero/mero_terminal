@@ -39,15 +39,32 @@ wezterm.on("update-right-status", function(window, _pane)
   end
 
   local tabs = mux_window:tabs_with_info()
-  if #tabs <= 1 then
+  local active_table = window:active_key_table()
+  local show_close_hint = active_table == "confirm_close_tab"
+
+  if #tabs <= 1 and not show_close_hint then
     window:set_right_status("")
     return
   end
 
   local cells = {}
 
+  if show_close_hint then
+    cells[#cells + 1] = {
+      Foreground = {
+        Color = "#7cb8ff",
+      },
+    }
+    cells[#cells + 1] = {
+      Attribute = {
+        Intensity = "Bold",
+      },
+    }
+    cells[#cells + 1] = { Text = "close? ↵" }
+  end
+
   for index, tab in ipairs(tabs) do
-    if index > 1 then
+    if #cells > 0 or index > 1 then
       cells[#cells + 1] = { Text = " " }
     end
 
@@ -187,6 +204,30 @@ config.keys = {
     key = "s",
     mods = "CTRL|SHIFT",
     action = send_if_nvim("\x1b[9002u", act.SendKey({ key = "s", mods = "CTRL|SHIFT" })),
+  },
+  {
+    key = "w",
+    mods = "ALT",
+    action = act.ActivateKeyTable({
+      name = "confirm_close_tab",
+      timeout_milliseconds = 1200,
+      one_shot = true,
+      until_unknown = true,
+      replace_current = true,
+    }),
+  },
+}
+
+config.key_tables = {
+  confirm_close_tab = {
+    {
+      key = "Enter",
+      action = act.CloseCurrentTab({ confirm = false }),
+    },
+    {
+      key = "Escape",
+      action = act.PopKeyTable,
+    },
   },
 }
 
