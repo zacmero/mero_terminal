@@ -42,6 +42,8 @@ WezTerm is now the default terminal installed by `mero_terminal`, with its confi
 *   **Pane shortcuts:** `Ctrl+Shift+/` splits horizontally and `Ctrl+Shift+-` splits vertically.
 *   **Fast close confirm:** `Alt+w` arms a short close-confirm mode, and pressing `w` again closes the current tab without invoking WezTerm's slower built-in confirmation overlay.
 *   **Lean tab locator:** WezTerm keeps its normal tab labels hidden and instead renders a compact bottom-right Roman numeral tracker. It only appears when there is more than one tab, highlights the active tab in cyan, and keeps the strip itself transparent so the numbers feel like a floating HUD element instead of a full tab bar.
+*   **Slim scroll bar:** WezTerm also shows a very thin, faint cyan scrollbar on the right for long sessions, keeping the indicator subtle while still making deep scrollback easy to orient.
+  Adjust `scroll_bar_width` at the top of `wezterm/wezterm.lua` when you need a wider hit area.
 *   **Theme font:** WezTerm uses `CaskaydiaCove Nerd Font Mono` with the larger spacing profile already established in this setup.
 *   **Mouse bypass:** WezTerm keeps `Shift` as the mouse-reporting bypass modifier, so terminal-side selection and paste can still be forced when terminal apps capture the mouse.
 *   **Wheel tuning:** Plain mouse-wheel scroll in shell scrollback is intentionally slower, while `Ctrl + mouse wheel` is the fast-scroll path.
