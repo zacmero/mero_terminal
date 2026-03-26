@@ -15,6 +15,7 @@ return {
       { "<leader>E", false },
       { "<leader>fe", false },
       { "<leader>fE", false },
+      { "<leader>gd", false },
     },
   },
   {
@@ -115,6 +116,110 @@ return {
   },
   {
     "lewis6991/gitsigns.nvim",
+    keys = {
+      {
+        "]h",
+        function()
+          if vim.wo.diff then
+            vim.cmd.normal({ "]h", bang = true })
+            return
+          end
+          require("gitsigns").nav_hunk("next")
+        end,
+        desc = "Next Git Hunk",
+      },
+      {
+        "[h",
+        function()
+          if vim.wo.diff then
+            vim.cmd.normal({ "[h", bang = true })
+            return
+          end
+          require("gitsigns").nav_hunk("prev")
+        end,
+        desc = "Previous Git Hunk",
+      },
+      {
+        "<leader>hs",
+        function()
+          require("gitsigns").stage_hunk()
+        end,
+        desc = "Stage Hunk",
+      },
+      {
+        "<leader>hr",
+        function()
+          require("gitsigns").reset_hunk()
+        end,
+        desc = "Reset Hunk",
+      },
+      {
+        "<leader>hS",
+        function()
+          require("gitsigns").stage_buffer()
+        end,
+        desc = "Stage Buffer",
+      },
+      {
+        "<leader>hR",
+        function()
+          require("gitsigns").reset_buffer()
+        end,
+        desc = "Reset Buffer",
+      },
+      {
+        "<leader>hp",
+        function()
+          require("gitsigns").preview_hunk()
+        end,
+        desc = "Preview Hunk",
+      },
+      {
+        "<leader>hb",
+        function()
+          require("gitsigns").blame_line({ full = true })
+        end,
+        desc = "Blame Line",
+      },
+      {
+        "<leader>hB",
+        function()
+          require("gitsigns").toggle_current_line_blame()
+        end,
+        desc = "Toggle Line Blame",
+      },
+      {
+        "<leader>hd",
+        function()
+          require("gitsigns").toggle_deleted()
+        end,
+        desc = "Toggle Deleted",
+      },
+      {
+        "<leader>hs",
+        function()
+          require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+        end,
+        mode = "v",
+        desc = "Stage Hunk",
+      },
+      {
+        "<leader>hr",
+        function()
+          require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+        end,
+        mode = "v",
+        desc = "Reset Hunk",
+      },
+      {
+        "ih",
+        function()
+          require("gitsigns").select_hunk()
+        end,
+        mode = { "o", "x" },
+        desc = "Git Hunk Text Object",
+      },
+    },
     opts = function(_, opts)
       opts.signcolumn = true
       opts.numhl = true
@@ -289,6 +394,7 @@ return {
       { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Diffview" },
       { "<leader>gD", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },
       { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "File History" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Repo History" },
     },
   },
   {
