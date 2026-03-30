@@ -70,7 +70,7 @@ AIChat is now a default tracked tool in `mero_terminal`. On Arch it installs fro
 ### Features:
 *   **Tracked config:** `aichat/config.yaml` is repo-managed and linked into `~/.config/aichat/config.yaml`.
 *   **Tracked roles:** The default `coder` and `suzy-brain` role prompts are tracked under `aichat/roles/` and linked into `~/.config/aichat/roles/`.
-*   **Gemini default:** The default model is `gemini:gemini-2.5-flash-lite`, which is the current official Flash-Lite replacement line in the Gemini API docs.
+*   **Gemini default:** The default model is `gemini:gemini-3-flash-preview`. As of March 30, 2026, the official Gemini docs list `gemini-3-flash-preview`, while the available Flash-Lite line is still `gemini-2.5-flash-lite` / `gemini-2.5-flash-lite-preview-09-2025`.
 *   **Secret isolation:** The Gemini API key is kept outside the repo in `/opt/mero_terminal/aichat.env`, and Bash exports `AICHAT_ENV_FILE` so AIChat can load it without ever placing the key in git.
 *   **Vi-first UX:** AIChat starts with `vi` keybindings and uses the tracked `coder` role as the REPL prelude.
 *   **PDF loading:** `pdftotext` is configured as the default PDF document loader for `.file` / `-f`.
