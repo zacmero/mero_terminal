@@ -360,6 +360,9 @@ install_fabric() {
     local temp_dir asset_url asset_name arch_suffix release_info download_path
 
     if [ "$DISTRO" = "Arch" ] && install_aur_package fabric-ai-bin; then
+        if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
+            run_sudo ln -sf "$(command -v fabric-ai)" /usr/local/bin/fabric || true
+        fi
         return 0
     fi
 

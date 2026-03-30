@@ -234,6 +234,16 @@ config.keys = {
 		mods = "CTRL|SHIFT",
 		action = send_if_nvim("\x1b[9002u", act.SendKey({ key = "s", mods = "CTRL|SHIFT" })),
 	},
+	{
+		key = "c",
+		mods = "CTRL|SHIFT",
+		action = act.CopyTo("ClipboardAndPrimarySelection"),
+	},
+	{
+		key = "v",
+		mods = "CTRL|SHIFT",
+		action = act.PasteFrom("Clipboard"),
+	},
 }
 
 config.key_tables = {
