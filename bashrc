@@ -264,8 +264,8 @@ fi
 export AICHAT_CONFIG_DIR="$HOME/.config/aichat"
 export AICHAT_CONFIG_FILE="$AICHAT_CONFIG_DIR/config.yaml"
 export AICHAT_ROLES_DIR="$AICHAT_CONFIG_DIR/roles"
-export AICHAT_ENV_FILE="/opt/mero_terminal/aichat.env"
-[ -f "$AICHAT_ENV_FILE" ] && source "$AICHAT_ENV_FILE"
+unset AICHAT_ENV_FILE
+[ -f "/opt/mero_terminal/aichat.env" ] && source "/opt/mero_terminal/aichat.env"
 
 if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
   alias fabric='fabric-ai'

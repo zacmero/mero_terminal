@@ -4,7 +4,7 @@ top_p: 0.95
 
 stream: true
 save: true
-keybindings: vi
+keybindings: emacs
 editor: nvim
 wrap: auto
 wrap_code: true
@@ -15,3 +15,10 @@ serve_addr: 127.0.0.1:8000
 # GEMINI_API_KEY is loaded from /opt/mero_terminal/aichat.env via Bash.
 document_loaders:
   pdf: "pdftotext $1 -"
+
+clients:
+  - type: gemini
+    models:
+      - name: gemini-3-flash-preview
+        max_input_tokens: 1048576
+        supports_function_calling: true

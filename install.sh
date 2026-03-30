@@ -419,7 +419,7 @@ ensure_aichat_secret_file() {
     cat > "$temp_file" <<'EOF'
 # AIChat secret environment
 # Set your real Gemini key here. This file is intentionally outside the repo.
-GEMINI_API_KEY="YOUR_GOOGLE_API_KEY_HERE"
+GEMINI_API_KEY=YOUR_GOOGLE_API_KEY_HERE
 EOF
 
     run_sudo mkdir -p "$secret_dir"
@@ -1031,6 +1031,9 @@ link_path "$MERO_TERMINAL_DIR/aichat/config.yaml" "$HOME/.config/aichat/config.y
 link_path "$MERO_TERMINAL_DIR/aichat/roles/coder.md" "$HOME/.config/aichat/roles/coder.md" "AIChat coder role"
 link_path "$MERO_TERMINAL_DIR/aichat/roles/suzy-brain.md" "$HOME/.config/aichat/roles/suzy-brain.md" "AIChat suzy-brain role"
 ensure_aichat_secret_file
+if [ -f /opt/mero_terminal/aichat.env ]; then
+    sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/=/' /opt/mero_terminal/aichat.env > "$HOME/.config/aichat/.env"
+fi
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"
