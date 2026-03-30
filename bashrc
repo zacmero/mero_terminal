@@ -260,6 +260,17 @@ if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
 
+# AIChat uses a tracked config, while secrets live outside the repo.
+export AICHAT_CONFIG_DIR="$HOME/.config/aichat"
+export AICHAT_CONFIG_FILE="$AICHAT_CONFIG_DIR/config.yaml"
+export AICHAT_ROLES_DIR="$AICHAT_CONFIG_DIR/roles"
+export AICHAT_ENV_FILE="/opt/mero_terminal/aichat.env"
+[ -f "$AICHAT_ENV_FILE" ] && source "$AICHAT_ENV_FILE"
+
+if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
+  alias fabric='fabric-ai'
+fi
+
 # OPENCODE
 export PATH="$HOME/.opencode/bin:$PATH"
 

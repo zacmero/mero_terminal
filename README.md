@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), and `fabric` (AI prompt/pattern toolkit).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -60,6 +60,53 @@ Croc is a tool that allows any two computers to simply and securely transfer fil
 *   **Simple Sending:** Run `croc send <file>` to generate a random code.
 *   **Simple Receiving:** On the receiving computer, run `croc <code>` to download the file.
 *   **Secure & Fast:** Uses relay servers but encrypts end-to-end using PAKE (Password-Authenticated Key Exchange).
+
+---
+
+## AIChat
+
+AIChat is now a default tracked tool in `mero_terminal`. On Arch it installs from the native `extra/aichat` package, and on Debian/Ubuntu the installer falls back to the latest official GitHub release binary.
+
+### Features:
+*   **Tracked config:** `aichat/config.yaml` is repo-managed and linked into `~/.config/aichat/config.yaml`.
+*   **Tracked roles:** The default `coder` and `suzy-brain` role prompts are tracked under `aichat/roles/` and linked into `~/.config/aichat/roles/`.
+*   **Gemini default:** The default model is `gemini:gemini-2.5-flash-lite`, which is the current official Flash-Lite replacement line in the Gemini API docs.
+*   **Secret isolation:** The Gemini API key is kept outside the repo in `/opt/mero_terminal/aichat.env`, and Bash exports `AICHAT_ENV_FILE` so AIChat can load it without ever placing the key in git.
+*   **Vi-first UX:** AIChat starts with `vi` keybindings and uses the tracked `coder` role as the REPL prelude.
+*   **PDF loading:** `pdftotext` is configured as the default PDF document loader for `.file` / `-f`.
+
+### First-time secret setup:
+
+```bash
+sudoedit /opt/mero_terminal/aichat.env
+```
+
+Set:
+
+```bash
+GEMINI_API_KEY="your-real-google-api-key"
+```
+
+Useful commands:
+
+```bash
+aichat
+aichat -r coder
+aichat -r suzy-brain
+aichat --serve
+aichat --list-roles
+```
+
+---
+
+## Fabric
+
+Fabric is now a default tracked tool in `mero_terminal`.
+
+### Features:
+*   **Arch path:** On Arch, the installer prefers the AUR binary package `fabric-ai-bin`.
+*   **Debian/Ubuntu fallback:** On Debian/Ubuntu, the installer falls back to the latest official Fabric binary release.
+*   **Unified command:** `mero_terminal` ensures `fabric` works even when the package exposes the binary as `fabric-ai`.
 
 ---
 
@@ -180,9 +227,9 @@ The installer now detects existing managed files and directories, backs them up 
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, and related packages using the correct package manager for the host (`pacman` on Arch, `apt` on Debian/Ubuntu).
-*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, and Ueberzugpp (conditionally if GUI is detected).
+*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric.
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, and `~/.config/atuin/config.toml`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, and the tracked AIChat files under `~/.config/aichat`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
 *   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! sync` for Neovim and `ya pkg install` for Yazi so the explorer and Git-status plugins are present from the first install.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 

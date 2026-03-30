@@ -191,6 +191,12 @@ install_package_group() {
                 "Debian") install_packages gh ;;
             esac
             ;;
+        aichat)
+            case "$DISTRO" in
+                "Arch") install_packages aichat ;;
+                "Debian") return 1 ;;
+            esac
+            ;;
         wezterm)
             case "$DISTRO" in
                 "Arch") install_packages wezterm ;;
@@ -270,6 +276,153 @@ install_oh_my_posh() {
     fi
 
     curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
+}
+
+install_aichat_release_fallback() {
+    local temp_dir asset_url asset_name extract_dir binary_path arch_pattern release_info
+    temp_dir=$(mktemp -d)
+
+    case "$ARCH_TYPE" in
+        x64) arch_pattern='(x86_64|amd64)' ;;
+        arm64) arch_pattern='(aarch64|arm64)' ;;
+        *)
+            rm -rf "$temp_dir"
+            return 1
+            ;;
+    esac
+
+    release_info=$(curl -fsSL "https://api.github.com/repos/sigoden/aichat/releases/latest") || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    asset_url=$(printf '%s\n' "$release_info" \
+        | grep -oE 'https://[^"]+' \
+        | grep -E "/aichat-.*${arch_pattern}.*unknown-linux-(gnu|musl)\.tar\.gz$" \
+        | head -n1)
+
+    if [ -z "$asset_url" ]; then
+        asset_url=$(printf '%s\n' "$release_info" \
+            | grep -oE 'https://[^"]+' \
+            | grep -E "/aichat-.*${arch_pattern}.*linux.*\.(tar\.gz|tgz)$" \
+            | head -n1)
+    fi
+
+    if [ -z "$asset_url" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    asset_name=${asset_url##*/}
+
+    if ! curl -fLo "$temp_dir/$asset_name" "$asset_url"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    extract_dir="$temp_dir/extract"
+    mkdir -p "$extract_dir"
+
+    if ! tar -xzf "$temp_dir/$asset_name" -C "$extract_dir"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    binary_path=$(find "$extract_dir" -type f -name aichat | head -n1)
+    if [ -z "$binary_path" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    run_sudo install -Dm755 "$binary_path" /usr/local/bin/aichat || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    rm -rf "$temp_dir"
+}
+
+install_aichat() {
+    case "$DISTRO" in
+        "Arch")
+            install_package_group aichat || install_aichat_release_fallback
+            ;;
+        "Debian")
+            install_aichat_release_fallback
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+install_fabric() {
+    local temp_dir asset_url asset_name arch_suffix release_info download_path
+
+    if [ "$DISTRO" = "Arch" ] && install_aur_package fabric-ai-bin; then
+        return 0
+    fi
+
+    case "$ARCH_TYPE" in
+        x64) arch_suffix="amd64" ;;
+        arm64) arch_suffix="arm64" ;;
+        *) return 1 ;;
+    esac
+
+    temp_dir=$(mktemp -d)
+    release_info=$(curl -fsSL "https://api.github.com/repos/danielmiessler/Fabric/releases/latest") || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    asset_url=$(printf '%s\n' "$release_info" \
+        | grep -oE 'https://[^"]+' \
+        | grep -E "/fabric-linux-${arch_suffix}$" \
+        | head -n1)
+
+    if [ -z "$asset_url" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    asset_name=${asset_url##*/}
+    download_path="$temp_dir/$asset_name"
+
+    if ! curl -fLo "$download_path" "$asset_url"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    run_sudo install -Dm755 "$download_path" /usr/local/bin/fabric-ai || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    run_sudo ln -sf /usr/local/bin/fabric-ai /usr/local/bin/fabric || true
+
+    rm -rf "$temp_dir"
+}
+
+ensure_aichat_secret_file() {
+    local secret_dir=/opt/mero_terminal
+    local secret_file=$secret_dir/aichat.env
+    local temp_file
+    local owner_user=${SUDO_USER:-$USER}
+
+    if [ -f "$secret_file" ]; then
+        return 0
+    fi
+
+    temp_file=$(mktemp)
+    cat > "$temp_file" <<'EOF'
+# AIChat secret environment
+# Set your real Gemini key here. This file is intentionally outside the repo.
+GEMINI_API_KEY="YOUR_GOOGLE_API_KEY_HERE"
+EOF
+
+    run_sudo mkdir -p "$secret_dir"
+    run_sudo install -Dm600 "$temp_file" "$secret_file"
+    run_sudo chown "$owner_user":"$owner_user" "$secret_file" || true
+    rm -f "$temp_file"
 }
 
 download_font_file() {
@@ -606,6 +759,21 @@ if ! command -v gh >/dev/null 2>&1; then
     install_package_group github-cli || log_optional_failure "GitHub CLI"
 fi
 
+# AIChat
+if ! command -v aichat >/dev/null 2>&1; then
+    echo "Installing AIChat..."
+    install_aichat || log_optional_failure "AIChat"
+fi
+
+# Fabric
+if ! command -v fabric >/dev/null 2>&1 && ! command -v fabric-ai >/dev/null 2>&1; then
+    echo "Installing Fabric..."
+    install_fabric || log_optional_failure "Fabric"
+fi
+if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
+    run_sudo ln -sf "$(command -v fabric-ai)" /usr/local/bin/fabric || true
+fi
+
 # WezTerm
 if [ "$INSTALL_WEZTERM" = "1" ] && ! command -v wezterm >/dev/null 2>&1; then
     install_wezterm || log_optional_failure "WezTerm"
@@ -855,6 +1023,11 @@ link_path "$MERO_TERMINAL_DIR/lazygit" "$HOME/.config/lazygit" "LazyGit configur
 link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
+mkdir -p "$HOME/.config/aichat/roles"
+link_path "$MERO_TERMINAL_DIR/aichat/config.yaml" "$HOME/.config/aichat/config.yaml" "AIChat configuration"
+link_path "$MERO_TERMINAL_DIR/aichat/roles/coder.md" "$HOME/.config/aichat/roles/coder.md" "AIChat coder role"
+link_path "$MERO_TERMINAL_DIR/aichat/roles/suzy-brain.md" "$HOME/.config/aichat/roles/suzy-brain.md" "AIChat suzy-brain role"
+ensure_aichat_secret_file
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"
