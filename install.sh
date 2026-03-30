@@ -1034,6 +1034,9 @@ ensure_aichat_secret_file
 if [ -f /opt/mero_terminal/aichat.env ]; then
     sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/=/' /opt/mero_terminal/aichat.env > "$HOME/.config/aichat/.env"
 fi
+if command -v aichat >/dev/null 2>&1; then
+    run_sudo ln -sf "$(command -v aichat)" /usr/local/bin/ai || true
+fi
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"

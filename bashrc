@@ -271,6 +271,8 @@ if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; 
   alias fabric='fabric-ai'
 fi
 
+alias ai='aichat'
+
 # OPENCODE
 export PATH="$HOME/.opencode/bin:$PATH"
 
