@@ -405,6 +405,59 @@ install_fabric() {
     rm -rf "$temp_dir"
 }
 
+install_lazydocker() {
+    local temp_dir release_info asset_url asset_name download_path arch_suffix binary_path
+
+    case "$ARCH" in
+        x86_64) arch_suffix="x86_64" ;;
+        aarch64) arch_suffix="arm64" ;;
+        armv7l) arch_suffix="armv7" ;;
+        *) return 1 ;;
+    esac
+
+    temp_dir=$(mktemp -d)
+    release_info=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest") || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    asset_url=$(printf '%s\n' "$release_info" \
+        | grep -oE 'https://[^"]+/lazydocker_[0-9.]+_Linux_'"$arch_suffix"'\.tar\.gz' \
+        | head -n1)
+
+    if [ -z "$asset_url" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    asset_name=${asset_url##*/}
+    download_path="$temp_dir/$asset_name"
+
+    if ! curl -fLo "$download_path" "$asset_url"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    tar -xzf "$download_path" -C "$temp_dir" || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    binary_path=$(find "$temp_dir" -type f -name lazydocker | head -n1)
+    if [ -z "$binary_path" ]; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    run_sudo install -Dm755 "$binary_path" /usr/local/bin/lazydocker || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    run_sudo install -Dm755 "$binary_path" /usr/local/bin/lazydocker.real || true
+
+    rm -rf "$temp_dir"
+}
+
 ensure_aichat_secret_file() {
     local secret_dir=/opt/mero_terminal
     local secret_file=$secret_dir/aichat.env
@@ -815,6 +868,12 @@ if ! command -v lazygit >/dev/null 2>&1; then
     fi
 fi
 
+# --- LazyDocker Installation (Universal) ---
+if ! command -v lazydocker >/dev/null 2>&1; then
+    echo "Installing LazyDocker..."
+    install_lazydocker || log_optional_failure "LazyDocker"
+fi
+
 # --- Image Viewers (chafa, ueberzugpp) ---
 install_image_viewers() {
     echo "Installing Image Viewer (chafa)..."
@@ -929,12 +988,9 @@ install_yazi() {
     local EXTRACTED_DIR="$TEMP_DIR/yazi-${YAZI_ARCH_DL}-unknown-linux-${BUILD_TYPE}"
 
     echo "Moving yazi and ya binaries to $YAZI_INSTALL_DIR..."
-    run_sudo mv "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/"
-    run_sudo mv "$EXTRACTED_DIR/ya" "$YAZI_INSTALL_DIR/"
-
-    echo "Setting permissions for yazi and ya..."
-    run_sudo chmod +x "$YAZI_INSTALL_DIR/yazi"
-    run_sudo chmod +x "$YAZI_INSTALL_DIR/ya"
+    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi"
+    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi.real"
+    run_sudo install -Dm755 "$EXTRACTED_DIR/ya" "$YAZI_INSTALL_DIR/ya"
 
     echo "Cleaning up temporary Yazi files..."
     rm -rf "$TEMP_DIR"
@@ -1037,6 +1093,8 @@ fi
 if command -v aichat >/dev/null 2>&1; then
     run_sudo ln -sf "$(command -v aichat)" /usr/local/bin/ai || true
 fi
+run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi-select || true
+run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"

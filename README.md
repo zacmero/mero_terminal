@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), and `fabric` (AI prompt/pattern toolkit).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), and `fabric` (AI prompt/pattern toolkit).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -22,6 +22,8 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Predictable `Ctrl+C` exit:** If you abort `yazi` with `Ctrl+C`, the shell stays in the directory where you launched it instead of jumping somewhere unexpected.
 *   **Neovim-first editing:** `nvim` is exported as the default `EDITOR`/`VISUAL`, and pressing `Enter` on text/code files in `yazi` opens them in Neovim.
 *   **Git status in Yazi:** The official `git.yazi` plugin is installed and shows per-file Git state directly in the file list inside Git repositories.
+*   **Selection-friendly mode:** Use `yazi-select` when you want the same file manager view but need to mouse-select/copy text from the terminal instead of letting Yazi capture mouse events.
+*   **Opt-in launcher:** `yazi-select` is separate from the normal `yazi` command, so you can keep the regular mouse behavior unless you explicitly want terminal selection.
 *   **IDE mode for Neovim:** Run `ide` (or `nvide`) inside any project folder to open the tracked `MeroIde` layout: one Neo-tree sidebar on the left and one real editor buffer in the center. It resumes a recent project file when possible, otherwise falls back to a smart starter file such as `README.md`, `main.*`, `index.*`, `app.*`, or `init.*`, then to the first tracked Git file. Snacks Explorer and netrw are disabled so Neo-tree remains the only explorer path.
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
 *   **File operations:** Easily copy, move, delete, and manage files.
@@ -107,6 +109,18 @@ Fabric is now a default tracked tool in `mero_terminal`.
 *   **Arch path:** On Arch, the installer prefers the AUR binary package `fabric-ai-bin`.
 *   **Debian/Ubuntu fallback:** On Debian/Ubuntu, the installer falls back to the latest official Fabric binary release.
 *   **Unified command:** `mero_terminal` ensures `fabric` works even when the package exposes the binary as `fabric-ai`.
+
+---
+
+## LazyDocker
+
+LazyDocker is now included by default in `mero_terminal` when the installer can fetch it.
+
+### Features:
+*   **Default install:** The installer downloads the latest official release on Arch, Debian, and Ubuntu when `lazydocker` is not already present.
+*   **Selection-friendly launcher:** Use `lazydocker-select` when you want to mouse-select/copy text from the terminal while using LazyDocker.
+*   **Mouse capture off:** The selection launcher enables `gui.mouseEvents: true` in a temporary config so your terminal emulator can keep normal selection behavior.
+*   **Opt-in launcher:** `lazydocker-select` is separate from the normal `lazydocker` command, so menus and log scrolling stay normal unless you explicitly switch into the copy-friendly mode.
 
 ---
 
