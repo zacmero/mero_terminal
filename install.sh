@@ -1097,7 +1097,7 @@ run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
-    nvim --headless "+Lazy! sync" +qa || log_optional_failure "Neovim plugins"
+    nvim --headless "+Lazy! restore" +qa || log_optional_failure "Neovim plugins"
 fi
 
 if command -v ya >/dev/null 2>&1; then
