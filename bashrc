@@ -1,4 +1,3 @@
-[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -297,7 +296,6 @@ elif command -v starship >/dev/null 2>&1; then
 fi
 
 eval "$(zoxide init bash)"
-eval "$(atuin init bash)"
 if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
   export MERO_FASTFETCH_SHOWN=1
   fastfetch
@@ -464,3 +462,8 @@ if command -v mise >/dev/null 2>&1; then
 elif [ -f "$HOME/.local/bin/mise" ]; then
   eval "$("$HOME/.local/bin/mise" activate bash)"
 fi
+
+# bash-preexec must be loaded after tools that rewrite PROMPT_COMMAND, and
+# before Atuin registers its preexec/precmd hooks.
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash)"

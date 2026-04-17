@@ -124,6 +124,18 @@ __bp_sanitize_string() {
     printf -v "$var" '%s' "$sanitized"
 }
 
+__bp_prompt_command_value() {
+    if [[ "$(declare -p PROMPT_COMMAND 2>/dev/null)" == declare\ -a* ]]; then
+        local command value=
+        for command in "${PROMPT_COMMAND[@]}"; do
+            value+="${value:+$'\n'}$command"
+        done
+        printf '%s' "$value"
+    else
+        printf '%s' "${PROMPT_COMMAND:-}"
+    fi
+}
+
 # This function is installed as part of the PROMPT_COMMAND;
 # It sets a variable to indicate that the prompt was just displayed,
 # to allow the DEBUG trap to know that the next command is likely interactive.
@@ -313,7 +325,7 @@ __bp_install() {
 
     local existing_prompt_command
     # Remove setting our trap install string and sanitize the existing prompt command string
-    existing_prompt_command="${PROMPT_COMMAND:-}"
+    existing_prompt_command="$(__bp_prompt_command_value)"
     # Edge case of appending to PROMPT_COMMAND
     existing_prompt_command="${existing_prompt_command//$__bp_install_string/:}" # no-op
     existing_prompt_command="${existing_prompt_command//$'\n':$'\n'/$'\n'}" # remove known-token only
@@ -325,14 +337,13 @@ __bp_install() {
 
     # Install our hooks in PROMPT_COMMAND to allow our trap to know when we've
     # actually entered something.
+    unset PROMPT_COMMAND
     PROMPT_COMMAND='__bp_precmd_invoke_cmd'
     PROMPT_COMMAND+=${existing_prompt_command:+$'\n'$existing_prompt_command}
-    if (( BASH_VERSINFO[0] > 5 || (BASH_VERSINFO[0] == 5 && BASH_VERSINFO[1] >= 1) )); then
-        PROMPT_COMMAND+=('__bp_interactive_mode')
-    else
-        # shellcheck disable=SC2179 # PROMPT_COMMAND is not an array in bash <= 5.0
-        PROMPT_COMMAND+=$'\n__bp_interactive_mode'
-    fi
+    # Keep PROMPT_COMMAND as a newline-delimited string. Converting it to an
+    # array here can prevent __bp_interactive_mode from reliably arming the
+    # next DEBUG-trap preexec on shells with other prompt integrations.
+    PROMPT_COMMAND+=$'\n__bp_interactive_mode'
 
     # Add two functions to our arrays for convenience
     # of definition.
@@ -353,7 +364,8 @@ __bp_install_after_session_init() {
     __bp_require_not_readonly PROMPT_COMMAND HISTCONTROL HISTTIMEFORMAT || return
 
     local sanitized_prompt_command
-    __bp_sanitize_string sanitized_prompt_command "${PROMPT_COMMAND:-}"
+    __bp_sanitize_string sanitized_prompt_command "$(__bp_prompt_command_value)"
+    unset PROMPT_COMMAND
     if [[ -n "$sanitized_prompt_command" ]]; then
         # shellcheck disable=SC2178 # PROMPT_COMMAND is not an array in bash <= 5.0
         PROMPT_COMMAND=${sanitized_prompt_command}$'\n'

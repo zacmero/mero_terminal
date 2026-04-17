@@ -247,6 +247,10 @@ The installer now detects existing managed files and directories, backs them up 
 *   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, and `ya pkg install` for Yazi so the explorer and Git-status plugins are present from the first install.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
+### Shell hook maintenance
+
+Atuin command capture depends on `bash-preexec.sh` owning the Bash `DEBUG` trap after prompt integrations have finished editing `PROMPT_COMMAND`. Keep `bash-preexec.sh` and `atuin init bash` at the end of `bashrc`, after tools such as Oh My Posh, zoxide, and mise. The tracked `bash-preexec.sh` is intentionally patched to tolerate prompt integrations that use array-style `PROMPT_COMMAND`; do not replace it with a pristine upstream copy without preserving that compatibility.
+
 ---
 
 ## Post-Installation
