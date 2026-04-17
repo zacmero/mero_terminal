@@ -259,10 +259,6 @@ install_package_group() {
 install_oh_my_posh() {
     echo "Installing Oh My Posh..."
 
-    if command -v oh-my-posh >/dev/null 2>&1; then
-        return 0
-    fi
-
     if command -v brew >/dev/null 2>&1; then
         if brew install jandedobbeleer/oh-my-posh/oh-my-posh; then
             return 0
@@ -767,16 +763,12 @@ if ! command -v oh-my-posh >/dev/null 2>&1; then
 fi
 
 # Zoxide
-if ! command -v zoxide >/dev/null 2>&1; then
-    echo "Installing Zoxide..."
-    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || log_optional_failure "Zoxide"
-fi
+echo "Installing Zoxide..."
+curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || log_optional_failure "Zoxide"
 
 # Atuin
-if ! command -v atuin >/dev/null 2>&1; then
-    echo "Installing Atuin..."
-    curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh || log_optional_failure "Atuin"
-fi
+echo "Installing Atuin..."
+curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh || log_optional_failure "Atuin"
 
 # FZF
 if [ ! -d "$HOME/.fzf" ]; then
@@ -804,10 +796,8 @@ if ! command -v trash >/dev/null 2>&1; then
 fi
 
 # Croc (Universal File Transfer)
-if ! command -v croc >/dev/null 2>&1; then
-    echo "Installing Croc..."
-    curl -fsSL https://getcroc.schollz.com | bash || log_optional_failure "Croc"
-fi
+echo "Installing Croc..."
+curl -fsSL https://getcroc.schollz.com | bash || log_optional_failure "Croc"
 
 # GitHub CLI
 if ! command -v gh >/dev/null 2>&1; then
@@ -816,34 +806,29 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 # AIChat
-if ! command -v aichat >/dev/null 2>&1; then
-    echo "Installing AIChat..."
-    install_aichat || log_optional_failure "AIChat"
-fi
+echo "Installing AIChat..."
+install_aichat || log_optional_failure "AIChat"
 
 # Fabric
-if ! command -v fabric >/dev/null 2>&1 && ! command -v fabric-ai >/dev/null 2>&1; then
-    echo "Installing Fabric..."
-    install_fabric || log_optional_failure "Fabric"
-fi
+echo "Installing Fabric..."
+install_fabric || log_optional_failure "Fabric"
 if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
     run_sudo ln -sf "$(command -v fabric-ai)" /usr/local/bin/fabric || true
 fi
 
 # WezTerm
-if [ "$INSTALL_WEZTERM" = "1" ] && ! command -v wezterm >/dev/null 2>&1; then
+if [ "$INSTALL_WEZTERM" = "1" ]; then
     install_wezterm || log_optional_failure "WezTerm"
 fi
 
 # --- LazyGit Installation (Universal) ---
-if ! command -v lazygit >/dev/null 2>&1; then
-    echo "Installing LazyGit..."
-    
-    # Get the latest version tag from GitHub
-    LAZYGIT_VERSION=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') || true
-    if [ -z "$LAZYGIT_VERSION" ]; then
-        log_optional_failure "LazyGit"
-    else
+echo "Installing LazyGit..."
+
+# Get the latest version tag from GitHub
+LAZYGIT_VERSION=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') || true
+if [ -z "$LAZYGIT_VERSION" ]; then
+    log_optional_failure "LazyGit"
+else
     
     # Detect architecture for the download URL
     ARCH=$(uname -m)
@@ -856,23 +841,20 @@ if ! command -v lazygit >/dev/null 2>&1; then
 
     echo "Downloading LazyGit v${LAZYGIT_VERSION} for ${LAZYGIT_ARCH}..."
     
-        if curl -fLo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_${LAZYGIT_ARCH}.tar.gz" \
-            && tar xf lazygit.tar.gz lazygit \
-            && run_sudo install lazygit /usr/local/bin; then
-            rm lazygit lazygit.tar.gz
-            echo "LazyGit installed successfully!"
-        else
-            rm -f lazygit lazygit.tar.gz
-            log_optional_failure "LazyGit"
-        fi
+    if curl -fLo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_${LAZYGIT_ARCH}.tar.gz" \
+        && tar xf lazygit.tar.gz lazygit \
+        && run_sudo install lazygit /usr/local/bin; then
+        rm lazygit lazygit.tar.gz
+        echo "LazyGit installed successfully!"
+    else
+        rm -f lazygit lazygit.tar.gz
+        log_optional_failure "LazyGit"
     fi
 fi
 
 # --- LazyDocker Installation (Universal) ---
-if ! command -v lazydocker >/dev/null 2>&1; then
-    echo "Installing LazyDocker..."
-    install_lazydocker || log_optional_failure "LazyDocker"
-fi
+echo "Installing LazyDocker..."
+install_lazydocker || log_optional_failure "LazyDocker"
 
 # --- Image Viewers (chafa, ueberzugpp) ---
 install_image_viewers() {
@@ -998,9 +980,7 @@ install_yazi() {
 }
 
 # Call Yazi installation function
-if ! command -v yazi >/dev/null 2>&1; then
-    install_yazi || log_optional_failure "Yazi"
-fi
+install_yazi || log_optional_failure "Yazi"
 
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
