@@ -5,3 +5,6 @@ gui:
   theme:
     unstagedChangesColor:
       - "#44FFB1"
+
+git:
+  autoFetch: true
