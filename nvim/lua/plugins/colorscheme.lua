@@ -10,6 +10,13 @@ return {
   {
     "folke/tokyonight.nvim",
     opts = {
+      style = "night",
+      -- 1. Change the background color variable
+      on_colors = function(colors)
+        colors.bg = "#1e1e2e"
+        colors.bg_sidebar = "#181825"
+        colors.bg_float = "#1e1e2e"
+      end,
       on_highlights = function(hl, _colors)
         hl.NeoTreeGitUntracked = { fg = "#44FFB1" }
         hl.NeoTreeGitAdded = { fg = "#44FFB1" }
@@ -22,7 +29,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight", 
+      colorscheme = "tokyonight",
     },
   },
 }

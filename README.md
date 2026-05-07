@@ -308,6 +308,21 @@ The tracked Neovim setup now includes:
 
 These mappings are tuned for terminal Neovim usage in `wezterm`. The shell config also disables XON/XOFF flow control so `Ctrl+S` reaches Neovim instead of freezing the terminal.
 
+## Visual Web Work
+
+The tracked Neovim setup now includes a small front-end and visual-work layer for when you need to inspect or build UI-heavy code without falling back to VS Code:
+
+*   **Colorizer:** Hex/RGB/HSL values are highlighted inline in CSS, HTML, JS/TS, React, Vue, Svelte, and Astro buffers.
+*   **Color picker:** `ccc.nvim` provides a floating color picker and converters for hex, RGB, and HSL.
+*   **Auto tags:** HTML-like buffers auto-close and auto-rename paired tags.
+*   **Web LSPs:** `cssls`, `html`, `tailwindcss`, `emmet_language_server`, and `tsserver` are enabled through the tracked LazyVim layer.
+
+Useful keys:
+
+*   `<leader>cp`: open the color picker
+*   `<leader>ch`: toggle live color highlighting
+*   `<leader>cc`: convert the current color under the cursor
+
 ## Neovim IDE Flow
 
 - `ide`: open Neovim on the current directory with Neo-tree on the left
