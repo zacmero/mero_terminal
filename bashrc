@@ -141,23 +141,6 @@ alias lt='eza -T'
 #fzf folder navigation + lazyvin fast open:
 alias v='fzf | xargs -r nvim'
 
-_mero_is_web_project() {
-  local dir=$1
-
-  [ -f "$dir/package.json" ] && return 0
-  [ -f "$dir/index.html" ] && return 0
-  [ -f "$dir/vite.config.js" ] && return 0
-  [ -f "$dir/vite.config.ts" ] && return 0
-  [ -f "$dir/astro.config.mjs" ] && return 0
-  [ -f "$dir/svelte.config.js" ] && return 0
-  [ -f "$dir/next.config.js" ] && return 0
-  [ -f "$dir/nuxt.config.ts" ] && return 0
-  [ -f "$dir/tailwind.config.js" ] && return 0
-  [ -f "$dir/tailwind.config.ts" ] && return 0
-  [ -f "$dir/postcss.config.js" ] && return 0
-  return 1
-}
-
 _mero_package_manager() {
   local dir=$1
 
@@ -187,11 +170,21 @@ _mero_package_script_exists() {
 _mero_start_web_preview() {
   local dir=$1
   local pm
-  local log_dir="$HOME/.cache/mero_terminal"
+  local log_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mero_terminal"
   local log_file="$log_dir/web-preview.log"
+  local status_file="$log_dir/web-preview.status"
   local port="${MERO_WEB_PREVIEW_PORT:-4173}"
+  local url="http://127.0.0.1:$port"
+  local ready=0
+  local attempts=0
+  local server_label=""
 
-  mkdir -p "$log_dir"
+  mkdir -p "$log_dir" 2>/dev/null || {
+    log_dir="/tmp/mero_terminal"
+    log_file="$log_dir/web-preview.log"
+    status_file="$log_dir/web-preview.status"
+    mkdir -p "$log_dir"
+  }
   pm=$(_mero_package_manager "$dir")
 
   if [ -f "$dir/package.json" ] && _mero_package_script_exists "$dir" dev; then
@@ -205,23 +198,53 @@ _mero_start_web_preview() {
       *)
         (cd "$dir" && nohup npm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
     esac
-    echo "Web preview: running dev server on http://127.0.0.1:$port"
-    return 0
+    server_label="dev script"
+    ready=1
   fi
 
-  if command -v live-server >/dev/null 2>&1; then
+  if [ "$ready" = 0 ] && command -v live-server >/dev/null 2>&1; then
     (cd "$dir" && nohup live-server --host=127.0.0.1 --port="$port" --no-browser >"$log_file" 2>&1 &)
-    echo "Web preview: live-server on http://127.0.0.1:$port"
-    return 0
+    server_label="live-server"
+    ready=1
   fi
 
-  if command -v python3 >/dev/null 2>&1; then
-    (cd "$dir" && nohup python3 -m http.server "$port" --bind 127.0.0.1 >"$log_file" 2>&1 &)
-    echo "Web preview: basic http.server on http://127.0.0.1:$port"
-    return 0
+  if [ "$ready" = 0 ] && command -v python3 >/dev/null 2>&1; then
+    (cd "$dir" && nohup python3 -u -m http.server "$port" --bind 127.0.0.1 >"$log_file" 2>&1 &)
+    server_label="python http.server"
+    ready=1
   fi
 
-  echo "Web preview requested, but no preview server tool is available."
+  if [ "$ready" = 0 ]; then
+    echo "Web preview requested, but no preview server tool is available."
+    return 1
+  fi
+
+  if command -v curl >/dev/null 2>&1; then
+    while [ "$attempts" -lt 40 ]; do
+      if curl -fsS "$url" >/dev/null 2>&1; then
+        printf '%s\n%s\n%s\n' "$url" "$server_label" "$log_file" >"$status_file"
+        echo "Web preview ready: $url ($server_label)"
+        echo "Web preview log: $log_file"
+        return 0
+      fi
+      attempts=$((attempts + 1))
+      sleep 0.25
+    done
+  fi
+
+  printf '%s\n%s\n%s\n' "$url" "$server_label" "$log_file" >"$status_file"
+  echo "Web preview starting: $url ($server_label)"
+  echo "Web preview log: $log_file"
+  return 0
+}
+
+web-status() {
+  local status_file="${XDG_CACHE_HOME:-$HOME/.cache}/mero_terminal/web-preview.status"
+  if [ -r "$status_file" ]; then
+    sed -n '1,3p' "$status_file"
+    return 0
+  fi
+  echo "No web preview status file found."
   return 1
 }
 
@@ -230,16 +253,18 @@ ide() {
   local target="."
   local resolved
 
-  if [ "${1:-}" = "-web" ] || [ "${1:-}" = "--web" ]; then
-    web_mode=1
-    shift
-  fi
+  case "${1:-}" in
+    -web|--web)
+      web_mode=1
+      shift
+      ;;
+  esac
 
   target="${1:-.}"
   resolved="$(realpath "$target" 2>/dev/null || printf '%s' "$target")"
 
-  if [ "$web_mode" = "1" ] && _mero_is_web_project "$resolved"; then
-    _mero_start_web_preview "$resolved" &
+  if [ "$web_mode" = "1" ]; then
+    _mero_start_web_preview "$resolved"
     if command -v xdg-open >/dev/null 2>&1 && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
       (sleep 1; xdg-open "http://127.0.0.1:${MERO_WEB_PREVIEW_PORT:-4173}" >/dev/null 2>&1 &) || true
     fi

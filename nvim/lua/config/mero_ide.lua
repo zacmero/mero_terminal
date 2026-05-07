@@ -63,11 +63,34 @@ local function pick_start_file(dir)
   return pick_recent_file(dir) or pick_preferred_file(dir) or pick_git_file(dir)
 end
 
-function M.open(target)
-  local dir = target
-  if dir == nil or dir == "" then
-    dir = vim.env.MERO_IDE_TARGET or vim.uv.cwd()
+local function normalize_target(target)
+  local cwd = vim.uv.cwd()
+  local env_target = vim.env.MERO_IDE_TARGET
+
+  if target == nil or target == "" or target == "-web" or target == "--web" then
+    if env_target and env_target ~= "" and vim.fn.isdirectory(env_target) == 1 then
+      return env_target
+    end
+    return cwd
   end
+
+  if vim.fn.isdirectory(target) == 1 then
+    return target
+  end
+
+  if vim.fn.filereadable(target) == 1 then
+    return vim.fn.fnamemodify(target, ":h")
+  end
+
+  if env_target and env_target ~= "" and vim.fn.isdirectory(env_target) == 1 then
+    return env_target
+  end
+
+  return cwd
+end
+
+function M.open(target)
+  local dir = normalize_target(target)
   dir = vim.fn.fnamemodify(dir, ":p")
 
   vim.cmd.cd(vim.fn.fnameescape(dir))
