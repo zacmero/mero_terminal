@@ -141,10 +141,110 @@ alias lt='eza -T'
 #fzf folder navigation + lazyvin fast open:
 alias v='fzf | xargs -r nvim'
 
+_mero_is_web_project() {
+  local dir=$1
+
+  [ -f "$dir/package.json" ] && return 0
+  [ -f "$dir/index.html" ] && return 0
+  [ -f "$dir/vite.config.js" ] && return 0
+  [ -f "$dir/vite.config.ts" ] && return 0
+  [ -f "$dir/astro.config.mjs" ] && return 0
+  [ -f "$dir/svelte.config.js" ] && return 0
+  [ -f "$dir/next.config.js" ] && return 0
+  [ -f "$dir/nuxt.config.ts" ] && return 0
+  [ -f "$dir/tailwind.config.js" ] && return 0
+  [ -f "$dir/tailwind.config.ts" ] && return 0
+  [ -f "$dir/postcss.config.js" ] && return 0
+  return 1
+}
+
+_mero_package_manager() {
+  local dir=$1
+
+  if [ -f "$dir/bun.lockb" ] || [ -f "$dir/bun.lock" ]; then
+    echo bun
+  elif [ -f "$dir/pnpm-lock.yaml" ]; then
+    echo pnpm
+  elif [ -f "$dir/yarn.lock" ]; then
+    echo yarn
+  else
+    echo npm
+  fi
+}
+
+_mero_package_script_exists() {
+  local dir=$1
+  local script=$2
+
+  command -v node >/dev/null 2>&1 || return 1
+  node -e '
+    const fs = require("fs");
+    const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    process.exit(pkg.scripts && pkg.scripts[process.argv[2]] ? 0 : 1);
+  ' "$dir/package.json" "$script" >/dev/null 2>&1
+}
+
+_mero_start_web_preview() {
+  local dir=$1
+  local pm
+  local log_dir="$HOME/.cache/mero_terminal"
+  local log_file="$log_dir/web-preview.log"
+  local port="${MERO_WEB_PREVIEW_PORT:-4173}"
+
+  mkdir -p "$log_dir"
+  pm=$(_mero_package_manager "$dir")
+
+  if [ -f "$dir/package.json" ] && _mero_package_script_exists "$dir" dev; then
+    case "$pm" in
+      bun)
+        (cd "$dir" && nohup bun run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
+      pnpm)
+        (cd "$dir" && nohup pnpm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
+      yarn)
+        (cd "$dir" && nohup yarn dev --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
+      *)
+        (cd "$dir" && nohup npm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
+    esac
+    echo "Web preview: running dev server on http://127.0.0.1:$port"
+    return 0
+  fi
+
+  if command -v live-server >/dev/null 2>&1; then
+    (cd "$dir" && nohup live-server --host=127.0.0.1 --port="$port" --no-browser >"$log_file" 2>&1 &)
+    echo "Web preview: live-server on http://127.0.0.1:$port"
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    (cd "$dir" && nohup python3 -m http.server "$port" --bind 127.0.0.1 >"$log_file" 2>&1 &)
+    echo "Web preview: basic http.server on http://127.0.0.1:$port"
+    return 0
+  fi
+
+  echo "Web preview requested, but no preview server tool is available."
+  return 1
+}
+
 ide() {
-  local target="${1:-.}"
+  local web_mode=0
+  local target="."
   local resolved
+
+  if [ "${1:-}" = "-web" ] || [ "${1:-}" = "--web" ]; then
+    web_mode=1
+    shift
+  fi
+
+  target="${1:-.}"
   resolved="$(realpath "$target" 2>/dev/null || printf '%s' "$target")"
+
+  if [ "$web_mode" = "1" ] && _mero_is_web_project "$resolved"; then
+    _mero_start_web_preview "$resolved" &
+    if command -v xdg-open >/dev/null 2>&1 && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+      (sleep 1; xdg-open "http://127.0.0.1:${MERO_WEB_PREVIEW_PORT:-4173}" >/dev/null 2>&1 &) || true
+    fi
+  fi
+
   MERO_IDE_TARGET="$resolved" nvim "+MeroIde"
 }
 

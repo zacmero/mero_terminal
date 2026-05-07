@@ -291,6 +291,7 @@ Commands prefixed with a leading space are intentionally excluded from shell his
 Inside the tracked LazyVim setup:
 
 *   **Open IDE mode:** `ide` or `nvide` in a folder. This calls the tracked `:MeroIde` command and skips the dashboard for project launches. Plain `nvim` still keeps the normal LazyVim dashboard.
+*   **Web IDE mode:** `ide -web` keeps the same Mero IDE layout, but also starts a local live-preview server when the directory looks like a web project. It prefers an app's own `dev` script when present, otherwise falls back to `live-server` if installed, and finally to a simple `python3 -m http.server` preview.
 *   **Toggle Neo-tree:** `<leader>e`
 *   **Reopen the left explorer for the current folder:** `<leader>fi` or `<leader>ii`
 *   **Open OpenCode agent:** `<leader>oa`
