@@ -76,7 +76,7 @@ echo "Detected Architecture: $ARCH_TYPE"
 # 1.2 Detect Distribution (Ubuntu/Debian vs Arch)
 if [ -f /etc/arch-release ]; then
     DISTRO="Arch"
-    UPDATE_CMD=(pacman -Syu --noconfirm)
+    UPDATE_CMD=(pacman -Sy --noconfirm)
 elif [ -f /etc/debian_version ]; then
     DISTRO="Debian"
     UPDATE_CMD=(apt-get update)
@@ -723,7 +723,7 @@ if ! command -v curl >/dev/null 2>&1; then
 fi
 
 # Update System
-echo "Updating package lists..."
+echo "Refreshing package databases..."
 update_system_packages
 install_package_group base
 
@@ -1078,6 +1078,12 @@ run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bi
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     nvim --headless "+Lazy! restore" +qa || log_optional_failure "Neovim plugins"
+    echo "Installing Neovim Treesitter parsers..."
+    nvim --headless "+Lazy load nvim-treesitter" "+TSInstall! vim vimdoc" +qa || log_optional_failure "Neovim Treesitter parsers"
+    VIM_TS_QUERY="$HOME/.local/share/nvim/lazy/nvim-treesitter/runtime/queries/vim/highlights.scm"
+    if [ -f "$VIM_TS_QUERY" ]; then
+        sed -i '/^[[:space:]]*"tab"$/d' "$VIM_TS_QUERY"
+    fi
 fi
 
 if command -v ya >/dev/null 2>&1; then
