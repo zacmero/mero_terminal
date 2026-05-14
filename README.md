@@ -286,6 +286,14 @@ git pull origin master
 
 Commands prefixed with a leading space are intentionally excluded from shell history, and the tracked Atuin config also filters those commands so they are not recorded there either.
 
+## Plugin Workflow
+
+Neovim plugin changes are only persistent when they land in the repo. Use this rule:
+
+*   **Edit the repo** when you add a new plugin, change plugin options, or want behavior to survive on other machines.
+*   **Use Lazy locally** when you only want to install the already-tracked plugin versions or refresh the local plugin cache.
+*   **Commit `nvim/lazy-lock.json`** when the repo already contains the plugin spec and you want to pin the resolved version for all machines.
+
 ## IDE Navigation
 
 Inside the tracked LazyVim setup:
@@ -316,6 +324,7 @@ The tracked Neovim setup now includes a small front-end and visual-work layer fo
 *   **Colorizer:** Hex/RGB/HSL values are highlighted inline in CSS, HTML, JS/TS, React, Vue, Svelte, and Astro buffers.
 *   **Color picker:** `ccc.nvim` provides a floating color picker and converters for hex, RGB, and HSL.
 *   **Auto tags:** HTML-like buffers auto-close and auto-rename paired tags.
+*   **Markdown rendering:** `render-markdown.nvim` renders Markdown tables and common syntax in a cleaner, terminal-friendly view.
 *   **Web LSPs:** `cssls`, `html`, `tailwindcss`, `emmet_language_server`, and `tsserver` are enabled through the tracked LazyVim layer.
 
 Useful keys:

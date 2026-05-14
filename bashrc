@@ -141,6 +141,47 @@ alias lt='eza -T'
 #fzf folder navigation + lazyvin fast open:
 alias v='fzf | xargs -r nvim'
 
+#Vim Mode:
+# --- Readline Mode Toggle & Dynamic Prompt Indicator ---
+
+# 1. Define the custom toggle function
+toggle_readline_mode() {
+  if [[ "$(set -o | grep 'vi ' | awk '{print $2}')" == "on" ]]; then
+    set -o emacs
+    # Force a prompt refresh to immediately update the indicator
+    bind '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
+  else
+    set -o vi
+    # Re-bind toggle key in Vi's sub-maps so it stays active
+    bind -m vi-insert '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
+    bind -m vi-command '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
+  fi
+
+  # Redraw the current prompt line cleanly
+  REPLY=$READLINE_LINE
+  unset READLINE_LINE
+  READLINE_LINE=$REPLY
+}
+
+# 2. Register the bash function as an executable readline macro
+# (Uses Ctrl + g as the single key toggle)
+if [[ $- == *i* ]]; then
+  bind -x '"\C-g": toggle_readline_mode'
+fi
+
+# 3. Dynamic Prompt Status Function
+get_editing_mode() {
+  if [[ "$(set -o | grep 'vi ' | awk '{print $2}')" == "on" ]]; then
+    echo -e "\[\e[1;31m\][VIM]\[\e[0m\]" # Bold Red
+  else
+    echo -e "\[\e[1;32m\][EMACS]\[\e[0m\]" # Bold Green
+  fi
+}
+
+# 4. Inject the status indicator into your existing prompt structure
+# Replace or prepend to your existing PS1 variable definition:
+PROMPT_COMMAND='PS1="$(get_editing_mode) \u@\h:\w\$ "'
+
 _mero_package_manager() {
   local dir=$1
 
@@ -189,14 +230,18 @@ _mero_start_web_preview() {
 
   if [ -f "$dir/package.json" ] && _mero_package_script_exists "$dir" dev; then
     case "$pm" in
-      bun)
-        (cd "$dir" && nohup bun run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
-      pnpm)
-        (cd "$dir" && nohup pnpm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
-      yarn)
-        (cd "$dir" && nohup yarn dev --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
-      *)
-        (cd "$dir" && nohup npm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &) ;;
+    bun)
+      (cd "$dir" && nohup bun run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &)
+      ;;
+    pnpm)
+      (cd "$dir" && nohup pnpm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &)
+      ;;
+    yarn)
+      (cd "$dir" && nohup yarn dev --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &)
+      ;;
+    *)
+      (cd "$dir" && nohup npm run dev -- --host 127.0.0.1 --port "$port" >"$log_file" 2>&1 &)
+      ;;
     esac
     server_label="dev script"
     ready=1
@@ -254,10 +299,10 @@ ide() {
   local resolved
 
   case "${1:-}" in
-    -web|--web)
-      web_mode=1
-      shift
-      ;;
+  -web | --web)
+    web_mode=1
+    shift
+    ;;
   esac
 
   target="${1:-.}"
@@ -266,7 +311,10 @@ ide() {
   if [ "$web_mode" = "1" ]; then
     _mero_start_web_preview "$resolved"
     if command -v xdg-open >/dev/null 2>&1 && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
-      (sleep 1; xdg-open "http://127.0.0.1:${MERO_WEB_PREVIEW_PORT:-4173}" >/dev/null 2>&1 &) || true
+      (
+        sleep 1
+        xdg-open "http://127.0.0.1:${MERO_WEB_PREVIEW_PORT:-4173}" >/dev/null 2>&1 &
+      ) || true
     fi
   fi
 
@@ -340,10 +388,10 @@ export FZF_ALT_C_OPTS="--preview 'eza -T -L 2 --icons {}' --preview-window=right
 # 3. Fuzzy Autocompletion (**<TAB>) Overrides
 # Make **<TAB> use ripgrep for path completions
 _fzf_compgen_path() {
-  rg --files --hidden --glob '!.git' --glob '!node_modules' --glob '!/mnt/*' "$1" 2> /dev/null
+  rg --files --hidden --glob '!.git' --glob '!node_modules' --glob '!/mnt/*' "$1" 2>/dev/null
 }
 _fzf_compgen_dir() {
-  find "$1" -mindepth 1 -maxdepth 5 -type d \( -name .git -o -name node_modules -o -path '/mnt/*' \) -prune -o -print 2> /dev/null
+  find "$1" -mindepth 1 -maxdepth 5 -type d \( -name .git -o -name node_modules -o -path '/mnt/*' \) -prune -o -print 2>/dev/null
 }
 
 # 4. Load System Scripts (Supports both APT and GitHub installs)
@@ -577,7 +625,6 @@ openclaw() {
   nvm use 22 >/dev/null
   command openclaw "$@"
 }
-
 
 alias claw="openclaw"
 
