@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), and `fabric` (AI prompt/pattern toolkit).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), and `merodoc-preview` (lightweight Word document preview helper).
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -20,7 +20,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 ### Features:
 *   **Automatic `cd` on exit:** When you quit `yazi`, your shell's current directory will automatically change to the last directory you were browsing in `yazi`.
 *   **Predictable `Ctrl+C` exit:** If you abort `yazi` with `Ctrl+C`, the shell stays in the directory where you launched it instead of jumping somewhere unexpected.
-*   **Neovim-first editing:** `nvim` is exported as the default `EDITOR`/`VISUAL`, and pressing `Enter` on text/code files in `yazi` opens them in Neovim.
+*   **Neovim-first editing:** `nvim` is exported as the default `EDITOR`/`VISUAL`, and pressing `Enter` on text/code files in `yazi` opens them in Neovim. DOCX files can route through the same Neovim path as lightweight previews, and legacy `.doc` files fall back to LibreOffice/soffice when it is installed. You can also call `:MeroDoc` directly inside Neovim to reopen a Word file as a preview.
 *   **Git status in Yazi:** The official `git.yazi` plugin is installed and shows per-file Git state directly in the file list inside Git repositories.
 *   **Selection-friendly mode:** Use `yazi-select` when you want the same file manager view but need to mouse-select/copy text from the terminal instead of letting Yazi capture mouse events.
 *   **Opt-in launcher:** `yazi-select` is separate from the normal `yazi` command, so you can keep the regular mouse behavior unless you explicitly want terminal selection.
@@ -244,7 +244,7 @@ The installer now detects existing managed files and directories, backs them up 
 *   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
 *   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, and the tracked AIChat files under `~/.config/aichat`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
-*   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so the explorer and Git-status plugins are present from the first install.
+*   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so the explorer and Git-status plugins are present from the first install. The installer also bootstraps the lightweight `merodoc-preview` helper so the `:MeroDoc` workflow can render Word docs on demand without adding a heavy Neovim plugin stack.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 
 ### Shell hook maintenance

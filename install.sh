@@ -166,10 +166,10 @@ install_package_group() {
         base)
             case "$DISTRO" in
                 "Arch")
-                    install_packages git curl base-devel unzip tar gzip python tmux file
+                    install_packages git curl base-devel unzip tar gzip python python-pip tmux file
                     ;;
                 "Debian")
-                    install_packages git curl build-essential unzip tar gzip python3 python3-venv tmux file
+                    install_packages git curl build-essential unzip tar gzip python3 python3-venv python3-pip tmux file
                     ;;
             esac
             ;;
@@ -452,6 +452,24 @@ install_lazydocker() {
     run_sudo install -Dm755 "$binary_path" /usr/local/bin/lazydocker.real || true
 
     rm -rf "$temp_dir"
+}
+
+install_doc_preview_tools() {
+    echo "Installing DOC preview helper..."
+
+    if ! command -v python3 >/dev/null 2>&1; then
+        return 1
+    fi
+
+    if [ "$EUID" -eq 0 ]; then
+        if [ -n "${SUDO_USER:-}" ]; then
+            sudo -u "$SUDO_USER" python3 -m pip install --user --upgrade mammoth || return 1
+        else
+            return 1
+        fi
+    else
+        python3 -m pip install --user --upgrade mammoth || return 1
+    fi
 }
 
 ensure_aichat_secret_file() {
@@ -815,6 +833,9 @@ install_fabric || log_optional_failure "Fabric"
 if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; then
     run_sudo ln -sf "$(command -v fabric-ai)" /usr/local/bin/fabric || true
 fi
+
+install_doc_preview_tools || log_optional_failure "DOC preview helper"
+run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/merodoc-preview" /usr/local/bin/merodoc-preview || true
 
 # WezTerm
 if [ "$INSTALL_WEZTERM" = "1" ]; then

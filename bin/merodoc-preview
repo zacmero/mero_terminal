@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_path="${1:-}"
+
+if [[ -z "$source_path" ]]; then
+  printf 'usage: merodoc-preview <file.docx|file.doc>\n' >&2
+  exit 1
+fi
+
+if [[ ! -f "$source_path" ]]; then
+  printf 'merodoc-preview: not a file: %s\n' "$source_path" >&2
+  exit 1
+fi
+
+case "${source_path,,}" in
+  *.docx)
+    python3 - "$source_path" <<'PYDOCX'
+import html as html_module
+import re
+import sys
+from html.parser import HTMLParser
+from pathlib import Path
+
+try:
+    import mammoth
+except Exception as exc:
+    print(f"merodoc-preview: python-mammoth is required for .docx previews ({exc})", file=sys.stderr)
+    raise SystemExit(1)
+
+path = Path(sys.argv[1])
+
+class TextExtractor(HTMLParser):
+    block_tags = {
+        'article', 'blockquote', 'div', 'footer', 'header', 'li', 'ol', 'p',
+        'section', 'table', 'tbody', 'thead', 'tfoot', 'tr', 'ul',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'br':
+            self.parts.append('\n')
+        elif tag in self.block_tags:
+            self.parts.append('\n\n')
+
+    def handle_endtag(self, tag):
+        if tag in self.block_tags:
+            self.parts.append('\n\n')
+
+    def handle_data(self, data):
+        self.parts.append(data)
+
+    def text(self):
+        text = html_module.unescape(''.join(self.parts))
+        text = re.sub(r'[ \t]+\n', '\n', text)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        return text.strip()
+
+with path.open('rb') as handle:
+    result = mammoth.convert_to_html(handle)
+
+parser = TextExtractor()
+parser.feed(result.value)
+text = parser.text()
+
+print(f'[DOCX preview] {path}')
+print()
+if text:
+    print(text)
+PYDOCX
+    ;;
+  *.doc)
+    if command -v soffice >/dev/null 2>&1; then
+      tmp_dir=$(mktemp -d)
+      trap 'rm -rf "$tmp_dir"' EXIT
+      soffice --headless --convert-to txt:Text --outdir "$tmp_dir" "$source_path" >/dev/null 2>&1 || {
+        printf 'merodoc-preview: LibreOffice failed to convert legacy .doc\n' >&2
+        exit 1
+      }
+      preview_file=$(find "$tmp_dir" -maxdepth 1 -type f -name '*.txt' | head -n1)
+      if [[ -z "$preview_file" ]]; then
+        printf 'merodoc-preview: LibreOffice did not produce a text file\n' >&2
+        exit 1
+      fi
+      printf '[DOC preview] %s\n\n' "$source_path"
+      cat "$preview_file"
+    else
+      printf 'merodoc-preview: legacy .doc preview requires LibreOffice (soffice)\n' >&2
+      exit 1
+    fi
+    ;;
+  *)
+    printf 'merodoc-preview: unsupported file type: %s\n' "$source_path" >&2
+    exit 1
+    ;;
+esac

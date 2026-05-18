@@ -8,6 +8,10 @@ edit = [
 
 [open]
 prepend_rules = [
+    { name = "*.docx", use = "edit" },
+    { name = "*.doc", use = "edit" },
+    { mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use = "edit" },
+    { mime = "application/msword", use = "edit" },
     { mime = "text/*", use = "edit" },
     { mime = "inode/x-empty", use = "edit" },
     { mime = "application/json", use = "edit" },

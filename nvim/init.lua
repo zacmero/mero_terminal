@@ -5,6 +5,7 @@ vim.g.loaded_netrwPlugin = 1
 require("config.lazy")
 
 require("config.mero_ide").setup()
+require("config.mero_doc").setup()
 
 vim.opt.number = true
 vim.opt.relativenumber = true
