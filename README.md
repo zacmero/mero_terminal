@@ -11,6 +11,16 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
+## Bash Readline Vi Mode
+
+Bash now starts in native readline vi mode by default, so you can edit the command line with Vim-style motions before you ever enter Neovim.
+
+### Behavior:
+*   **Default mode:** Bash readline is set to `vi`, so `Esc` switches between insert and command mode inside the command line.
+*   **Mnemonic toggle:** `Alt+v` toggles the whole shell session between vi and emacs editing modes if you ever need the old behavior back.
+*   **No prompt hack:** The shell no longer fakes a mode indicator in `PROMPT_COMMAND`; readline owns the editing mode directly.
+*   **Portable:** The behavior is tracked in `bashrc`, so fresh installs get it automatically.
+
 ---
 
 ## Yazi (Terminal File Manager)

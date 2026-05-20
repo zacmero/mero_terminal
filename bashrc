@@ -142,45 +142,28 @@ alias lt='eza -T'
 alias v='fzf | xargs -r nvim'
 
 #Vim Mode:
-# --- Readline Mode Toggle & Dynamic Prompt Indicator ---
+# Bash readline native vi mode.
+# - Esc switches between insert/command mode inside the line.
+# - Alt+v toggles the whole shell between vi and emacs editing modes.
+bind 'set editing-mode vi'
 
-# 1. Define the custom toggle function
 toggle_readline_mode() {
-  if [[ "$(set -o | grep 'vi ' | awk '{print $2}')" == "on" ]]; then
-    set -o emacs
-    # Force a prompt refresh to immediately update the indicator
-    bind '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
-  else
-    set -o vi
-    # Re-bind toggle key in Vi's sub-maps so it stays active
-    bind -m vi-insert '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
-    bind -m vi-command '"\C-g": " \C-b\C-k\C-g"' 2>/dev/null
-  fi
+  local current_mode
+  current_mode="$(set -o | awk '/^vi[[:space:]]/ { print $2 }' | head -n1)"
 
-  # Redraw the current prompt line cleanly
-  REPLY=$READLINE_LINE
-  unset READLINE_LINE
-  READLINE_LINE=$REPLY
+  if [[ "$current_mode" == "on" ]]; then
+    bind 'set editing-mode emacs'
+  else
+    bind 'set editing-mode vi'
+  fi
 }
 
-# 2. Register the bash function as an executable readline macro
-# (Uses Ctrl + g as the single key toggle)
 if [[ $- == *i* ]]; then
-  bind -x '"\C-g": toggle_readline_mode'
+  bind -m emacs -x '"\ev": toggle_readline_mode'
+  bind -x '"\ev": toggle_readline_mode'
+  bind -m vi-insert -x '"\ev": toggle_readline_mode'
+  bind -m vi-command -x '"\ev": toggle_readline_mode'
 fi
-
-# 3. Dynamic Prompt Status Function
-get_editing_mode() {
-  if [[ "$(set -o | grep 'vi ' | awk '{print $2}')" == "on" ]]; then
-    echo -e "\[\e[1;31m\][VIM]\[\e[0m\]" # Bold Red
-  else
-    echo -e "\[\e[1;32m\][EMACS]\[\e[0m\]" # Bold Green
-  fi
-}
-
-# 4. Inject the status indicator into your existing prompt structure
-# Replace or prepend to your existing PS1 variable definition:
-PROMPT_COMMAND='PS1="$(get_editing_mode) \u@\h:\w\$ "'
 
 _mero_package_manager() {
   local dir=$1
