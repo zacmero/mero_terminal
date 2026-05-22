@@ -13,13 +13,23 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 ## Bash Readline Vi Mode
 
-Bash now starts in native readline vi mode by default, so you can edit the command line with Vim-style motions before you ever enter Neovim.
+Bash keeps the normal emacs/readline editing mode by default, but includes a tracked vi-mode toggle for fast command-line editing when you want it.
 
 ### Behavior:
-*   **Default mode:** Bash readline is set to `vi`, so `Esc` switches between insert and command mode inside the command line.
-*   **Mnemonic toggle:** `Alt+v` toggles the whole shell session between vi and emacs editing modes if you ever need the old behavior back.
-*   **No prompt hack:** The shell no longer fakes a mode indicator in `PROMPT_COMMAND`; readline owns the editing mode directly.
+*   **Default mode:** Bash starts in standard `emacs` mode.
+*   **Vi toggle:** `F8` toggles the current shell session between `vi` and `emacs`, and in WezTerm it also injects an automatic `Enter` so the prompt redraws cleanly on a fresh line. In vi mode, `Esc` switches between insert and command mode inside the command line.
+*   **Prompt indicator:** When vi mode is active, the prompt bar shows a single green `` icon beside the project language badges.
+*   **WezTerm-safe:** WezTerm maps `F8` to a stable shell control sequence, and Bash also keeps the standard terminal F8 escape as a fallback.
+*   **Line editor bridge:** In vi command mode, `v` opens the current prompt buffer in `$VISUAL`/`$EDITOR` and writes the edited text back into the command line when you quit the editor. It does not auto-execute the result, so `:wq` returns you to the prompt with the updated command ready.
+*   **Readline boundary:** Bash readline vi mode still does not implement true Vim visual selection inside the prompt. The supported high-level path is `Esc`, then `v`, edit in Neovim, then `:wq` back to the prompt buffer.
 *   **Portable:** The behavior is tracked in `bashrc`, so fresh installs get it automatically.
+
+### Mero Vim Mode Workflow:
+*   **Enter Mero vi mode:** Press `F8`. The prompt redraws on a new line and the green `` marker confirms vi mode is active.
+*   **Switch to command mode:** Press `Esc` while editing the current command line.
+*   **Open the current line in Neovim:** Press `v` from vi command mode.
+*   **Return the edited line to the prompt:** Quit Neovim with `:wq`. The edited command comes back into the shell buffer and waits there for you to run or keep editing.
+*   **Leave Mero vi mode:** Press `F8` again to go back to the normal emacs/readline mode.
 
 ---
 

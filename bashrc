@@ -139,30 +139,63 @@ alias l='eza -l -h --icons --git'
 alias lt='eza -T'
 
 #fzf folder navigation + lazyvin fast open:
-alias v='fzf | xargs -r nvim'
+# Keep single-letter `v` free for shell/vi workflows.
+alias vf='fzf | xargs -r nvim'
 
 #Vim Mode:
-# Bash readline native vi mode.
-# - Esc switches between insert/command mode inside the line.
-# - Alt+v toggles the whole shell between vi and emacs editing modes.
-bind 'set editing-mode vi'
+# Bash readline native editing-mode toggle.
+# - Bash starts in emacs mode.
+# - F8 toggles vi/emacs; in vi mode Esc switches insert/command inside the line.
+set -o emacs
+export MERO_READLINE_MODE=emacs
+
+_mero_edit_readline_buffer() {
+  local tmp_file editor
+
+  tmp_file="$(mktemp "${TMPDIR:-/tmp}/mero-readline.XXXXXX")" || return
+  printf '%s' "${READLINE_LINE:-}" >"$tmp_file"
+
+  editor="${VISUAL:-${EDITOR:-nvim}}"
+
+  # Run the editor against a temp file, then pull the edited content back into
+  # the current Readline buffer instead of executing it immediately.
+  bash -lc "$editor \"\$1\"" _ "$tmp_file"
+
+  if [ -f "$tmp_file" ]; then
+    READLINE_LINE="$(cat "$tmp_file")"
+    READLINE_POINT=${#READLINE_LINE}
+    READLINE_MARK=0
+    command rm -f "$tmp_file"
+  fi
+}
 
 toggle_readline_mode() {
   local current_mode
   current_mode="$(set -o | awk '/^vi[[:space:]]/ { print $2 }' | head -n1)"
 
   if [[ "$current_mode" == "on" ]]; then
-    bind 'set editing-mode emacs'
+    set -o emacs
+    export MERO_READLINE_MODE=emacs
   else
-    bind 'set editing-mode vi'
+    set -o vi
+    export MERO_READLINE_MODE=vi
   fi
 }
 
 if [[ $- == *i* ]]; then
-  bind -m emacs -x '"\ev": toggle_readline_mode'
-  bind -x '"\ev": toggle_readline_mode'
-  bind -m vi-insert -x '"\ev": toggle_readline_mode'
-  bind -m vi-command -x '"\ev": toggle_readline_mode'
+  # In vi-command mode, `v` opens the current prompt buffer in $VISUAL/$EDITOR
+  # and writes the result back into Readline without auto-executing it.
+  bind -m vi-command -x '"v": _mero_edit_readline_buffer'
+  # WezTerm maps F8 to Ctrl+_ so the toggle is stable across terminal modes.
+  bind -m emacs -x '"\C-_": toggle_readline_mode'
+  bind -x '"\C-_": toggle_readline_mode'
+  bind -m vi-insert -x '"\C-_": toggle_readline_mode'
+  bind -m vi-command -x '"\C-_": toggle_readline_mode'
+  # Keep the standard F8 escape as a fallback for terminals outside WezTerm.
+  bind -m emacs -x '"\e[19~": toggle_readline_mode'
+  bind -x '"\e[19~": toggle_readline_mode'
+  bind -m vi-insert -x '"\e[19~": toggle_readline_mode'
+  bind -m vi-command -x '"\e[19~": toggle_readline_mode'
 fi
 
 _mero_package_manager() {
@@ -454,7 +487,11 @@ fi
 eval "$(zoxide init bash)"
 if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
   export MERO_FASTFETCH_SHOWN=1
-  fastfetch
+  if [ -f "$HOME/.config/fastfetch/config.jsonc" ]; then
+    fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
+  else
+    fastfetch --logo arch --structure-disabled display,font,terminalfont,locale
+  fi
 fi
 
 # Ensure /usr/local/bin is in PATH for globally installed tools like Yazi

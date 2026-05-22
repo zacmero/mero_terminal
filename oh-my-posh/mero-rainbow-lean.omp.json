@@ -46,6 +46,12 @@
           "type": "python"
         },
         {
+          "foreground": "#44ffb1",
+          "style": "plain",
+          "template": "{{ if eq .Env.MERO_READLINE_MODE \"vi\" }} {{ end }}",
+          "type": "text"
+        },
+        {
           "foreground": "#7fd5ea",
           "properties": {
             "fetch_version": false,

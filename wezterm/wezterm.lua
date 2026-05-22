@@ -230,6 +230,11 @@ config.keys = {
 		action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
 	{
+		key = "F8",
+		mods = "NONE",
+		action = act.SendString(string.char(0x1f) .. "\r"),
+	},
+	{
 		key = "s",
 		mods = "CTRL|SHIFT",
 		action = send_if_nvim("\x1b[9002u", act.SendKey({ key = "s", mods = "CTRL|SHIFT" })),

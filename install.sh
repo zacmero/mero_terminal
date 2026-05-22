@@ -1081,6 +1081,7 @@ fi
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
 link_path "$MERO_TERMINAL_DIR/lazygit" "$HOME/.config/lazygit" "LazyGit configuration"
 link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
+link_path "$MERO_TERMINAL_DIR/fastfetch" "$HOME/.config/fastfetch" "Fastfetch configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.config/aichat/roles"
