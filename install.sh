@@ -478,15 +478,15 @@ ensure_aichat_secret_file() {
     local temp_file
     local owner_user=${SUDO_USER:-$USER}
 
-    if [ -f "$secret_file" ]; then
+    if [ -f "$secret_file" ] && [ -r "$secret_file" ]; then
         return 0
     fi
 
     temp_file=$(mktemp)
     cat > "$temp_file" <<'EOF'
 # AIChat secret environment
-# Set your real Gemini key here. This file is intentionally outside the repo.
-GEMINI_API_KEY=YOUR_GOOGLE_API_KEY_HERE
+# Set your real OpenRouter key here. This file is intentionally outside the repo.
+OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY_HERE
 EOF
 
     run_sudo mkdir -p "$secret_dir"
@@ -1089,7 +1089,7 @@ link_path "$MERO_TERMINAL_DIR/aichat/config.yaml" "$HOME/.config/aichat/config.y
 link_path "$MERO_TERMINAL_DIR/aichat/roles/coder.md" "$HOME/.config/aichat/roles/coder.md" "AIChat coder role"
 link_path "$MERO_TERMINAL_DIR/aichat/roles/suzy-brain.md" "$HOME/.config/aichat/roles/suzy-brain.md" "AIChat suzy-brain role"
 ensure_aichat_secret_file
-if [ -f /opt/mero_terminal/aichat.env ]; then
+if [ -r /opt/mero_terminal/aichat.env ]; then
     sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/=/' /opt/mero_terminal/aichat.env > "$HOME/.config/aichat/.env"
 fi
 if command -v aichat >/dev/null 2>&1; then
