@@ -1099,6 +1099,8 @@ run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
+    # This also restores the tracked Neovim image stack (3rd/image.nvim plus the
+    # chafa fallback bridge), so fresh machines get image previews immediately.
     nvim --headless "+Lazy! restore" +qa || log_optional_failure "Neovim plugins"
     echo "Installing Neovim Treesitter parsers..."
     nvim --headless "+Lazy load nvim-treesitter" "+TSInstall! vim vimdoc" +qa || log_optional_failure "Neovim Treesitter parsers"

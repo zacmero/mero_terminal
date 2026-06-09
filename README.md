@@ -8,7 +8,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), and `merodoc-preview` (lightweight Word document preview helper).
--   **Image Viewers:** `chafa` for terminal image previews over SSH/headless VMs, and dynamically installs `ueberzugpp` on desktop/GUI machines.
+-   **Image Viewers:** `chafa` for universal terminal previews, `ueberzugpp` on desktop/GUI machines, and Neovim image rendering through `image.nvim` with a `chafa` fallback when the terminal cannot do richer graphics.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
 ## Bash Readline Vi Mode
@@ -46,6 +46,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **Opt-in launcher:** `yazi-select` is separate from the normal `yazi` command, so you can keep the regular mouse behavior unless you explicitly want terminal selection.
 *   **IDE mode for Neovim:** Run `ide` (or `nvide`) inside any project folder to open the tracked `MeroIde` layout: one Neo-tree sidebar on the left and one real editor buffer in the center. It resumes a recent project file when possible, otherwise falls back to a smart starter file such as `README.md`, `main.*`, `index.*`, `app.*`, or `init.*`, then to the first tracked Git file. Snacks Explorer and netrw are disabled so Neo-tree remains the only explorer path.
 *   **Rich previews:** `yazi` includes support for image previews, video thumbnails, archive contents, and more, provided you have the necessary optional dependencies installed (which the `install.sh` script handles automatically).
+*   **Neovim images:** Image files and Markdown image links can render inside Neovim through `3rd/image.nvim` when the terminal supports richer graphics. If the backend is unavailable, Neovim falls back to `chafa` text rendering automatically. `MERO_IMAGE_BACKEND=chafa|kitty|sixel|ueberzug` can force a backend when you want to test a specific path.
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
 *   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.

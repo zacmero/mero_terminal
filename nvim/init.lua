@@ -6,6 +6,7 @@ require("config.lazy")
 
 require("config.mero_ide").setup()
 require("config.mero_doc").setup()
+require("config.mero_image").setup()
 
 vim.opt.number = true
 vim.opt.relativenumber = true
