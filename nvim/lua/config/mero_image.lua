@@ -23,7 +23,6 @@ local video_patterns = {
   "*.mpg",
   "*.mpeg",
   "*.ogv",
-  "*.ts",
   "*.m2ts",
   "*.3gp",
   "*.flv",
