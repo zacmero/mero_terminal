@@ -659,3 +659,8 @@ fi
 # before Atuin registers its preexec/precmd hooks.
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash)"
+
+# >>> Codex installer >>>
+export PATH="/home/zacmero/.local/bin:$PATH"
+# <<< Codex installer <<<
+alias codexh="codex-headroom"

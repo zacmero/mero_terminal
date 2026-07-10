@@ -6,7 +6,7 @@ mapscii --> A literal world map made of ASCII characters that you can zoom into.
 faker --> create fake data direclty on terminal or to feed applications. 
 grex --> create regex on demand. 
 wezterm ricing pass --> add a more intentional visual design, keymaps, and workflow polish after the base install path is stable.
-
+Tmux-Floax --> floating terminal pane over the current one, with persistent memory.
 
 OBS: all of these msut be installed in a portable way0 and described on the README.md after installed. 
 
