@@ -674,9 +674,5 @@ codex() {
 }
 
 codexh() {
-    if [ "$#" -eq 0 ]; then
-        command codex-headroom resume --all
-    else
-        command codex-headroom "$@"
-    fi
+    command codex-headroom "$@"
 }
