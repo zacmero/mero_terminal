@@ -663,4 +663,20 @@ eval "$(atuin init bash)"
 # >>> Codex installer >>>
 export PATH="/home/zacmero/.local/bin:$PATH"
 # <<< Codex installer <<<
-alias codexh="codex-headroom"
+# Bare interactive launches open the cross-project resume picker. Explicit
+# subcommands and flags still pass through directly to the underlying binary.
+codex() {
+    if [ "$#" -eq 0 ]; then
+        command codex resume --all
+    else
+        command codex "$@"
+    fi
+}
+
+codexh() {
+    if [ "$#" -eq 0 ]; then
+        command codex-headroom resume --all
+    else
+        command codex-headroom "$@"
+    fi
+}
