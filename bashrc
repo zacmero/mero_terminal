@@ -664,9 +664,72 @@ eval "$(atuin init bash)"
 export PATH="/home/zacmero/.local/bin:$PATH"
 # <<< Codex installer <<<
 codexh() {
-    if [ "$1" = "savings" ]; then
-        HEADROOM_PORT="${MERO_HEADROOM_PORT:-18992}" headroom savings
-        return
-    fi
-    command codex-headroom "$@"
+  if [ "${1:-}" = "savings" ]; then
+    local port stats mode failures log_file failure found=0
+
+    for port in 18994 18996 18995; do
+      stats="$(command curl -fsS --max-time 1 "http://127.0.0.1:${port}/stats" 2>/dev/null)" || continue
+      found=1
+      case "$port" in
+        18996) mode="token" ;;
+        18995) mode="cache" ;;
+        *) mode="unknown" ;;
+      esac
+
+      printf '%s\n' "$stats" | command jq -r --arg port "$port" --arg mode "$mode" '
+        def n: . // 0;
+        def pct($part; $whole):
+          if $whole > 0 then (($part * 10000 / $whole | round) / 100 | tostring) + "%" else "n/a" end;
+        .codex_ws as $ws |
+        ($ws.frame_tokens_saved_sum | n) as $saved |
+        ($ws.frame_attempted_tokens_sum | n) as $attempted_tokens |
+        ($ws.frames_compressed_total | n) as $applied |
+        ($ws.frames_failed_total | n) as $failed |
+        ($ws.frames_attempted_total | n) as $frames |
+        ($ws.frame_elapsed_ms.average | n) as $avg_ms |
+        ($ws.frame_elapsed_ms.max | n) as $max_ms |
+        ($ws.units_modified_total | n) as $units_modified |
+        ($ws.units_total | n) as $units |
+        ($ws.units_kompress_attempted_total | n) as $kompress_attempted |
+        ($ws.units_to_kompress_total | n) as $kompress_candidates |
+        (.prefix_cache.totals.cache_read_tokens | n) as $cache_reads |
+        "Headroom proxy :\($port) [\($mode)]",
+        "  tool-result compression: \($saved) tokens saved (\(pct($saved; $attempted_tokens))) from \($attempted_tokens) eligible tokens",
+        "  frames: \($applied)/\($frames) compressed (\(pct($applied; $frames))); \($failed) failed open",
+        "  compression time: \($avg_ms) ms/frame average; \($max_ms) ms maximum",
+        "  units: \($units_modified)/\($units) modified; Kompress \($kompress_attempted)/\($kompress_candidates) attempted",
+        "  provider prefix-cache reads: \($cache_reads) tokens (not compression or proven quota savings)"
+      '
+
+      failures="$(printf '%s\n' "$stats" | command jq -r '.codex_ws.frames_failed_total // 0')"
+      if [ "$failures" -gt 0 ] 2>/dev/null; then
+        failure=""
+        for log_file in \
+          "$HOME/.local/state/mero-headroom/proxy-${mode}-${port}.log" \
+          "$HOME/.local/state/mero-headroom/proxy-${port}.log"; do
+          [ -f "$log_file" ] || continue
+          failure="$(command rg -i -S 'WS /v1/responses .*compression (failed|timed out)|WS /v1/responses .*failed; forwarding original' "$log_file" 2>/dev/null | command tail -n 1)"
+          [ -n "$failure" ] && break
+        done
+        if [ -n "$failure" ]; then
+          printf '  latest failure: %s\n' "$(printf '%s\n' "$failure" | command sed -E 's/^\[[^]]+\] //')"
+        else
+          printf '%s\n' '  failure diagnosis: no matching proxy log entry; Headroom exposes only an aggregate counter after the event.'
+        fi
+      fi
+    done
+
+    [ "$found" -eq 1 ] || printf '%s\n' 'No reachable Headroom proxy on ports 18994, 18996, or 18995.'
+    return
+  fi
+  command codex-headroom "$@"
+}
+
+codexh() {
+  if [ "${1:-}" = "savings" ]; then
+    shift
+    command /home/zacmero/projects/mero-headroom/scripts/codexh-savings "$@"
+    return
+  fi
+  command codex-headroom "$@"
 }
