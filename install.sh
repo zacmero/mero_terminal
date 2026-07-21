@@ -3,6 +3,7 @@ set -e # Exit immediately if a command exits with a non-zero status
 
 INSTALL_WEZTERM="${MERO_INSTALL_WEZTERM:-}"
 WEZTERM_CHANNEL="${MERO_WEZTERM_CHANNEL:-auto}"
+NVIM_CHANNEL="${MERO_NVIM_CHANNEL:-nightly}"
 
 prompt_yes_no() {
     local prompt_text=$1
@@ -472,6 +473,43 @@ install_doc_preview_tools() {
     fi
 }
 
+install_latex_rendering_tools() {
+    echo "Installing LaTeX rendering helper..."
+
+    if ! command -v python3 >/dev/null 2>&1 || ! python3 -m pip --version >/dev/null 2>&1; then
+        return 1
+    fi
+
+    local pip_args=(install --user --upgrade pylatexenc)
+    if python3 -m pip install --help 2>/dev/null | grep -q -- "--break-system-packages"; then
+        pip_args+=(--break-system-packages)
+    fi
+
+    if [ "$EUID" -eq 0 ]; then
+        if [ -n "${SUDO_USER:-}" ]; then
+            sudo -u "$SUDO_USER" python3 -m pip "${pip_args[@]}" || return 1
+        else
+            return 1
+        fi
+    else
+        python3 -m pip "${pip_args[@]}" || return 1
+    fi
+}
+
+install_treesitter_cli() {
+    echo "Installing Tree-sitter CLI..."
+
+    if command -v tree-sitter >/dev/null 2>&1; then
+        return 0
+    fi
+
+    case "$DISTRO" in
+        "Arch") install_packages tree-sitter-cli ;;
+        "Debian") install_packages tree-sitter-cli ;;
+        *) return 1 ;;
+    esac
+}
+
 ensure_aichat_secret_file() {
     local secret_dir=/opt/mero_terminal
     local secret_file=$secret_dir/aichat.env
@@ -835,6 +873,8 @@ if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; 
 fi
 
 install_doc_preview_tools || log_optional_failure "DOC preview helper"
+install_latex_rendering_tools || log_optional_failure "LaTeX rendering helper"
+install_treesitter_cli || log_optional_failure "Tree-sitter CLI"
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/merodoc-preview" /usr/local/bin/merodoc-preview || true
 
 # WezTerm
@@ -1040,7 +1080,7 @@ if ! command -v eza >/dev/null 2>&1; then
     install_package_group eza || log_optional_failure "Eza"
 fi
 
-# Neovim (Latest Stable)
+# Neovim (nightly by default; nvim-treesitter main requires Neovim 0.12+)
 echo "Installing/Updating Neovim..."
 NVIM_DIR="/opt/nvim"
 NVIM_TAR=""
@@ -1052,8 +1092,8 @@ elif [ "$ARCH_TYPE" = "arm64" ]; then
 fi
 
 if [ -n "$NVIM_TAR" ]; then
-    echo "Downloading Neovim ($NVIM_TAR)..."
-    if curl -fLO "https://github.com/neovim/neovim/releases/latest/download/$NVIM_TAR" \
+    echo "Downloading Neovim ($NVIM_CHANNEL, $NVIM_TAR)..."
+    if curl -fLO "https://github.com/neovim/neovim/releases/download/$NVIM_CHANNEL/$NVIM_TAR" \
         && run_sudo rm -rf "$NVIM_DIR" \
         && run_sudo tar -C /opt -xzf "$NVIM_TAR" \
         && run_sudo mv "/opt/${NVIM_TAR%.tar.gz}" "$NVIM_DIR"; then
@@ -1103,7 +1143,7 @@ if command -v nvim >/dev/null 2>&1; then
     # chafa fallback bridge), so fresh machines get image previews immediately.
     nvim --headless "+Lazy! restore" +qa || log_optional_failure "Neovim plugins"
     echo "Installing Neovim Treesitter parsers..."
-    nvim --headless "+Lazy load nvim-treesitter" "+TSInstall! vim vimdoc" +qa || log_optional_failure "Neovim Treesitter parsers"
+    nvim --headless "+Lazy load nvim-treesitter" "+lua local ts=require('nvim-treesitter'); if ts.install then ts.install({'latex', 'vim', 'vimdoc'}):wait(300000) else vim.cmd('TSInstall! latex vim vimdoc') end" +qa || log_optional_failure "Neovim Treesitter parsers"
     VIM_TS_QUERY="$HOME/.local/share/nvim/lazy/nvim-treesitter/runtime/queries/vim/highlights.scm"
     if [ -f "$VIM_TS_QUERY" ]; then
         sed -i '/^[[:space:]]*"tab"$/d' "$VIM_TS_QUERY"

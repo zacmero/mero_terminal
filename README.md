@@ -6,7 +6,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
--   **Editor:** Neovim (Latest Stable) with LazyVim configuration (fully tracked in this repo).
+-   **Editor:** Neovim nightly (0.12+) with LazyVim configuration (fully tracked in this repo).
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), and `merodoc-preview` (lightweight Word document preview helper).
 -   **Media Viewers:** `chafa` for universal terminal previews, `ueberzugpp` on desktop/GUI machines, Yazi's official video preview preset for video thumbnails, and Neovim media rendering through `image.nvim` with a `chafa` fallback when the terminal cannot do richer graphics.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
@@ -305,6 +305,8 @@ git pull origin master
 ./install.sh
 ```
 
+The installer uses Neovim nightly so the tracked `nvim-treesitter` stack remains compatible with Neovim 0.12+.
+
 Commands prefixed with a leading space are intentionally excluded from shell history, and the tracked Atuin config also filters those commands so they are not recorded there either.
 
 ## Plugin Workflow
@@ -345,7 +347,7 @@ The tracked Neovim setup now includes a small front-end and visual-work layer fo
 *   **Colorizer:** Hex/RGB/HSL values are highlighted inline in CSS, HTML, JS/TS, React, Vue, Svelte, and Astro buffers.
 *   **Color picker:** `ccc.nvim` provides a floating color picker and converters for hex, RGB, and HSL.
 *   **Auto tags:** HTML-like buffers auto-close and auto-rename paired tags.
-*   **Markdown rendering:** `render-markdown.nvim` renders Markdown tables and common syntax in a cleaner, terminal-friendly view.
+*   **Markdown and LaTeX rendering:** `render-markdown.nvim` renders Markdown tables, common syntax, and LaTeX math blocks in a cleaner, terminal-friendly view. The installer pins the `latex` Treesitter parser and installs `pylatexenc` for formula conversion.
 *   **Web LSPs:** `cssls`, `html`, `tailwindcss`, `emmet_language_server`, and `tsserver` are enabled through the tracked LazyVim layer.
 
 Useful keys:

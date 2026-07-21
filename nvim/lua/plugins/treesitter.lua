@@ -8,6 +8,7 @@ return {
         "gomod",
         "gosum",
         "gowork",
+        "latex",
         "vim",
         "vimdoc",
       },

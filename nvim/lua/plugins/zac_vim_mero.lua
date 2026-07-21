@@ -445,6 +445,10 @@ return {
     },
     opts = {
       file_types = { "markdown", "markdown_inline" },
+      latex = {
+        enabled = true,
+        converter = { "latex2text", "utftex" },
+      },
     },
   },
 }
