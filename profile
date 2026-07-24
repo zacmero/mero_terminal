@@ -32,3 +32,6 @@ export EDITOR="$VISUAL"
 if command -v wezterm >/dev/null 2>&1; then
     export TERMINAL="wezterm"
 fi
+
+# pi-node PATH (for pi coding agent)
+export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"

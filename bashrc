@@ -730,4 +730,3 @@ codexh() {
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
