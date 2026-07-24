@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Fastfetch wrapper - uses machine-specific config on mero-machine, default elsewhere
+
+REAL_FASTFETCH="/usr/bin/fastfetch"
+[ -x "$REAL_FASTFETCH" ] || REAL_FASTFETCH="/usr/local/bin/fastfetch"
+[ -x "$REAL_FASTFETCH" ] || REAL_FASTFETCH="$(command -v fastfetch 2>/dev/null | grep -v "$0" | head -1)"
+
+if [[ "$HOSTNAME" == "mero-machine" ]]; then
+    exec "$REAL_FASTFETCH" --config "$HOME/.config/fastfetch/config.meromachine.jsonc" "$@"
+else
+    exec "$REAL_FASTFETCH" --config "$HOME/.config/fastfetch/config.jsonc" "$@"
+fi

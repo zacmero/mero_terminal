@@ -481,11 +481,7 @@ fi
 eval "$(zoxide init bash)"
 if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
   export MERO_FASTFETCH_SHOWN=1
-  if [ -f "$HOME/.config/fastfetch/config.jsonc" ]; then
-    fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
-  else
-    fastfetch --logo arch --structure-disabled display,font,terminalfont,locale
-  fi
+  fastfetch
 fi
 
 # Ensure /usr/local/bin is in PATH for globally installed tools like Yazi

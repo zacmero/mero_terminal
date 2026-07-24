@@ -1194,6 +1194,7 @@ if command -v aichat >/dev/null 2>&1; then
 fi
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi-select || true
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
+run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/fastfetch" /usr/local/bin/fastfetch || true
 if command -v nvim >/dev/null 2>&1; then
     echo "Syncing Neovim plugins..."
     # This also restores the tracked Neovim image stack (3rd/image.nvim plus the
