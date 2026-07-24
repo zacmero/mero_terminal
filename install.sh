@@ -500,9 +500,30 @@ install_treesitter_cli() {
     echo "Installing Tree-sitter CLI..."
 
     if command -v tree-sitter >/dev/null 2>&1; then
+        local version
+        version=$(tree-sitter --version 2>/dev/null | awk '{print $2}')
+        # Need >= 0.22.0 for 'build' subcommand (0.20.8 only has 'build-wasm')
+        if [ -n "$version" ] && printf '%s\n' "0.22.0" "$version" | sort -V | head -1 | grep -q "^0\.22\.0$"; then
+            echo "Found tree-sitter $version (>= 0.22.0), skipping install"
+            return 0
+        fi
+    fi
+
+    local ts_url="https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-x64.gz"
+    if [ "$ARCH_TYPE" = "arm64" ]; then
+        ts_url="https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-arm64.gz"
+    fi
+
+    local temp_file
+    temp_file=$(mktemp)
+    if curl -fL "$ts_url" -o "$temp_file" && gunzip -c "$temp_file" > "$temp_file.bin" && run_sudo install -m755 "$temp_file.bin" /usr/local/bin/tree-sitter; then
+        rm -f "$temp_file" "$temp_file.bin"
+        echo "Tree-sitter CLI installed from GitHub releases"
         return 0
     fi
 
+    rm -f "$temp_file" "$temp_file.bin"
+    echo "Falling back to package manager for tree-sitter-cli..."
     case "$DISTRO" in
         "Arch") install_packages tree-sitter-cli ;;
         "Debian") install_packages tree-sitter-cli ;;
@@ -910,6 +931,42 @@ else
     else
         rm -f lazygit lazygit.tar.gz
         log_optional_failure "LazyGit"
+    fi
+
+    # Ensure lazygit config exists in repo
+    if [ ! -f "$MERO_TERMINAL_DIR/lazygit/config.yml" ]; then
+        echo "Creating default lazygit config.yml..."
+        mkdir -p "$MERO_TERMINAL_DIR/lazygit"
+        cat > "$MERO_TERMINAL_DIR/lazygit/config.yml" <<'EOF'
+gui:
+  nerdFontsVersion: "3"
+  showFileTree: true
+  showRandomTip: false
+  theme:
+    activeBorderColor:
+      - "#7cb8ff"
+      - bold
+    inactiveBorderColor:
+      - "#315c78"
+    optionsTextColor:
+      - "#e8e8e8"
+    selectedLineBgColor:
+      - "#214969"
+    cherryPickedCommitBgColor:
+      - "#44FFB1"
+    cherryPickedCommitFgColor:
+      - "#161a1f"
+    defaultFgColor:
+      - "#e8e8e8"
+    searchMatchBgColor:
+      - "#4a86d9"
+    searchMatchFgColor:
+      - "#0f1317"
+    unstagedChangesColor:
+      - "#E52E2E"
+    stagedChangesColor:
+      - "#44FFB1"
+EOF
     fi
 fi
 

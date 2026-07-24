@@ -8,8 +8,8 @@ edit = [
 
 [open]
 prepend_rules = [
-    { name = "*.docx", use = "edit" },
-    { name = "*.doc", use = "edit" },
+    { name = "*.docx", url = "*.docx", use = "edit" },
+    { name = "*.doc", url = "*.doc", use = "edit" },
     { mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use = "edit" },
     { mime = "application/msword", use = "edit" },
     { mime = "text/*", use = "edit" },
@@ -21,12 +21,4 @@ prepend_rules = [
     { mime = "application/x-shellscript", use = "edit" },
 ]
 
-[[plugin.prepend_fetchers]]
-id = "git"
-url = "*"
-run = "git"
 
-[[plugin.prepend_fetchers]]
-id = "git"
-url = "*/"
-run = "git"

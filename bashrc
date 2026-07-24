@@ -464,12 +464,6 @@ alias ai='aichat'
 # OPENCODE
 export PATH="$HOME/.opencode/bin:$PATH"
 
-# LOCAL BIN needs to be available before prompt init so shells can see
-# repo-installed tools like oh-my-posh on fresh login sessions.
-if [ -d "$HOME/.local/bin" ]; then
-  PATH="$HOME/.local/bin:$PATH"
-fi
-
 # Oh My Posh (P10K-style), with Starship kept only as a fallback.
 if command -v oh-my-posh >/dev/null 2>&1; then
   POSH_THEME="$HOME/.config/oh-my-posh/mero-rainbow-lean.omp.json"
@@ -733,3 +727,7 @@ codexh() {
   fi
   command codex-headroom "$@"
 }
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
