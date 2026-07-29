@@ -851,7 +851,9 @@ curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh || log_optiona
 if [ ! -d "$HOME/.fzf" ]; then
     echo "Installing FZF..."
     if git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf; then
-        ~/.fzf/install --all || log_optional_failure "FZF"
+        # bashrc loads bindings through compatible system/local paths. Do not
+        # append the version-specific ~/.fzf.bash source line to managed bashrc.
+        ~/.fzf/install --all --no-bash || log_optional_failure "FZF"
     else
         log_optional_failure "FZF"
     fi
