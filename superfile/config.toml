@@ -5,7 +5,7 @@
 editor = "nvim"
 dir_editor = "nvim"
 auto_check_update = true
-cd_on_quit = false
+cd_on_quit = true
 
 default_open_file_preview = true
 show_image_preview = true

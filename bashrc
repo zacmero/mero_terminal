@@ -138,8 +138,20 @@ alias l='eza -l -h --icons --git'
 # -T: tree
 alias lt='eza -T'
 
-# Superfile's short, universal launcher; the official command remains `spf`.
-alias sf='spf'
+# Superfile launcher that returns the shell to Superfile's last directory.
+# The child process cannot change the parent shell directly, so consume the
+# path printed by Superfile after it exits.
+sf() {
+  local superfile_dir superfile_status
+  superfile_dir=$(command spf --print-last-dir "$@")
+  superfile_status=$?
+  if [ "$superfile_status" -ne 0 ]; then
+    return "$superfile_status"
+  fi
+  if [ -n "$superfile_dir" ] && [ -d "$superfile_dir" ]; then
+    cd -- "$superfile_dir" || return
+  fi
+}
 
 #fzf folder navigation + lazyvin fast open:
 # Keep single-letter `v` free for shell/vi workflows.
