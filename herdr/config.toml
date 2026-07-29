@@ -1,0 +1,13 @@
+# Mero Terminal Herdr configuration.
+# Keep the user-owned configuration in the repository so every installation
+# shares the same prefix and detach behavior.
+
+onboarding = false
+
+[update]
+channel = "stable"
+
+[keys]
+# Herdr's prefix is intentionally distinct from tmux's Ctrl+Space prefix.
+prefix = "ctrl+space"
+detach = "prefix+d"

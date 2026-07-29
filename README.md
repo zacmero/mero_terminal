@@ -51,6 +51,16 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
 *   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.
 
+## Herdr (Agent Multiplexer)
+
+Herdr is installed from the official stable Linux release for x86_64 and ARM64. Its tracked configuration lives in `herdr/config.toml` and is linked to `~/.config/herdr/config.toml`.
+
+The Mero Terminal keymap uses `Ctrl+Space`, then `d` to detach. This prefix is intentionally separate from tmux's prefix. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and installs the official global Herdr agent skill through `npx skills` or a direct raw-file fallback on lean machines.
+
+Herdr's generated hooks and extensions remain in the owning harness directories (`~/.codex` and `~/.pi`); they are app-managed runtime integration files, not secrets or repository configuration.
+
+---
+
 ## Superfile (Lean File Manager)
 
 Superfile is installed alongside Yazi and does not replace it. Use `sf` (alias for the official `spf` command) for a lean, fast, modern file-management TUI; keep Yazi for legacy machines, previews, and more complex filing automation. Superfile is installed from Arch's native `superfile` package or from its official Linux release archive on Debian/Ubuntu.

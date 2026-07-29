@@ -1155,6 +1155,72 @@ install_superfile() {
 
 install_superfile || log_optional_failure "Superfile"
 
+# --- Herdr agent multiplexer ---
+install_herdr() {
+    echo "Installing Herdr..."
+    local herdr_asset herdr_url temp_dir
+
+    case "$ARCH_TYPE" in
+        x64) herdr_asset="herdr-linux-x86_64" ;;
+        arm64) herdr_asset="herdr-linux-aarch64" ;;
+        *) return 1 ;;
+    esac
+
+    herdr_url="https://github.com/ogulcancelik/herdr/releases/latest/download/${herdr_asset}"
+    temp_dir=$(mktemp -d)
+    if ! curl -fL --retry 3 -o "$temp_dir/herdr" "$herdr_url"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+    run_sudo install -Dm755 "$temp_dir/herdr" /usr/local/bin/herdr || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    rm -rf "$temp_dir"
+}
+
+install_herdr || log_optional_failure "Herdr"
+
+install_herdr_integrations() {
+    command -v herdr >/dev/null 2>&1 || return 1
+
+    local codex_home pi_home skill_parent skill_tmp skill_installed
+    codex_home="${CODEX_HOME:-$HOME/.codex}"
+    pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi}"
+
+    if [ -d "$codex_home" ]; then
+        herdr integration install codex || log_optional_failure "Herdr Codex integration"
+    fi
+    if [ -d "$pi_home" ]; then
+        herdr integration install pi || log_optional_failure "Herdr Pi integration"
+    fi
+
+    skill_installed=0
+    if command -v npx >/dev/null 2>&1; then
+        npx --yes skills add ogulcancelik/herdr --skill herdr -g && skill_installed=1
+    fi
+
+    # The official installer currently requires Node 22.20+. Keep a raw-file
+    # fallback so older VMs still receive the same Herdr skill.
+    if [ "$skill_installed" -eq 0 ]; then
+        skill_tmp=$(mktemp -d)
+        if ! curl -fsSL https://raw.githubusercontent.com/ogulcancelik/herdr/master/SKILL.md \
+            -o "$skill_tmp/SKILL.md"; then
+            rm -rf "$skill_tmp"
+            return 1
+        fi
+
+        for skill_parent in "$HOME/.agents/skills" "$codex_home/skills" "$pi_home/agent/skills"; do
+            if [ -L "$skill_parent" ] && [ ! -e "$skill_parent" ]; then
+                mv "$skill_parent" "${skill_parent}.broken-$(date +%Y%m%d-%H%M%S)"
+            fi
+            mkdir -p "$skill_parent/herdr"
+            install -m644 "$skill_tmp/SKILL.md" "$skill_parent/herdr/SKILL.md"
+        done
+        rm -rf "$skill_tmp"
+    fi
+}
+
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
 
@@ -1231,6 +1297,9 @@ if [ "$INSTALL_WEZTERM" = "1" ]; then
     link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
 fi
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
+mkdir -p "$HOME/.config/herdr"
+link_path "$MERO_TERMINAL_DIR/herdr/config.toml" "$HOME/.config/herdr/config.toml" "Herdr configuration"
+install_herdr_integrations || log_optional_failure "Herdr integrations"
 mkdir -p "$HOME/.config/superfile"
 link_path "$MERO_TERMINAL_DIR/superfile/config.toml" "$HOME/.config/superfile/config.toml" "Superfile configuration"
 link_path "$MERO_TERMINAL_DIR/superfile/hotkeys.toml" "$HOME/.config/superfile/hotkeys.toml" "Superfile hotkeys"
