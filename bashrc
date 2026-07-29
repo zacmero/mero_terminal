@@ -689,7 +689,7 @@ fi
 eval "$(atuin init bash)"
 
 # >>> Codex installer >>>
-export PATH="/home/zacmero/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 # <<< Codex installer <<<
 codexh() {
   if [ "${1:-}" = "savings" ]; then
