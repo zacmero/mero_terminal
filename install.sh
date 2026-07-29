@@ -1100,6 +1100,59 @@ install_yazi() {
 # Call Yazi installation function
 install_yazi || log_optional_failure "Yazi"
 
+# --- Superfile Installation (independent file manager) ---
+install_superfile() {
+    echo "Installing Superfile..."
+
+    if [ "$DISTRO" = "Arch" ]; then
+        install_packages superfile
+        return
+    fi
+
+    local superfile_arch
+    case "$ARCH" in
+        x86_64) superfile_arch="amd64" ;;
+        aarch64) superfile_arch="arm64" ;;
+        *) echo "Unsupported architecture for Superfile: $ARCH"; return 1 ;;
+    esac
+
+    local release_info
+    local version
+    local package_name
+    local temp_dir
+    local binary_path
+
+    release_info=$(curl -fsS https://api.github.com/repos/yorukot/superfile/releases/latest) || return 1
+    version=$(echo "$release_info" | grep -oP '"tag_name"[[:space:]]*:[[:space:]]*"v\K[^"]+' | head -n1)
+    [ -n "$version" ] || return 1
+
+    package_name="superfile-linux-v${version}-${superfile_arch}"
+    temp_dir=$(mktemp -d)
+    if ! curl -fL -o "$temp_dir/$package_name.tar.gz" \
+        "https://github.com/yorukot/superfile/releases/download/v${version}/${package_name}.tar.gz"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    tar -xzf "$temp_dir/$package_name.tar.gz" -C "$temp_dir" || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    binary_path=$(find "$temp_dir" -type f -name spf | head -n1)
+    [ -n "$binary_path" ] || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    run_sudo install -Dm755 "$binary_path" /usr/local/bin/spf || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    rm -rf "$temp_dir"
+}
+
+install_superfile || log_optional_failure "Superfile"
+
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
 
@@ -1176,6 +1229,9 @@ if [ "$INSTALL_WEZTERM" = "1" ]; then
     link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
 fi
 link_path "$MERO_TERMINAL_DIR/yazi" "$HOME/.config/yazi" "Yazi configuration"
+mkdir -p "$HOME/.config/superfile"
+link_path "$MERO_TERMINAL_DIR/superfile/config.toml" "$HOME/.config/superfile/config.toml" "Superfile configuration"
+link_path "$MERO_TERMINAL_DIR/superfile/hotkeys.toml" "$HOME/.config/superfile/hotkeys.toml" "Superfile hotkeys"
 link_path "$MERO_TERMINAL_DIR/lazygit" "$HOME/.config/lazygit" "LazyGit configuration"
 link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
 link_path "$MERO_TERMINAL_DIR/fastfetch" "$HOME/.config/fastfetch" "Fastfetch configuration"

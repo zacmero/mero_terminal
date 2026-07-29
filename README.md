@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim nightly (0.12+) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` (terminal file manager), `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), and `merodoc-preview` (lightweight Word document preview helper).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), and `merodoc-preview` (lightweight Word document preview helper).
 -   **Media Viewers:** `chafa` for universal terminal previews, `ueberzugpp` on desktop/GUI machines, Yazi's official video preview preset for video thumbnails, and Neovim media rendering through `image.nvim` with a `chafa` fallback when the terminal cannot do richer graphics.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -50,6 +50,12 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
 *   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.
+
+## Superfile (Lean File Manager)
+
+Superfile is installed alongside Yazi and does not replace it. Use `sf` (alias for the official `spf` command) for a lean, fast, modern file-management TUI; keep Yazi for legacy machines, previews, and more complex filing automation. Superfile is installed from Arch's native `superfile` package or from its official Linux release archive on Debian/Ubuntu.
+
+Superfile's tracked configuration lives in `superfile/config.toml` and `superfile/hotkeys.toml`; the installer symlinks them to `~/.config/superfile/`. Its navigation remains Vim-like, but file actions use deliberate `y`, `p`, `X`, `Delete`, and `Shift+Delete` bindings instead of ambiguous Ctrl shortcuts. `M` changes panel mode, `e` opens the selected file in Neovim, and `G` opens the current directory in Neovim. `q` or `Esc` exits. The app owns these keys while it is focused, so Bash Vim mode, tmux, and Hyprland bindings are not modified.
 
 ---
 
@@ -262,9 +268,9 @@ The installer now detects existing managed files and directories, backs them up 
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, and related packages using the correct package manager for the host (`pacman` on Arch, `apt` on Debian/Ubuntu). The installer only refreshes package databases before installs; it does not run a full system upgrade.
-*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
+*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Superfile, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, and the tracked AIChat files under `~/.config/aichat`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, the tracked Superfile files under `~/.config/superfile`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, and the tracked AIChat files under `~/.config/aichat`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
 *   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so the explorer, Git-status, and video preview plugins are present from the first install. The installer also bootstraps the lightweight `merodoc-preview` helper so the `:MeroDoc` workflow can render Word docs on demand without adding a heavy Neovim plugin stack.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
 

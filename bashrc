@@ -138,6 +138,9 @@ alias l='eza -l -h --icons --git'
 # -T: tree
 alias lt='eza -T'
 
+# Superfile's short, universal launcher; the official command remains `spf`.
+alias sf='spf'
+
 #fzf folder navigation + lazyvin fast open:
 # Keep single-letter `v` free for shell/vi workflows.
 alias vf='fzf | xargs -r nvim'
@@ -725,4 +728,3 @@ codexh() {
 }
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
