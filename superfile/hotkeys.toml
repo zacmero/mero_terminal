@@ -4,8 +4,8 @@
 
 # Global hotkeys
 confirm = ['enter', 'right', 'l']
-cd_quit = ['Q', '']
-quit = ['q', 'esc']
+cd_quit = ['esc', 'q']
+quit = ['Q', '']
 list_down = ['down', 'j']
 list_up = ['up', 'k']
 page_down = ['pgdown', '']

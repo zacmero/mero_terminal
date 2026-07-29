@@ -8,6 +8,8 @@ auto_check_update = true
 cd_on_quit = true
 
 default_open_file_preview = true
+# Enable previews. `spf` selects Superfile's ANSI renderer under WezTerm,
+# whose Kitty implementation does not support Superfile's Unicode placeholders.
 show_image_preview = true
 show_panel_footer_info = true
 default_directory = "."

@@ -167,10 +167,10 @@ install_package_group() {
         base)
             case "$DISTRO" in
                 "Arch")
-                    install_packages git curl base-devel unzip tar gzip python python-pip tmux file util-linux
+                    install_packages git curl base-devel unzip tar gzip python python-pip tmux file
                     ;;
                 "Debian")
-                    install_packages git curl build-essential unzip tar gzip python3 python3-venv python3-pip tmux file util-linux
+                    install_packages git curl build-essential unzip tar gzip python3 python3-venv python3-pip tmux file
                     ;;
             esac
             ;;

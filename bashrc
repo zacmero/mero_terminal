@@ -138,37 +138,39 @@ alias l='eza -l -h --icons --git'
 # -T: tree
 alias lt='eza -T'
 
-# Superfile launcher that returns the shell to Superfile's last directory.
-# The child process cannot change the parent shell directly, so consume the
-# path printed by Superfile after it exits.
-sf() {
-  local superfile_log superfile_cmd superfile_arg superfile_output
-  local superfile_dir superfile_status
-
-  if ! command -v script >/dev/null 2>&1; then
-    printf 'sf: util-linux `script` is required for directory handoff\n' >&2
-    return 127
+# Superfile launcher that returns the shell to the directory saved by its
+# cd_quit action. This keeps Superfile on the native terminal so its preview
+# renderer receives the real terminal dimensions instead of an extra PTY.
+spf() {
+  # WezTerm lacks the Kitty Unicode-placeholder feature Superfile requires.
+  # Mask it only for Superfile so it selects the portable ANSI renderer.
+  if [ "${TERM_PROGRAM:-}" = "WezTerm" ]; then
+    TERM_PROGRAM=MeroTerminal command spf "$@"
+  else
+    command spf "$@"
   fi
+}
 
-  superfile_log=$(mktemp) || return 1
-  superfile_cmd='command spf --print-last-dir'
-  for superfile_arg in "$@"; do
-    printf -v superfile_cmd '%s %q' "$superfile_cmd" "$superfile_arg"
-  done
+sf() {
+  local superfile_state_dir superfile_lastdir_file
+  local superfile_lastdir superfile_dir superfile_status
 
-  # script supplies a real PTY, so Superfile keeps rendering while its final
-  # printed directory is recorded for the parent shell.
-  script -qefc "$superfile_cmd" "$superfile_log"
+  superfile_state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/superfile"
+  superfile_lastdir_file="$superfile_state_dir/lastdir"
+
+  spf "$@"
   superfile_status=$?
   if [ "$superfile_status" -ne 0 ]; then
-    command rm -f "$superfile_log"
     return "$superfile_status"
   fi
 
-  superfile_output=$(tail -c 8192 "$superfile_log")
-  command rm -f "$superfile_log"
-  superfile_output=${superfile_output##*$'\a'}
-  superfile_dir=${superfile_output%%$'\r'*}
+  [ -r "$superfile_lastdir_file" ] || return 0
+  superfile_lastdir=$(<"$superfile_lastdir_file")
+  case "$superfile_lastdir" in
+    "cd '"*"'") superfile_dir=${superfile_lastdir:4:-1} ;;
+    *) return 0 ;;
+  esac
+
   if [ -n "$superfile_dir" ] && [ -d "$superfile_dir" ]; then
     cd -- "$superfile_dir" || return
   fi
