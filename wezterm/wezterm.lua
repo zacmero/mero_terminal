@@ -119,6 +119,10 @@ config.window_padding = {
 }
 config.window_background_opacity = 0.96
 config.adjust_window_size_when_changing_font_size = false
+
+-- Superfile and Neovim image previews use the Kitty graphics protocol.
+config.enable_kitty_graphics = true
+
 config.window_frame = {
 	active_titlebar_bg = "#161a1f",
 	inactive_titlebar_bg = "#161a1f",

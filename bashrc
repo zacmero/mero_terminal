@@ -142,12 +142,33 @@ alias lt='eza -T'
 # The child process cannot change the parent shell directly, so consume the
 # path printed by Superfile after it exits.
 sf() {
+  local superfile_log superfile_cmd superfile_arg superfile_output
   local superfile_dir superfile_status
-  superfile_dir=$(command spf --print-last-dir "$@")
+
+  if ! command -v script >/dev/null 2>&1; then
+    printf 'sf: util-linux `script` is required for directory handoff\n' >&2
+    return 127
+  fi
+
+  superfile_log=$(mktemp) || return 1
+  superfile_cmd='command spf --print-last-dir'
+  for superfile_arg in "$@"; do
+    printf -v superfile_cmd '%s %q' "$superfile_cmd" "$superfile_arg"
+  done
+
+  # script supplies a real PTY, so Superfile keeps rendering while its final
+  # printed directory is recorded for the parent shell.
+  script -qefc "$superfile_cmd" "$superfile_log"
   superfile_status=$?
   if [ "$superfile_status" -ne 0 ]; then
+    command rm -f "$superfile_log"
     return "$superfile_status"
   fi
+
+  superfile_output=$(tail -c 8192 "$superfile_log")
+  command rm -f "$superfile_log"
+  superfile_output=${superfile_output##*$'\a'}
+  superfile_dir=${superfile_output%%$'\r'*}
   if [ -n "$superfile_dir" ] && [ -d "$superfile_dir" ]; then
     cd -- "$superfile_dir" || return
   fi

@@ -62,7 +62,7 @@ toggle_footer = ['F', '']
 
 # Typing hotkeys
 confirm_typing = ['enter', '']
-cancel_typing = ['ctrl+c', 'esc']
+cancel_typing = ['esc', '']
 
 # Mode-specific hotkeys
 parent_directory = ['h', 'left', 'backspace']
