@@ -8,6 +8,23 @@ onboarding = false
 channel = "stable"
 
 [keys]
-# Herdr's prefix is intentionally distinct from tmux's Ctrl+Space prefix.
+# Share Ctrl+Space with tmux; the Ctrl+Alt+Shift layer below avoids collisions.
 prefix = "ctrl+space"
 detach = "prefix+d"
+new_tab = "ctrl+alt+shift+t"
+split_vertical = "ctrl+alt+shift+slash"
+split_horizontal = "ctrl+alt+shift+minus"
+# Herdr does not expose PageUp/PageDown in config syntax; keep this layer
+# mnemonic while tmux preserves the exact PageUp/PageDown physical keys.
+previous_tab = "ctrl+alt+shift+p"
+next_tab = "ctrl+alt+shift+n"
+focus_pane_left = "ctrl+alt+shift+left"
+focus_pane_down = "ctrl+alt+shift+down"
+focus_pane_up = "ctrl+alt+shift+up"
+focus_pane_right = "ctrl+alt+shift+right"
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+show_agent_labels_on_pane_borders = false
