@@ -8,21 +8,20 @@ onboarding = false
 channel = "stable"
 
 [keys]
-# Keep Ctrl+Space as the canonical Herdr prefix, matching tmux.
-prefix = "ctrl+space"
+# Use a short second layer that is less likely to be intercepted by the
+# terminal emulator, desktop, shell, or editor.
+prefix = "shift+tab"
 detach = "prefix+d"
-# Retain prefix bindings and add direct Ctrl+Alt actions. This family survives
-# WezTerm and Hyprland without stealing Ctrl+Shift terminal shortcuts.
-new_tab = ["prefix+t", "ctrl+alt+c"]
-rename_tab = ["prefix+comma", "ctrl+alt+comma"]
-split_vertical = ["prefix+slash", "ctrl+alt+slash"]
-split_horizontal = ["prefix+minus", "ctrl+alt+minus"]
-previous_tab = ["prefix+p", "ctrl+alt+p"]
-next_tab = ["prefix+n", "ctrl+alt+n"]
-focus_pane_left = ["prefix+left", "ctrl+alt+h"]
-focus_pane_down = ["prefix+down", "ctrl+alt+j"]
-focus_pane_up = ["prefix+up", "ctrl+alt+k"]
-focus_pane_right = ["prefix+right", "ctrl+alt+l"]
+new_tab = "prefix+t"
+rename_tab = "prefix+comma"
+split_vertical = "prefix+slash"
+split_horizontal = "prefix+minus"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+focus_pane_left = "prefix+left"
+focus_pane_down = "prefix+down"
+focus_pane_up = "prefix+up"
+focus_pane_right = "prefix+right"
 
 [ui.toast]
 delivery = "system"
