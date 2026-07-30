@@ -55,7 +55,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 
 Herdr is installed from the official stable Linux release for x86_64 and ARM64. Its tracked configuration lives in `herdr/config.toml` and is linked to `~/.config/herdr/config.toml`.
 
-The Mero Terminal keymap uses `Shift+Tab` as Herdr's action prefix: `Shift+Tab`, then `d` detaches, `t` creates a tab, `,` renames the tab, `/` splits vertically, `-` splits horizontally, `p`/`n` cycle tabs, and the arrow keys move pane focus. This is a two-key sequence, not a fragile multi-modifier chord. Tmux keeps its existing `Ctrl+Space` prefix and adds the same `Shift+Tab` action table, using `PageUp`/`PageDown` for previous/next tab. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and installs the official global Herdr agent skill through `npx skills` or a direct raw-file fallback on lean machines.
+The Mero Terminal keymap uses `Ctrl+Space`, then `d` to detach, matching tmux. Multiplexer actions add `Ctrl+Alt+Shift`: `t` creates a tab, `/` splits vertically, `-` splits horizontally, and the arrow keys move pane focus. Tmux uses `PageUp`/`PageDown` for previous/next tab; Herdr uses the equivalent mnemonic `p`/`n` because its config parser does not expose PageUp/PageDown names. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and installs the official global Herdr agent skill through `npx skills` or a direct raw-file fallback on lean machines.
 
 Herdr's generated hooks and extensions remain in the owning harness directories (`~/.codex` and `~/.pi`); they are app-managed runtime integration files, not secrets or repository configuration.
 
