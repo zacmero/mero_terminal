@@ -35,3 +35,7 @@ fi
 
 # pi-node PATH (for pi coding agent)
 export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/zacmero/.local/bin:$PATH"

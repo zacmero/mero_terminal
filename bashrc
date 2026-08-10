@@ -761,3 +761,7 @@ codexh() {
   fi
   command codex-headroom "$@"
 }
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/zacmero/.local/bin:$PATH"
