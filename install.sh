@@ -1155,6 +1155,51 @@ install_superfile() {
 
 install_superfile || log_optional_failure "Superfile"
 
+# --- systemctl-tui (systemd service manager) ---
+install_systemctl_tui() {
+    echo "Installing systemctl-tui..."
+
+    if [ "$DISTRO" = "Arch" ]; then
+        install_packages systemctl-tui
+        return
+    fi
+
+    local asset temp_dir binary_path
+    case "$ARCH" in
+        x86_64) asset="systemctl-tui-x86_64-unknown-linux-musl.tar.gz" ;;
+        aarch64) asset="systemctl-tui-aarch64-unknown-linux-musl.tar.gz" ;;
+        *)
+            echo "Unsupported architecture for systemctl-tui: $ARCH"
+            return 1
+            ;;
+    esac
+
+    temp_dir=$(mktemp -d)
+    if ! curl -fL --retry 3 -o "$temp_dir/systemctl-tui.tar.gz" \
+        "https://github.com/rgwood/systemctl-tui/releases/latest/download/$asset"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    tar -xzf "$temp_dir/systemctl-tui.tar.gz" -C "$temp_dir" || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    binary_path=$(find "$temp_dir" -type f -name systemctl-tui | head -n1)
+    [ -n "$binary_path" ] || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+
+    run_sudo install -Dm755 "$binary_path" /usr/local/bin/systemctl-tui || {
+        rm -rf "$temp_dir"
+        return 1
+    }
+    rm -rf "$temp_dir"
+}
+
+install_systemctl_tui || log_optional_failure "systemctl-tui"
+
 # --- Herdr agent multiplexer ---
 install_herdr() {
     echo "Installing Herdr..."

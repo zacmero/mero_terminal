@@ -51,6 +51,16 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
 *   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.
 
+## systemctl-tui (Systemd Manager)
+
+`systemctl-tui` is a lightweight TUI for browsing systemd units and logs, and starting, stopping, or editing services and timers. Run:
+
+```bash
+systemctl-tui
+```
+
+The installer uses Arch's official package on Arch Linux and the official static release on Debian/Ubuntu for both x86_64 and ARM64.
+
 ## Herdr (Agent Multiplexer)
 
 Herdr is installed from the official stable Linux release for x86_64 and ARM64. Its tracked configuration lives in `herdr/config.toml` and is linked to `~/.config/herdr/config.toml`.
