@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+morph_bin="${MERO_MCP_MORPH_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/mero-mcp/morph/node_modules/.bin/morph-mcp}"
+secret_file="${MERO_MCP_SECRET_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/mero/codex-secrets.toml}"
+if [[ ! -x "$morph_bin" ]]; then
+  printf 'Morph runtime not found: %s\n' "$morph_bin" >&2
+  exit 1
+fi
+if [[ ! -r "$secret_file" ]]; then
+  printf 'Morph secret file not found: %s\n' "$secret_file" >&2
+  exit 1
+fi
+
+morph_key="$(awk '
+  /^\[mcp_servers\.morph-mcp\.env\]$/ { in_env = 1; next }
+  in_env && /^MORPH_API_KEY[[:space:]]*=/ {
+    sub(/^[^=]*=[[:space:]]*"/, "")
+    sub(/"[[:space:]]*$/, "")
+    print
+    exit
+  }
+' "$secret_file")"
+if [[ -z "$morph_key" ]]; then
+  printf 'MORPH_API_KEY is missing from %s\n' "$secret_file" >&2
+  exit 1
+fi
+
+export MORPH_API_KEY="$morph_key"
+exec "$morph_bin" "$@"

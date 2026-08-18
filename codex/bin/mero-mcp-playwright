@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+playwright_bin="${MERO_MCP_PLAYWRIGHT_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/mero-mcp/playwright/node_modules/.bin/playwright-mcp}"
+if [[ ! -x "$playwright_bin" ]]; then
+  printf 'Playwright runtime not found: %s\n' "$playwright_bin" >&2
+  exit 1
+fi
+
+exec "$playwright_bin" "$@"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+serena_bin="${MERO_MCP_SERENA_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/uv/tools/serena-agent/bin/serena}"
+if [[ ! -x "$serena_bin" ]]; then
+  printf 'Serena runtime not found: %s\n' "$serena_bin" >&2
+  exit 1
+fi
+
+export SERENA_HOME="${SERENA_HOME:-/tmp/mero-serena}"
+exec "$serena_bin" "$@"
