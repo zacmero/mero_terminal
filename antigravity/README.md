@@ -39,24 +39,24 @@ antigravity/
 - **Key MCP Tools**:
   - `find_symbol`: Locate function/class/interface declarations without regex guesswork.
   - `get_symbols_overview`: High-level structural outline of files or modules.
--   `find_referencing_symbols`: Find all call sites and usages across the project.
-  - `edit_symbol`: Symbol-targeted edits that avoid full-file rewrites.
+  - `find_referencing_symbols`: Find all call sites and usages across the project.
+  - `edit_symbol` / `replace_symbol_body`: Symbol-targeted edits that avoid full-file rewrites.
 - **Headless Mode**: The web dashboard and browser opening are intentionally disabled (`--enable-web-dashboard false --open-web-dashboard false`) so Serena functions cleanly as a pure, headless stdio MCP server without external port binding issues.
-- **Antigravity Particularity**: In large repositories, prefer querying Serena symbol tools before reading entire directory trees into context.
+- **Enforcement Guideline**: Always prioritize Serena semantic symbol navigation over broad grep or reading entire directories into context.
 
 ---
 
-### 2. Headroom (`headroomlabs-ai/headroom`) & RTK
-- **Type**: Toggleable Plugin (`plugins/headroom/`) + MCP Proxy (`plugins/headroom/mcp_config.json`) + Skill (`plugins/headroom/skills/headroom/`).
-- **Core Capability**: Local context compression layer running on port `18996` with telemetry disabled (`HEADROOM_TELEMETRY=off`). Intercepts repetitive tool outputs and logs to reduce token consumption.
-- **⚠️ Delicate Projects Warning**:
-  - In projects with fragile multi-file AST relationships, macros, or byte-exact protocols, aggressive tool-result compression can omit critical compiler warnings.
-  - **Headroom is disabled by default** (`"headroom": { "enabled": false }` in `config.json`).
-- **How to Enable / Disable**:
-  - Enable for token-heavy sessions: Set `"headroom": { "enabled": true }` in `antigravity/config.json`.
-  - Disable: Set `"headroom": { "enabled": false }` in `antigravity/config.json`.
-- **RTK (Rust Token Killer)**: Installed globally as a standalone CLI tool (`rtk`) for fast, safe command execution.
-- **Live Metrics**: Run `codexh savings` or `headroom status` to inspect tokens saved and proxy health.
+### 2. RTK (Rust Token Killer) & Headroom (`headroomlabs-ai/headroom`)
+- **RTK CLI (Mandatory Default Filter)**:
+  - Prepend `rtk` to standard terminal and shell commands (`rtk git status`, `rtk ls -la`, `rtk test`, `rtk err <cmd>`, `rtk npm ...`, `rtk cargo ...`) to filter noisy boilerplate.
+  - **Sensitive / Byte-Exact Bypass**: Use `rtk proxy <command>` or `rtk run <command>` when inspecting sensitive configuration files, raw binary streams, or private keys.
+- **Headroom MCP (Context Compression Layer)**:
+  - **Type**: Toggleable Plugin (`plugins/headroom/`) + MCP Proxy (`plugins/headroom/mcp_config.json`) + Skill (`plugins/headroom/skills/headroom/`).
+  - **Usage**: Actively call `headroom_compress` on massive JSON outputs, server logs, RAG chunks, or bulky query responses.
+  - **Safety Rules**:
+    - **NEVER** compress sensitive documents, credentials, or private keys.
+    - **Fallback Protocol**: If information is missing or truncated after compression, immediately retrieve the uncompressed original via `headroom_retrieve <hash>` or re-run without Headroom.
+  - **Live Metrics**: Run `codexh savings` or `headroom status` to inspect tokens saved and proxy health.
 
 ---
 
