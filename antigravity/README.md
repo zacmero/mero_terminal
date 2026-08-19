@@ -39,8 +39,9 @@ antigravity/
 - **Key MCP Tools**:
   - `find_symbol`: Locate function/class/interface declarations without regex guesswork.
   - `get_symbols_overview`: High-level structural outline of files or modules.
-  - `find_referencing_symbols`: Find all call sites and usages across the project.
+-   `find_referencing_symbols`: Find all call sites and usages across the project.
   - `edit_symbol`: Symbol-targeted edits that avoid full-file rewrites.
+- **Headless Mode**: The web dashboard and browser opening are intentionally disabled (`--enable-web-dashboard false --open-web-dashboard false`) so Serena functions cleanly as a pure, headless stdio MCP server without external port binding issues.
 - **Antigravity Particularity**: In large repositories, prefer querying Serena symbol tools before reading entire directory trees into context.
 
 ---

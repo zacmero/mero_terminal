@@ -1,13 +1,16 @@
 {
   "plugins": {
-    "headroom": {
-      "enabled": true 
-    },
-    "ponytail": {
-      "enabled": true 
-    },
     "caveman": {
       "enabled": true
+    },
+    "headroom": {
+      "enabled": true
+    },
+    "ponytail": {
+      "enabled": true
     }
+  },
+  "userSettings": {
+    "remoteControlHostname": "mero-machine-vivid-corona"
   }
 }

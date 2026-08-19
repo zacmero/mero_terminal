@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim nightly (0.12+) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), `antigravity` (agent configs, MCPs, skills, and plugins), and `merodoc-preview` (lightweight Word document preview helper).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), `rtk` (Rust token killer CLI proxy), `antigravity` (agent configs, MCPs, skills, and plugins), and `merodoc-preview` (lightweight Word document preview helper).
 -   **Media Viewers:** `chafa` for universal terminal previews, `ueberzugpp` on desktop/GUI machines, Yazi's official video preview preset for video thumbnails, and Neovim media rendering through `image.nvim` with a `chafa` fallback when the terminal cannot do richer graphics.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -156,6 +156,21 @@ Fabric is now a default tracked tool in `mero_terminal`.
 *   **Arch path:** On Arch, the installer prefers the AUR binary package `fabric-ai-bin`.
 *   **Debian/Ubuntu fallback:** On Debian/Ubuntu, the installer falls back to the latest official Fabric binary release.
 *   **Unified command:** `mero_terminal` ensures `fabric` works even when the package exposes the binary as `fabric-ai`.
+
+---
+
+## RTK (Rust Token Killer)
+
+RTK is a standalone, blazing-fast Rust CLI proxy that filters and condenses terminal and command outputs (such as `git`, `cargo`, `npm`, `pytest`, `ls`, and `docker`) before they reach LLM context windows.
+
+### Features:
+*   **Standalone Binary:** Installed to `/usr/local/bin/rtk` and `$HOME/.local/bin/rtk`, independent of any agent harness.
+*   **Compact Output Commands:**
+    - `rtk ls`: Token-optimized directory listings.
+    - `rtk git status` / `rtk git diff`: Ultra-condensed Git outputs.
+    - `rtk test`: Runs tests and prints failures only.
+    - `rtk err <cmd>`: Executes commands filtering only errors and warnings.
+    - `rtk gain`: Displays historical token savings metrics.
 
 ---
 

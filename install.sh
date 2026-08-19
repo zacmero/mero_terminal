@@ -902,6 +902,24 @@ if command -v fabric-ai >/dev/null 2>&1 && ! command -v fabric >/dev/null 2>&1; 
     run_sudo ln -sf "$(command -v fabric-ai)" /usr/local/bin/fabric || true
 fi
 
+# RTK (Rust Token Killer - Standalone CLI proxy & output filter)
+install_rtk() {
+    echo "Installing RTK (Rust Token Killer)..."
+    if command -v rtk >/dev/null 2>&1; then
+        return 0
+    fi
+    if curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh; then
+        if [ -f "$HOME/.local/bin/rtk" ]; then
+            run_sudo install -Dm755 "$HOME/.local/bin/rtk" /usr/local/bin/rtk || true
+        fi
+        return 0
+    fi
+    return 1
+}
+
+install_rtk || log_optional_failure "RTK"
+
+
 install_doc_preview_tools || log_optional_failure "DOC preview helper"
 install_latex_rendering_tools || log_optional_failure "LaTeX rendering helper"
 install_treesitter_cli || log_optional_failure "Tree-sitter CLI"
@@ -1308,6 +1326,9 @@ install_antigravity_tools() {
     fi
     if [ -f "$MERO_TERMINAL_DIR/bin/mero-mcp-morph" ]; then
         run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/mero-mcp-morph" /usr/local/bin/mero-mcp-morph || true
+    fi
+    if [ -f "$MERO_TERMINAL_DIR/bin/mero-mcp-headroom" ]; then
+        run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/mero-mcp-headroom" /usr/local/bin/mero-mcp-headroom || true
     fi
 }
 

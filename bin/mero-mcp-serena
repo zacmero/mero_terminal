@@ -1,17 +1,58 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+import sys
+import os
+import signal
+import subprocess
+import shutil
 
-serena_bin="${MERO_MCP_SERENA_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/uv/tools/serena-agent/bin/serena}"
-if [[ ! -x "$serena_bin" ]]; then
-  if command -v serena >/dev/null 2>&1; then
-    serena_bin="$(command -v serena)"
-  elif [[ -x "$HOME/.local/bin/serena" ]]; then
-    serena_bin="$HOME/.local/bin/serena"
-  else
-    printf 'Error: Serena runtime not found (%s). Install with: uv tool install serena-agent\n' "$serena_bin" >&2
-    exit 1
-  fi
-fi
+p = None
 
-export SERENA_HOME="${SERENA_HOME:-/tmp/mero-serena}"
-exec "$serena_bin" "$@"
+def handle_sig(sig, frame):
+    global p
+    if p and p.poll() is None:
+        p.terminate()
+        try:
+            p.wait(timeout=3)
+        except Exception:
+            p.kill()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_sig)
+signal.signal(signal.SIGINT, handle_sig)
+
+serena_bin = os.environ.get("MERO_MCP_SERENA_BIN")
+if not serena_bin or not os.path.exists(serena_bin):
+    serena_bin = shutil.which("serena")
+if not serena_bin:
+    for candidate in [
+        os.path.expanduser("~/.local/bin/serena"),
+        os.path.expanduser("~/.local/share/uv/tools/serena-agent/bin/serena"),
+        "/usr/local/bin/serena",
+    ]:
+        if os.path.exists(candidate):
+            serena_bin = candidate
+            break
+
+if not serena_bin:
+    sys.stderr.write("Error: serena binary not found in PATH or ~/.local/bin. Install with: uv tool install serena-agent\n")
+    sys.exit(1)
+
+os.environ["SERENA_HOME"] = os.environ.get("SERENA_HOME", "/tmp/mero-serena")
+
+# If no args are passed, provide standard daemon args
+extra_args = sys.argv[1:]
+if not extra_args:
+    extra_args = [
+        "start-mcp-server",
+        "--project-from-cwd",
+        "--enable-web-dashboard",
+        "false",
+        "--open-web-dashboard",
+        "false",
+    ]
+
+args = [serena_bin] + extra_args
+
+p = subprocess.Popen(args)
+ret = p.wait()
+sys.exit(0 if ret in (0, -15, -2, 143, 130) else ret)

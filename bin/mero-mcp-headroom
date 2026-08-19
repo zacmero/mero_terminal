@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+import sys
+import os
+import signal
+import subprocess
+import shutil
+
+p = None
+
+def handle_sig(sig, frame):
+    global p
+    if p and p.poll() is None:
+        p.terminate()
+        try:
+            p.wait(timeout=3)
+        except Exception:
+            p.kill()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_sig)
+signal.signal(signal.SIGINT, handle_sig)
+
+headroom_bin = os.environ.get("MERO_MCP_HEADROOM_BIN")
+if not headroom_bin or not os.path.exists(headroom_bin):
+    headroom_bin = shutil.which("headroom")
+if not headroom_bin:
+    for candidate in [
+        os.path.expanduser("~/.local/bin/headroom"),
+        os.path.expanduser("~/.local/share/uv/tools/headroom-ai/bin/headroom"),
+        "/usr/local/bin/headroom",
+    ]:
+        if os.path.exists(candidate):
+            headroom_bin = candidate
+            break
+
+if not headroom_bin:
+    sys.stderr.write("Error: headroom binary not found in PATH or ~/.local/bin. Install with: uv tool install 'headroom-ai[proxy]==0.31.0'\n")
+    sys.exit(1)
+
+os.environ["HEADROOM_PROXY_URL"] = os.environ.get("HEADROOM_PROXY_URL", "http://127.0.0.1:18996")
+os.environ["HEADROOM_TELEMETRY"] = os.environ.get("HEADROOM_TELEMETRY", "off")
+
+extra_args = sys.argv[1:]
+if not extra_args:
+    extra_args = ["mcp", "serve"]
+
+args = [headroom_bin] + extra_args
+
+p = subprocess.Popen(args)
+ret = p.wait()
+sys.exit(0 if ret in (0, -15, -2, 143, 130) else ret)
