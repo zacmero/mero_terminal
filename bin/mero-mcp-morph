@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+morph_bin="${MERO_MCP_MORPH_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/mero-mcp/morph/node_modules/.bin/morph-mcp}"
+secret_file="${MERO_MCP_SECRET_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/mero/codex-secrets.toml}"
+
+if [[ -z "${MORPH_API_KEY:-}" ]]; then
+  if [[ -r "$secret_file" ]]; then
+    morph_key="$(awk '
+      /^\[mcp_servers\.morph-mcp\.env\]$/ { in_env = 1; next }
+      /^\[morph\]$/ { in_env = 1; next }
+      in_env && /^MORPH_API_KEY[[:space:]]*=/ {
+        sub(/^[^=]*=[[:space:]]*"/, "")
+        sub(/"[[:space:]]*$/, "")
+        print
+        exit
+      }
+    ' "$secret_file")"
+    if [[ -n "$morph_key" ]]; then
+      export MORPH_API_KEY="$morph_key"
+    fi
+  fi
+fi
+
+if [[ -z "${MORPH_API_KEY:-}" ]]; then
+  printf 'WARNING: MORPH_API_KEY is not set and could not be found in %s\n' "$secret_file" >&2
+fi
+
+if [[ -x "$morph_bin" ]]; then
+  exec "$morph_bin" "$@"
+elif command -v morph-mcp >/dev/null 2>&1; then
+  exec morph-mcp "$@"
+elif command -v npx >/dev/null 2>&1; then
+  exec npx -y @morphllm/morphmcp "$@"
+else
+  printf 'Error: Morph MCP runtime not found. Install with npm install -g @morphllm/morphmcp or run install.sh\n' >&2
+  exit 1
+fi

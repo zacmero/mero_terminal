@@ -834,6 +834,13 @@ if [ ! -d "$HOME/.bun" ]; then
     curl -fsSL https://bun.sh/install | bash || log_optional_failure "Bun"
 fi
 
+# UV (Python package & tool manager)
+if [ ! -f "$HOME/.local/bin/uv" ] && ! command -v uv >/dev/null 2>&1; then
+    echo "Installing uv..."
+    curl -fsSL https://astral.sh/uv/install.sh | sh || log_optional_failure "uv"
+fi
+
+
 # Oh My Posh
 if ! command -v oh-my-posh >/dev/null 2>&1; then
     install_oh_my_posh || log_optional_failure "Oh My Posh"
@@ -1266,8 +1273,49 @@ install_herdr_integrations() {
     fi
 }
 
+install_antigravity_tools() {
+    echo "Installing Antigravity MCP tools & runtimes..."
+    export PATH="$HOME/.local/bin:$PATH"
+
+    if command -v uv >/dev/null 2>&1; then
+        if ! command -v serena >/dev/null 2>&1; then
+            echo "Installing Serena agent via uv..."
+            uv tool install --force --from git+https://github.com/oraios/serena serena-agent || log_optional_failure "Serena"
+        fi
+
+        if ! command -v headroom >/dev/null 2>&1; then
+            echo "Installing Headroom via uv..."
+            uv tool install --force 'headroom-ai[proxy]==0.31.0' || log_optional_failure "Headroom"
+        fi
+
+        if ! command -v browser-harness >/dev/null 2>&1; then
+            echo "Installing browser-harness via uv..."
+            uv tool install --python 3.12 --upgrade --force browser-harness || log_optional_failure "browser-harness"
+        fi
+    fi
+
+    if command -v npm >/dev/null 2>&1; then
+        local morph_dir="$HOME/.local/share/mero-mcp/morph"
+        if [ ! -d "$morph_dir" ]; then
+            echo "Installing Morph MCP runtime..."
+            mkdir -p "$morph_dir"
+            npm install --prefix "$morph_dir" --no-save --no-package-lock --omit=dev @morphllm/morphmcp || log_optional_failure "Morph MCP"
+        fi
+    fi
+
+    if [ -f "$MERO_TERMINAL_DIR/bin/mero-mcp-serena" ]; then
+        run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/mero-mcp-serena" /usr/local/bin/mero-mcp-serena || true
+    fi
+    if [ -f "$MERO_TERMINAL_DIR/bin/mero-mcp-morph" ]; then
+        run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/mero-mcp-morph" /usr/local/bin/mero-mcp-morph || true
+    fi
+}
+
+install_antigravity_tools || log_optional_failure "Antigravity tools"
+
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
+
 
 
 

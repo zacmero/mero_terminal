@@ -1,3 +1,13 @@
 {
-  "plugins": {}
+  "plugins": {
+    "headroom": {
+      "enabled": true 
+    },
+    "ponytail": {
+      "enabled": true 
+    },
+    "caveman": {
+      "enabled": true
+    }
+  }
 }

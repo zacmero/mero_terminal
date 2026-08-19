@@ -1,0 +1,5 @@
+{
+  "name": "headroom",
+  "description": "Local-first context compression layer for token reduction via Headroom MCP proxy (delicate: disabled by default).",
+  "disabled": true
+}

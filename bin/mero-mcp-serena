@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+serena_bin="${MERO_MCP_SERENA_BIN:-${XDG_DATA_HOME:-$HOME/.local/share}/uv/tools/serena-agent/bin/serena}"
+if [[ ! -x "$serena_bin" ]]; then
+  if command -v serena >/dev/null 2>&1; then
+    serena_bin="$(command -v serena)"
+  elif [[ -x "$HOME/.local/bin/serena" ]]; then
+    serena_bin="$HOME/.local/bin/serena"
+  else
+    printf 'Error: Serena runtime not found (%s). Install with: uv tool install serena-agent\n' "$serena_bin" >&2
+    exit 1
+  fi
+fi
+
+export SERENA_HOME="${SERENA_HOME:-/tmp/mero-serena}"
+exec "$serena_bin" "$@"

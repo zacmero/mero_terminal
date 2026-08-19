@@ -165,10 +165,13 @@ Antigravity (AGY) global configurations are tracked in this repository under `an
 
 ### Features:
 *   **Tracked Configs:** `antigravity/config.json`, `antigravity/mcp_config.json`, and `antigravity/hooks.json` are linked to `~/.gemini/config/`.
+*   **MCP Servers:** Preconfigured global integrations for **Serena** (semantic code intelligence) and **Morph** (fast apply & WarpGrep).
+*   **Toggleable Plugins:** Bundled plugins for **Headroom** (delicate context compression proxy), **Ponytail** (lazy senior dev mode), and **Caveman** (terse communication mode), managed directly in `config.json`.
+*   **Custom Skills:** Integrated skills for **Browser Harness** (direct CDP browser automation), Serena, and Morph.
 *   **Custom Registries:** `antigravity/skills.json` and `antigravity/plugins.json` allow declaring explicit search paths and inheritance for skills and plugins.
 *   **Global Rules:** `antigravity/rules/AGENTS.md` is linked to `~/.gemini/config/rules/` to enforce unified guidelines across all projects and sessions.
-*   **Modular Extensions:** `antigravity/skills/` and `antigravity/plugins/` directories are tracked for custom workflows and reusable tool bundles.
 *   **Privacy & Local Isolation:** Runtime state, session transcripts, and token stores in `~/.gemini/antigravity-cli/` remain local to the machine and are never tracked in Git.
+
 
 ---
 

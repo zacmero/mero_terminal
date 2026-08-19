@@ -1,0 +1,5 @@
+{
+  "name": "ponytail",
+  "description": "Lazy senior developer mode to prevent over-engineering and eliminate unnecessary code (disabled by default).",
+  "disabled": true
+}
