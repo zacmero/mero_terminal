@@ -1364,6 +1364,18 @@ fi
 if command -v aichat >/dev/null 2>&1; then
     run_sudo ln -sf "$(command -v aichat)" /usr/local/bin/ai || true
 fi
+
+# Antigravity (AGY) configuration
+mkdir -p "$HOME/.gemini/config"
+link_path "$MERO_TERMINAL_DIR/antigravity/config.json" "$HOME/.gemini/config/config.json" "Antigravity configuration"
+link_path "$MERO_TERMINAL_DIR/antigravity/mcp_config.json" "$HOME/.gemini/config/mcp_config.json" "Antigravity MCP configuration"
+link_path "$MERO_TERMINAL_DIR/antigravity/hooks.json" "$HOME/.gemini/config/hooks.json" "Antigravity hooks configuration"
+link_path "$MERO_TERMINAL_DIR/antigravity/skills.json" "$HOME/.gemini/config/skills.json" "Antigravity skills registry"
+link_path "$MERO_TERMINAL_DIR/antigravity/plugins.json" "$HOME/.gemini/config/plugins.json" "Antigravity plugins registry"
+link_path "$MERO_TERMINAL_DIR/antigravity/rules" "$HOME/.gemini/config/rules" "Antigravity rules"
+link_path "$MERO_TERMINAL_DIR/antigravity/skills" "$HOME/.gemini/config/skills" "Antigravity skills"
+link_path "$MERO_TERMINAL_DIR/antigravity/plugins" "$HOME/.gemini/config/plugins" "Antigravity plugins"
+
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi-select || true
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/fastfetch" /usr/local/bin/fastfetch || true
