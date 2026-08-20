@@ -168,6 +168,39 @@ config.mouse_bindings = {
 		mods = "CTRL",
 		action = act.ScrollByLine(10),
 	},
+	-- Right-click = paste (like Ctrl+Shift+V)
+	{
+		event = { Down = { streak = 1, button = "Right" } },
+		mods = "NONE",
+		action = act.Nop,
+	},
+	{
+		event = { Up = { streak = 1, button = "Right" } },
+		mods = "NONE",
+		action = act.PasteFrom("Clipboard"),
+	},
+	-- Ctrl+Right-click = context menu
+	{
+		event = { Down = { streak = 1, button = "Right" } },
+		mods = "CTRL",
+		action = act.Nop,
+	},
+	{
+		event = { Up = { streak = 1, button = "Right" } },
+		mods = "CTRL",
+		action = wezterm.action.ShowLauncherArgs({ title = "Context", flags = "FUZZY" }),
+	},
+	-- Ctrl+Shift+Right-click = launcher
+	{
+		event = { Down = { streak = 1, button = "Right" } },
+		mods = "CTRL|SHIFT",
+		action = act.Nop,
+	},
+	{
+		event = { Up = { streak = 1, button = "Right" } },
+		mods = "CTRL|SHIFT",
+		action = act.ShowLauncher,
+	},
 }
 
 local function foreground_is_nvim(pane)
