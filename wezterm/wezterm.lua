@@ -179,7 +179,7 @@ config.mouse_bindings = {
 		mods = "NONE",
 		action = act.PasteFrom("Clipboard"),
 	},
-	-- Ctrl+Right-click = context menu
+	-- Ctrl+Right-click = command palette (quick actions: copy, paste, split, etc.)
 	{
 		event = { Down = { streak = 1, button = "Right" } },
 		mods = "CTRL",
@@ -188,7 +188,7 @@ config.mouse_bindings = {
 	{
 		event = { Up = { streak = 1, button = "Right" } },
 		mods = "CTRL",
-		action = wezterm.action.ShowLauncherArgs({ title = "Context", flags = "FUZZY" }),
+		action = act.ActivateCommandPalette,
 	},
 	-- Ctrl+Shift+Right-click = launcher
 	{
