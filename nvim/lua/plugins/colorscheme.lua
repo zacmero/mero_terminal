@@ -25,6 +25,20 @@ return {
         hl.GitSignsAddPreview = { fg = "#44ff8f" }
         hl.GitSignsStagedAddNr = { fg = "#44ff8f" }
         hl.GitSignsStagedAddLn = { fg = "#44ff8f" }
+
+        -- Bright clear blue for modifications (code changes)
+        hl.GitSignsChange = { fg = "#58d6ff" }
+        hl.GitSignsChangeNr = { fg = "#58d6ff", bold = true }
+        hl.GitSignsChangeLn = { fg = "#58d6ff" }
+        hl.GitSignsChangedelete = { fg = "#58d6ff" }
+        hl.GitSignsChangedeleteNr = { fg = "#58d6ff", bold = true }
+        hl.GitSignsChangedeleteLn = { fg = "#58d6ff" }
+        hl.GitSignsStagedChange = { fg = "#58d6ff" }
+        hl.GitSignsStagedChangeNr = { fg = "#58d6ff", bold = true }
+        hl.GitSignsStagedChangeLn = { fg = "#58d6ff" }
+        hl.GitSignsStagedChangedelete = { fg = "#58d6ff" }
+        hl.GitSignsStagedChangedeleteNr = { fg = "#58d6ff", bold = true }
+        hl.GitSignsStagedChangedeleteLn = { fg = "#58d6ff" }
       end,
     },
   },
