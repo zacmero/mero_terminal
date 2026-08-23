@@ -10,3 +10,27 @@ local opt = vim.opt
 opt.mouse = "a"
 vim.o.mousemodel = "extend"
 opt.clipboard = "unnamedplus"
+
+-- Force OSC 52 clipboard provider in SSH, Herdr, containers, or headless environments
+-- so yanking escapes directly through the terminal to the client's system clipboard.
+local is_remote = vim.env.SSH_TTY ~= nil
+  or vim.env.SSH_CLIENT ~= nil
+  or vim.env.SSH_CONNECTION ~= nil
+  or vim.env.HERDR_SESSION ~= nil
+  or vim.env.REMOTE_CONTAINERS ~= nil
+  or vim.env.MERO_FORCE_OSC52 == "1"
+  or (vim.env.WAYLAND_DISPLAY == nil and vim.env.DISPLAY == nil)
+
+if is_remote then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+    },
+    paste = {
+      ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+    },
+  }
+end
