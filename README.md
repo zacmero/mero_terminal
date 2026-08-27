@@ -240,6 +240,21 @@ Tmux is configured for a robust multiplexing experience with plugins managed by 
 
 ---
 
+## Fastfetch (Dynamic Responsive System Info)
+
+Fastfetch is configured with an intelligent auto-responsive wrapper that scales its layout and OS logo based on your terminal window width, preventing line wrapping or distorted logos on mobile/phone screens.
+
+### Modes & Subcommands:
+*   **Auto-Responsive (Default `fastfetch`):**
+    - **Mobile / Narrow (`< 62 cols`):** Uses the `tiny` configuration (small logo placed cleanly at the top, essential metrics, zero text wrapping).
+    - **Split-Pane / Half-Screen (`62..94 cols`):** Uses the `compact` configuration (small left logo with condensed CPU/GPU/memory metrics).
+    - **Full Terminal (`>= 95 cols`):** Full spec layout with full ASCII distro art and detailed hardware specifications.
+*   **`fastfetch complete` (or `fastfetch full` / `fastfetch -f`):** Displays the full, unconstrained spec sheet with complete details regardless of window size.
+*   **`fastfetch compact`:** Explicitly forces the compact side-by-side layout.
+*   **`fastfetch tiny`:** Explicitly forces the vertical mobile layout.
+
+---
+
 ## ⚠️ Prerequisites (Read First)
 
 ### Setting a Sudo Password (Cloud/VPS Users)
