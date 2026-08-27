@@ -1303,7 +1303,7 @@ install_antigravity_tools() {
 
         if ! command -v headroom >/dev/null 2>&1; then
             echo "Installing Headroom via uv..."
-            uv tool install --force 'headroom-ai[proxy]==0.31.0' || log_optional_failure "Headroom"
+            uv tool install --force --with 'mcp==1.28.1' 'headroom-ai[proxy]==0.31.0' || log_optional_failure "Headroom"
         fi
 
         if ! command -v browser-harness >/dev/null 2>&1; then
