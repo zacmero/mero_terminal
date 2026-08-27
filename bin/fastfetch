@@ -37,6 +37,16 @@ host_name="${HOSTNAME:-$(hostname 2>/dev/null || true)}"
 is_mero_machine=false
 [[ "$host_name" == "mero-machine" ]] && is_mero_machine=true
 
+small_logo=""
+if ! $is_mero_machine && [[ -r /etc/os-release ]]; then
+  # shellcheck disable=SC1091
+  source /etc/os-release
+  case "${ID:-}" in
+    ubuntu) small_logo="ubuntu_small" ;;
+    debian) small_logo="debian_small" ;;
+  esac
+fi
+
 run_config() {
   local config_name="$1"
   local logo_size="$2"
@@ -60,6 +70,14 @@ run_responsive_config() {
 
   if $is_mero_machine; then
     exec "$real_fastfetch" --config "$config_dir/$workstation_config" "$@"
+  fi
+
+  if [[ -n "$small_logo" ]]; then
+    exec "$real_fastfetch" \
+      --config "$config_dir/$universal_config" \
+      --logo "$small_logo" \
+      --logo-type builtin \
+      "$@"
   fi
 
   exec "$real_fastfetch" --config "$config_dir/$universal_config" "$@"

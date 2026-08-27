@@ -19,7 +19,7 @@
     { "type": "uptime", "key": "Uptime" },
     { "type": "shell", "key": "Shell" },
     { "type": "wm", "key": "WM" },
-    { "type": "cpu", "key": "CPU", "format": "{cores-physical} cores @ {freq-max}", "temp": false },
+    { "type": "cpu", "key": "CPU", "format": "{cores-physical} cores", "temp": false },
     { "type": "gpu", "key": "GPU", "format": "{vendor} {type}" },
     { "type": "memory", "key": "Memory", "format": "{used} / {total}" },
     { "type": "disk", "key": "Disk", "folders": "/", "format": "{size-used} / {size-total}" }
