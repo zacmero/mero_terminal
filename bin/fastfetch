@@ -1,45 +1,49 @@
 #!/usr/bin/env bash
 # Fastfetch dynamic wrapper - auto-scales logo and spec layout based on terminal width.
-# Supports: fastfetch (auto-responsive), fastfetch complete/full, fastfetch compact, fastfetch tiny.
+# Prevents logo distortion, eliminates startup lag, and provides 'fastfetch complete'.
 
 set -euo pipefail
 
-# 1. Locate the real fastfetch binary (avoiding recursion with $0)
+# 1. Fast binary resolution (avoiding recursive call to self)
 REAL_FASTFETCH=""
 for candidate in /usr/bin/fastfetch /usr/local/bin/fastfetch "$HOME/.local/bin/fastfetch"; do
-    if [[ -x "$candidate" ]] && [[ "$candidate" != "$0" ]] && [[ "$(readlink -f "$candidate" 2>/dev/null || true)" != "$(readlink -f "$0" 2>/dev/null || true)" ]]; then
-        REAL_FASTFETCH="$candidate"
-        break
+    if [[ -x "$candidate" ]]; then
+        cand_real="$(readlink -f "$candidate" 2>/dev/null || echo "$candidate")"
+        self_real="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+        if [[ "$cand_real" != "$self_real" ]]; then
+            REAL_FASTFETCH="$candidate"
+            break
+        fi
     fi
 done
 
 if [[ -z "$REAL_FASTFETCH" ]]; then
-    while IFS= read -r path; do
-        if [[ -x "$path" ]] && [[ "$(readlink -f "$path" 2>/dev/null || true)" != "$(readlink -f "$0" 2>/dev/null || true)" ]]; then
-            REAL_FASTFETCH="$path"
-            break
+    while IFS= read -r candidate; do
+        if [[ -x "$candidate" ]]; then
+            cand_real="$(readlink -f "$candidate" 2>/dev/null || echo "$candidate")"
+            self_real="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+            if [[ "$cand_real" != "$self_real" ]]; then
+                REAL_FASTFETCH="$candidate"
+                break
+            fi
         fi
     done < <(type -ap fastfetch 2>/dev/null || true)
 fi
 
 if [[ -z "$REAL_FASTFETCH" ]]; then
-    printf 'Error: real fastfetch binary not found.\n' >&2
+    printf 'Error: fastfetch binary not found.\n' >&2
     exit 1
 fi
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch"
 [ -d "$CONFIG_DIR" ] || CONFIG_DIR="$HOME/mero_terminal/fastfetch"
 
-# 2. Check for explicit subcommands
-mode="${1:-auto}"
-case "$mode" in
+# 2. Handle explicit subcommands
+cmd="${1:-auto}"
+case "$cmd" in
     complete|full|--full|-f)
         shift || true
-        if [[ "$HOSTNAME" == "mero-machine" ]] && [[ -f "$CONFIG_DIR/config.meromachine.jsonc" ]]; then
-            exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.meromachine.jsonc" "$@"
-        else
-            exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.jsonc" "$@"
-        fi
+        exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.full.jsonc" "$@"
         ;;
     compact|--compact)
         shift || true
@@ -55,20 +59,24 @@ case "$mode" in
         ;;
 esac
 
-# 3. Dynamic Auto-Selection based on terminal columns
-cols="$(tput cols 2>/dev/null || echo "${COLUMNS:-80}")"
-if ! [[ "$cols" =~ ^[0-9]+$ ]] || [[ "$cols" -le 0 ]]; then
+# 3. Fast width detection (reads $COLUMNS directly, fallback to tput)
+cols="${COLUMNS:-}"
+if [[ -z "$cols" ]] || ! [[ "$cols" =~ ^[0-9]+$ ]] || [[ "$cols" -le 0 ]]; then
+    cols="$(tput cols 2>/dev/null || true)"
+fi
+if [[ -z "$cols" ]] || ! [[ "$cols" =~ ^[0-9]+$ ]] || [[ "$cols" -le 0 ]]; then
     cols=80
 fi
 
+# 4. Auto-Responsive Selection:
+# - < 62 cols (Mobile phone portrait / ultra-narrow): Top logo layout, ~35 cols max.
+# - 62..104 cols (Mobile landscape / Split panes / 80-col terms): Small side logo, ~60 cols max.
+# - >= 105 cols (Wide windows): Full ASCII logo with clean specs, ~82 cols max.
 if [[ "$cols" -lt 62 ]]; then
-    # Ultra-narrow / mobile phone terminal (e.g. Termius mobile, Termux, narrow split)
     exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.tiny.jsonc" "$@"
-elif [[ "$cols" -lt 95 ]]; then
-    # Medium / Half-screen / Split-pane terminal
+elif [[ "$cols" -lt 105 ]]; then
     exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.compact.jsonc" "$@"
 else
-    # Full / Standard terminal
     if [[ "$HOSTNAME" == "mero-machine" ]] && [[ -f "$CONFIG_DIR/config.meromachine.jsonc" ]]; then
         exec "$REAL_FASTFETCH" --config "$CONFIG_DIR/config.meromachine.jsonc" "$@"
     else

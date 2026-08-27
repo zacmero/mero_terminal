@@ -1,5 +1,9 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "general": {
+    "thread": true,
+    "processingTimeout": 300
+  },
   "logo": {
     "type": "builtin",
     "source": "auto",
@@ -11,7 +15,7 @@
     "separator": ": ",
     "brightColor": true,
     "key": {
-      "width": 12,
+      "width": 11,
       "type": "string"
     }
   },
@@ -38,10 +42,8 @@
     {
       "type": "packages",
       "key": "Packages",
-      "disabled": [
-        "apk"
-      ],
-      "combined": false
+      "disabled": ["apk"],
+      "combined": true
     },
     {
       "type": "shell",
@@ -49,20 +51,7 @@
     },
     {
       "type": "wm",
-      "key": "WM",
-      "detectPlugin": true
-    },
-    {
-      "type": "theme",
-      "key": "Theme"
-    },
-    {
-      "type": "icons",
-      "key": "Icons"
-    },
-    {
-      "type": "cursor",
-      "key": "Cursor"
+      "key": "WM"
     },
     {
       "type": "terminal",
@@ -72,8 +61,7 @@
       "type": "cpu",
       "key": "CPU",
       "temp": false,
-      "showPeCoreCount": false,
-      "tempSensor": ""
+      "showPeCoreCount": false
     },
     {
       "type": "gpu",
@@ -89,7 +77,8 @@
     },
     {
       "type": "disk",
-      "key": "Disk"
+      "key": "Disk",
+      "folders": "/"
     },
     "break",
     "colors"

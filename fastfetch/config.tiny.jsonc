@@ -1,8 +1,13 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "general": {
+    "thread": true,
+    "processingTimeout": 200
+  },
   "logo": {
     "type": "small",
     "position": "top",
+    "source": "auto",
     "padding": {
       "left": 0,
       "right": 0,
@@ -13,7 +18,7 @@
     "separator": ": ",
     "brightColor": true,
     "key": {
-      "width": 8,
+      "width": 7,
       "type": "string"
     }
   },
@@ -41,11 +46,12 @@
     {
       "type": "memory",
       "key": "Memory",
-      "format": "{used} / {total} ({percentage})"
+      "format": "{used} / {total}"
     },
     {
       "type": "disk",
-      "key": "Disk"
+      "key": "Disk",
+      "folders": "/"
     },
     "break",
     "colors"
