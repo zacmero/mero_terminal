@@ -1,85 +1,29 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "general": {
-    "thread": true,
-    "processingTimeout": 300
-  },
+  "general": { "thread": true, "processingTimeout": 250 },
   "logo": {
     "type": "builtin",
     "source": "arch",
-    "padding": {
-      "right": 2
-    }
+    "padding": { "right": 2 }
   },
   "display": {
     "separator": ": ",
     "brightColor": true,
-    "key": {
-      "width": 11,
-      "type": "string"
-    }
+    "key": { "width": 9, "type": "string" }
   },
   "modules": [
     "title",
     "separator",
-    {
-      "type": "os",
-      "key": "OS",
-      "format": "ArchMerOS {arch}"
-    },
-    {
-      "type": "host",
-      "key": "Host"
-    },
-    {
-      "type": "kernel",
-      "key": "Kernel"
-    },
-    {
-      "type": "uptime",
-      "key": "Uptime"
-    },
-    {
-      "type": "packages",
-      "key": "Packages",
-      "disabled": ["apk"],
-      "combined": true
-    },
-    {
-      "type": "shell",
-      "key": "Shell"
-    },
-    {
-      "type": "wm",
-      "key": "WM"
-    },
-    {
-      "type": "terminal",
-      "key": "Terminal"
-    },
-    {
-      "type": "cpu",
-      "key": "CPU",
-      "temp": false,
-      "showPeCoreCount": false
-    },
-    {
-      "type": "gpu",
-      "key": "GPU"
-    },
-    {
-      "type": "memory",
-      "key": "Memory"
-    },
-    {
-      "type": "swap",
-      "key": "Swap"
-    },
-    {
-      "type": "disk",
-      "key": "Disk",
-      "folders": "/"
-    },
+    { "type": "os", "key": "OS", "format": "ArchMerOS {arch}" },
+    { "type": "kernel", "key": "Kernel", "format": "{release}" },
+    { "type": "uptime", "key": "Uptime" },
+    { "type": "shell", "key": "Shell" },
+    { "type": "wm", "key": "WM" },
+    { "type": "cpu", "key": "CPU", "format": "{vendor} {cores-physical} cores @ {freq-max}", "temp": false },
+    { "type": "gpu", "key": "GPU", "format": "{vendor} {name}" },
+    { "type": "memory", "key": "Memory", "format": "{used} / {total} ({percentage})" },
+    { "type": "swap", "key": "Swap", "format": "{used} / {total}" },
+    { "type": "disk", "key": "Disk", "folders": "/", "format": "{size-used} / {size-total}" },
     "break",
     "colors"
   ]

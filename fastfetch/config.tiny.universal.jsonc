@@ -3,8 +3,9 @@
   "general": { "thread": true, "processingTimeout": 250 },
   "logo": {
     "type": "small",
-    "source": "arch_small",
-    "padding": { "right": 1 }
+    "position": "top",
+    "source": "auto",
+    "padding": { "left": 0, "right": 0, "top": 0 }
   },
   "display": {
     "separator": ": ",
@@ -12,15 +13,10 @@
     "key": { "width": 7, "type": "string" }
   },
   "modules": [
-    "title",
-    "separator",
-    { "type": "os", "key": "OS", "format": "ArchMerOS {arch}" },
+    { "type": "os", "key": "OS", "format": "{name} {arch}" },
     { "type": "kernel", "key": "Kernel", "format": "{release}" },
     { "type": "uptime", "key": "Uptime" },
     { "type": "shell", "key": "Shell" },
-    { "type": "wm", "key": "WM" },
-    { "type": "cpu", "key": "CPU", "format": "{cores-physical} cores @ {freq-max}", "temp": false },
-    { "type": "gpu", "key": "GPU", "format": "{vendor} {type}" },
     { "type": "memory", "key": "Memory", "format": "{used} / {total}" },
     { "type": "disk", "key": "Disk", "folders": "/", "format": "{size-used} / {size-total}" }
   ]

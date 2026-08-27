@@ -247,11 +247,13 @@ Fastfetch is configured with an intelligent auto-responsive wrapper that scales 
 ### Modes & Subcommands:
 *   **Auto-Responsive (Default `fastfetch`):**
     - **Mobile / Narrow (`< 62 cols`):** Uses the `tiny` configuration (small logo placed cleanly at the top, essential metrics, zero text wrapping).
-    - **Split-Pane / Half-Screen (`62..94 cols`):** Uses the `compact` configuration (small left logo with condensed CPU/GPU/memory metrics).
-    - **Full Terminal (`>= 95 cols`):** Full spec layout with full ASCII distro art and detailed hardware specifications.
+    - **Split-Pane / Half-Screen (`62..104 cols`):** Uses the compact configuration with bounded CPU/GPU values and no package-manager probes.
+    - **Full Terminal (`>= 105 cols`):** Uses the clean desktop hardware layout. On `mero-machine`, ArchMerOS branding is always enforced instead of auto-detecting EndeavourOS.
 *   **`fastfetch complete` (or `fastfetch full` / `fastfetch -f`):** Displays the full, unconstrained spec sheet with complete details regardless of window size.
 *   **`fastfetch compact`:** Explicitly forces the compact side-by-side layout.
 *   **`fastfetch tiny`:** Explicitly forces the vertical mobile layout.
+
+Automatic startup layouts omit package counts, themes, icons, cursor details, terminal version strings, and secondary disks. This keeps remote/mobile startup fast and prevents long values from wrapping through the logo. Use `fastfetch complete` when you explicitly want those uncensored details. Ubuntu and Debian machines keep native auto-detected branding; the workstation compact/tiny presets explicitly use ArchMerOS branding.
 
 ---
 
