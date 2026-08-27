@@ -8,6 +8,9 @@ case $- in
 *) return ;;
 esac
 
+# Ensure user binaries and system binaries are in PATH early
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
+
 # Allow Ctrl+S / Ctrl+Q to reach terminal apps like Neovim instead of
 # triggering terminal flow control.
 if tty -s; then
@@ -756,12 +759,14 @@ codexh() {
 codexh() {
   if [ "${1:-}" = "savings" ]; then
     shift
-    command /home/zacmero/projects/mero-headroom/scripts/codexh-savings "$@"
-    return
+    if [ -x "$HOME/projects/mero-headroom/scripts/codexh-savings" ]; then
+      command "$HOME/projects/mero-headroom/scripts/codexh-savings" "$@"
+      return
+    fi
   fi
   command codex-headroom "$@"
 }
 
+# Ensure ~/.local/bin is in PATH
+export PATH="$HOME/.local/bin:$PATH"
 
-# Added by Antigravity CLI installer
-export PATH="/home/zacmero/.local/bin:$PATH"

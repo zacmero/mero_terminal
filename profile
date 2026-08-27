@@ -37,5 +37,6 @@ fi
 export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
 
 
-# Added by Antigravity CLI installer
-export PATH="/home/zacmero/.local/bin:$PATH"
+# Ensure ~/.local/bin is in PATH for all login shells
+export PATH="$HOME/.local/bin:$PATH"
+
