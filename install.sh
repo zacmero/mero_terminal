@@ -1407,6 +1407,9 @@ fi
 
 # Managed config symlinks
 link_path "$MERO_TERMINAL_DIR/nvim" "$HOME/.config/nvim" "Neovim configuration"
+if [ -d "$MERO_TERMINAL_DIR/.git" ]; then
+    git -C "$MERO_TERMINAL_DIR" update-index --skip-worktree nvim/lazy-lock.json 2>/dev/null || true
+fi
 if [ "$INSTALL_WEZTERM" = "1" ]; then
     link_path "$MERO_TERMINAL_DIR/wezterm" "$HOME/.config/wezterm" "WezTerm configuration"
 fi

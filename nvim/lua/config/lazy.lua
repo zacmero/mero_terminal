@@ -30,6 +30,8 @@ require("lazy").setup({
     version = false, -- always use the latest git commit
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
+  -- Store lockfile in local state directory (~/.local/state/nvim/) so it never pollutes the git repo
+  lockfile = vim.fn.stdpath("state") .. "/lazy-lock.json",
   install = { colorscheme = { "tokyonight", "habamax" } },
   checker = {
     enabled = true, -- check for plugin updates periodically
