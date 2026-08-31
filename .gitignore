@@ -1,2 +1,3 @@
 # Installed from the pinned entries in yazi/package.toml.
 /yazi/flavors/
+/yazi/plugins/*
