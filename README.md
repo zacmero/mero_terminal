@@ -50,6 +50,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 *   **File operations:** Easily copy, move, delete, and manage files.
 *   **On-demand Metadata:** Press `Ctrl+i` to instantly show file size and modification time next to files (custom linemode). Press `Shift+i` to hide it.
 *   **Post-exit listing:** After `yazi` exits, the shell runs your normal `ls` alias in the resulting directory.
+*   **Zoxide jumper:** Press `g`, then `z` inside Yazi to open its native zoxide directory picker. This changes Yazi's active directory directly and works in local terminals, tmux, and SSH sessions. Uppercase `Z` remains Yazi's native shortcut for the same picker; lowercase `z` opens Yazi's fzf file/directory jumper.
 
 ## systemctl-tui (Systemd Manager)
 

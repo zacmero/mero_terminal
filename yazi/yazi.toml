@@ -1,4 +1,4 @@
-[manager]
+[mgr]
 linemode = "size_and_mtime"
 
 [opener]
@@ -20,5 +20,4 @@ prepend_rules = [
     { mime = "application/javascript", use = "edit" },
     { mime = "application/x-shellscript", use = "edit" },
 ]
-
 
