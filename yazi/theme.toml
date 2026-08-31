@@ -1,3 +1,6 @@
 [flavor]
 dark = "catppuccin-mocha"
 light = "catppuccin-mocha"
+
+[indicator]
+preview = { underline = false }
