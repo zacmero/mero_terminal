@@ -1,6 +1,7 @@
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 approvals_reviewer = "auto_review"
+# service_tier = "fast"
 [projects."/home/zacmero"]
 trust_level = "trusted"
 
@@ -68,6 +69,9 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/ubuntu/maintenance"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-protocol/vex-steele"]
 trust_level = "trusted"
 
 [notice]

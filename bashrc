@@ -179,6 +179,28 @@ sf() {
   fi
 }
 
+# Keep the shell in Yazi's final directory. A child process cannot change its
+# parent shell, so Yazi writes the directory and this function applies it.
+yazi() {
+    local cwd_file cwd yazi_status
+
+    cwd_file="$(mktemp "${TMPDIR:-/tmp}/yazi-cwd.XXXXXX")" || return
+    command yazi --cwd-file="$cwd_file" "$@"
+    yazi_status=$?
+
+    if [ "$yazi_status" -eq 0 ] && [ -r "$cwd_file" ]; then
+        cwd=$(<"$cwd_file")
+        if [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && [ -d "$cwd" ]; then
+            builtin cd -- "$cwd" || yazi_status=$?
+        fi
+    fi
+
+    command rm -f -- "$cwd_file"
+    return "$yazi_status"
+}
+
+alias y='yazi'
+
 #fzf folder navigation + lazyvin fast open:
 # Keep single-letter `v` free for shell/vi workflows.
 alias vf='fzf | xargs -r nvim'
@@ -769,4 +791,3 @@ codexh() {
 
 # Ensure ~/.local/bin is in PATH
 export PATH="$HOME/.local/bin:$PATH"
-

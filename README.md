@@ -39,7 +39,7 @@ Yazi is an advanced, fast terminal file manager. This setup automatically instal
 
 ### Features:
 *   **Automatic `cd` on exit:** When you quit `yazi`, your shell's current directory will automatically change to the last directory you were browsing in `yazi`.
-*   **Predictable `Ctrl+C` exit:** If you abort `yazi` with `Ctrl+C`, the shell stays in the directory where you launched it instead of jumping somewhere unexpected.
+*   **Predictable `Ctrl+C` exit:** Closing `yazi` with `Ctrl+C` leaves the shell in the directory where Yazi was closed.
 *   **Neovim-first editing:** `nvim` is exported as the default `EDITOR`/`VISUAL`, and pressing `Enter` on text/code files in `yazi` opens them in Neovim. DOCX files can route through the same Neovim path as lightweight previews, and legacy `.doc` files fall back to LibreOffice/soffice when it is installed. You can also call `:MeroDoc` directly inside Neovim to reopen a Word file as a preview.
 *   **Git status in Yazi:** The official `git.yazi` plugin is installed and shows per-file Git state directly in the file list inside Git repositories.
 *   **Selection-friendly mode:** Use `yazi-select` when you want the same file manager view but need to mouse-select/copy text from the terminal instead of letting Yazi capture mouse events.
@@ -339,8 +339,15 @@ The installer now detects existing managed files and directories, backs them up 
 *   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Superfile, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
 *   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, the tracked Superfile files under `~/.config/superfile`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, the tracked AIChat files under `~/.config/aichat`, and the Antigravity configuration files under `~/.gemini/config`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
-*   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so the explorer, Git-status, and video preview plugins are present from the first install. The installer also bootstraps the lightweight `merodoc-preview` helper so the `:MeroDoc` workflow can render Word docs on demand without adding a heavy Neovim plugin stack.
+*   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so the explorer, Git-status, video preview plugin, and Catppuccin Mocha flavor are present from the first install. The installer also bootstraps the lightweight `merodoc-preview` helper so the `:MeroDoc` workflow can render Word docs on demand without adding a heavy Neovim plugin stack.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
+
+### Yazi navigation
+
+Yazi uses the same Catppuccin Mocha palette as Superfile. Launch it with `yazi`
+or `y`; leaving with `Ctrl+C` returns Bash in the directory where Yazi was
+closed. The tracked Bash function is required because a child process cannot
+directly change its parent shell's working directory.
 
 ### Shell hook maintenance
 

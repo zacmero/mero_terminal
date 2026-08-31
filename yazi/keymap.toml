@@ -1,6 +1,6 @@
 [manager]
 prepend_keymap = [
-    { on = [ "<C-c>" ], run = "quit --no-cwd-file", desc = "Quit without changing shell cwd" },
+    { on = [ "<C-c>" ], run = "quit", desc = "Quit and keep the current directory" },
     { on = [ "<C-i>" ], run = "linemode size_and_mtime", desc = "Show size and modified time" },
     { on = [ "<S-I>" ], run = "linemode none", desc = "Hide linemode metadata" },
 ]
