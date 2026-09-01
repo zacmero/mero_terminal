@@ -40,3 +40,8 @@ export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
 # Ensure ~/.local/bin is in PATH for all login shells
 export PATH="$HOME/.local/bin:$PATH"
 
+# Mero Precision — selective completion gate
+export MERO_PRECISION_MODE=selective
+export MERO_PRECISION_THRESHOLD=6
+export MERO_PRECISION_MAX_CONTINUATIONS=1
+

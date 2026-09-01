@@ -1,15 +1,16 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
+# Ensure user binaries and system binaries are in PATH early
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
+
+# Mero Precision — selective completion gate
+export MERO_PRECISION_MODE=selective
+export MERO_PRECISION_THRESHOLD=6
+export MERO_PRECISION_MAX_CONTINUATIONS=1
 
 # If not running interactively, don't do anything
 case $- in
 *i*) ;;
 *) return ;;
 esac
-
-# Ensure user binaries and system binaries are in PATH early
-export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
 
 # Allow Ctrl+S / Ctrl+Q to reach terminal apps like Neovim instead of
 # triggering terminal flow control.
@@ -792,7 +793,4 @@ codexh() {
 # Ensure ~/.local/bin is in PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-# Mero Precision — selective completion gate (no shadow mode)
-export MERO_PRECISION_MODE=selective
-export MERO_PRECISION_THRESHOLD=6
-export MERO_PRECISION_MAX_CONTINUATIONS=1
+
