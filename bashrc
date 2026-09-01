@@ -791,3 +791,8 @@ codexh() {
 
 # Ensure ~/.local/bin is in PATH
 export PATH="$HOME/.local/bin:$PATH"
+
+# Mero Precision — selective completion gate (no shadow mode)
+export MERO_PRECISION_MODE=selective
+export MERO_PRECISION_THRESHOLD=6
+export MERO_PRECISION_MAX_CONTINUATIONS=1

@@ -6,7 +6,7 @@ end)
 
 function M:entry()
 	local enabled = toggle()
-	ya.emit("linemode", { enabled and "size" or "none" })
+	ya.emit("linemode", { enabled and "size" or "git_status" })
 end
 
 return M

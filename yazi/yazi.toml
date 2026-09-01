@@ -1,5 +1,15 @@
 [mgr]
-linemode = "none"
+linemode = "git_status"
+
+[[plugin.prepend_fetchers]]
+url = "*"
+run = "git"
+group = "git"
+
+[[plugin.prepend_fetchers]]
+url = "*/"
+run = "git"
+group = "git"
 
 [opener]
 edit = [
@@ -20,4 +30,3 @@ prepend_rules = [
     { mime = "application/javascript", use = "edit" },
     { mime = "application/x-shellscript", use = "edit" },
 ]
-
