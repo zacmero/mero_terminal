@@ -2,14 +2,20 @@
 linemode = "git_status"
 
 [[plugin.prepend_fetchers]]
+id = "git"
 url = "*"
 run = "git"
 group = "git"
 
 [[plugin.prepend_fetchers]]
+id = "git"
 url = "*/"
 run = "git"
 group = "git"
+
+[[plugin.prepend_previewers]]
+mime = "image/*"
+run = "chafa"
 
 [opener]
 edit = [

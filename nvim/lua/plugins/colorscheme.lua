@@ -20,9 +20,11 @@ return {
       on_highlights = function(hl, _colors)
         hl.NeoTreeGitUntracked = { fg = "#44ff8f" }
         hl.NeoTreeGitAdded = { fg = "#44ff8f" }
+        hl.GitSignsAdd = { fg = "#44ff8f" }
         hl.GitSignsAddNr = { fg = "#44ff8f" }
         hl.GitSignsAddLn = { fg = "#44ff8f" }
         hl.GitSignsAddPreview = { fg = "#44ff8f" }
+        hl.GitSignsStagedAdd = { fg = "#44ff8f" }
         hl.GitSignsStagedAddNr = { fg = "#44ff8f" }
         hl.GitSignsStagedAddLn = { fg = "#44ff8f" }
 

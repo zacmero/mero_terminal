@@ -3,3 +3,5 @@
 /yazi/plugins/*
 !/yazi/plugins/toggle.yazi/
 !/yazi/plugins/toggle.yazi/**
+!/yazi/plugins/chafa.yazi/
+!/yazi/plugins/chafa.yazi/**

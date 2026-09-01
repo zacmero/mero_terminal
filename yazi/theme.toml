@@ -4,3 +4,20 @@ light = "catppuccin-mocha"
 
 [indicator]
 preview = { underline = false }
+
+[git]
+unstaged = { fg = "blue" }
+staged = { fg = "green" }
+added = { fg = "green" }
+untracked = { fg = "yellow" }
+deleted = { fg = "red", bold = true }
+updated = { fg = "magenta" }
+clean = { fg = "green" }
+
+unstaged_sign = "!"
+staged_sign = "!"
+added_sign = "A"
+untracked_sign = "?"
+deleted_sign = "D"
+updated_sign = "U"
+clean_sign = " "

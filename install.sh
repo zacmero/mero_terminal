@@ -210,7 +210,7 @@ install_package_group() {
                     install_packages file ffmpeg p7zip jq poppler fd ripgrep resvg imagemagick wl-clipboard xclip xsel
                     ;;
                 "Debian")
-                    install_packages file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep imagemagick wl-clipboard xclip xsel
+                    install_packages file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep imagemagick librsvg2-bin wl-clipboard xclip xsel
                     ;;
             esac
             ;;
@@ -1011,8 +1011,26 @@ install_image_viewers() {
             fi
             ;;
         "Debian")
-            if ! command -v chafa >/dev/null 2>&1; then
-                install_packages chafa
+            if ! command -v chafa >/dev/null 2>&1 || ! chafa --help 2>&1 | grep -q -- '--probe'; then
+                echo "Installing/building modern Chafa (with Yazi --probe support)..."
+                install_packages libglib2.0-dev libfreetype-dev libjpeg-dev libpng-dev libtiff-dev libwebp-dev librsvg2-dev
+                local chafa_tmp
+                chafa_tmp=$(mktemp -d)
+                if curl -fsSL -o "$chafa_tmp/chafa.tar.xz" "https://github.com/hpjansson/chafa/releases/download/1.18.2/chafa-1.18.2.tar.xz" \
+                    && tar -xf "$chafa_tmp/chafa.tar.xz" -C "$chafa_tmp" \
+                    && (
+                        cd "$chafa_tmp/chafa-1.18.2"
+                        ./configure --prefix=/usr/local --disable-static
+                        make -j"$(nproc)"
+                        run_sudo make install
+                        run_sudo ldconfig
+                    ); then
+                    echo "Modern Chafa installed."
+                else
+                    echo "WARNING: Failed to build modern Chafa from source. Falling back to package manager."
+                    install_packages chafa || true
+                fi
+                rm -rf "$chafa_tmp"
             fi
             ;;
     esac
@@ -1093,12 +1111,12 @@ install_yazi() {
         return 1
     fi
 
-    YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/v\d+\.\d+\.\d+/yazi-${YAZI_ARCH_DL}-unknown-linux-gnu\.zip")
+    YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/[^/]+/yazi-${YAZI_ARCH_DL}-unknown-linux-gnu\.zip" | head -n1)
 
     if [ -z "$YAZI_ZIP_URL" ]; then
         echo "Warning: No 'gnu' build found for $YAZI_ARCH_DL. Trying 'musl' build."
         BUILD_TYPE="musl"
-        YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/v\d+\.\d+\.\d+/yazi-${YAZI_ARCH_DL}-unknown-linux-musl\.zip")
+        YAZI_ZIP_URL=$(echo "$release_info" | grep -oP "https://github.com/sxyazi/yazi/releases/download/[^/]+/yazi-${YAZI_ARCH_DL}-unknown-linux-musl\.zip" | head -n1)
     fi
 
     if [ -z "$YAZI_ZIP_URL" ]; then
@@ -1336,6 +1354,9 @@ install_antigravity_tools || log_optional_failure "Antigravity tools"
 
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
+if ! command -v magick >/dev/null 2>&1 && command -v convert >/dev/null 2>&1; then
+    run_sudo ln -sf "$(command -v convert)" /usr/local/bin/magick || true
+fi
 
 
 
