@@ -7,7 +7,7 @@ This repository contains my personal dotfiles for a portable, universal terminal
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim nightly (0.12+) with LazyVim configuration (fully tracked in this repo).
--   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), `rtk` (Rust token killer CLI proxy), `antigravity` (agent configs, MCPs, skills, and plugins), and `merodoc-preview` (lightweight Word document preview helper).
+-   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `atuin` (shell history), `herdr` (agent multiplexer), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), `rtk` (Rust token killer CLI proxy), `antigravity`/`agy` (agent CLI, configs, MCPs, skills, and plugins), and `merodoc-preview` (lightweight Word document preview helper).
 -   **Media Viewers:** `chafa` for universal terminal previews, `ueberzugpp` on desktop/GUI machines, Yazi's native video thumbnails, and Neovim media rendering through `image.nvim` with a `chafa` fallback when the terminal cannot do richer graphics.
 -   **Universal:** Single script setup for different Linux distributions and architectures.
 
@@ -67,7 +67,7 @@ The installer uses Arch's official package on Arch Linux and the official static
 
 Herdr is installed from the official stable Linux release for x86_64 and ARM64. Its tracked configuration lives in `herdr/config.toml` and is linked to `~/.config/herdr/config.toml`.
 
-The Mero Terminal keymap uses `Ctrl+Space`, then `d` to detach, matching tmux. Multiplexer actions add `Ctrl+Alt+Shift`: `t` creates a tab, `/` splits vertically, `-` splits horizontally, and the arrow keys move pane focus. Tmux uses `PageUp`/`PageDown` for previous/next tab; Herdr uses the equivalent mnemonic `p`/`n` because its config parser does not expose PageUp/PageDown names. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and installs the official global Herdr agent skill through `npx skills` or a direct raw-file fallback on lean machines.
+The Mero Terminal keymap uses `Ctrl+Space`, then `d` to detach, matching tmux. Multiplexer actions add `Ctrl+Alt+Shift`: `t` creates a tab, `/` splits vertically, `-` splits horizontally, and the arrow keys move pane focus. Tmux uses `PageUp`/`PageDown` for previous/next tab; Herdr uses the equivalent mnemonic `p`/`n` because its config parser does not expose PageUp/PageDown names. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and writes the official global Herdr agent skill from `herdr --skill` (with the package installer as a compatibility fallback).
 
 Herdr's generated hooks and extensions remain in the owning harness directories (`~/.codex` and `~/.pi`); they are app-managed runtime integration files, not secrets or repository configuration.
 
@@ -179,6 +179,8 @@ RTK is a standalone, blazing-fast Rust CLI proxy that filters and condenses term
 ## Antigravity (Google Antigravity Agent Configuration)
 
 Antigravity (AGY) global configurations are tracked in this repository under `antigravity/` and symlinked into `~/.gemini/config/`. This allows agent rules, MCP server definitions, custom skills, plugins, and hooks to persist seamlessly across machines.
+
+The installer also uses Google's official `agy` CLI installer when the host supports its architecture. On older x86_64 CPUs without `pclmulqdq`, the upstream binary is skipped and recorded in `~/failed-installations.txt` instead of being executed and failing with `Illegal instruction`; the tracked Antigravity configuration and MCP launchers still install.
 
 ### Features:
 *   **Tracked Configs:** `antigravity/config.json`, `antigravity/mcp_config.json`, and `antigravity/hooks.json` are linked to `~/.gemini/config/`.
@@ -338,11 +340,13 @@ The installer now detects existing managed files and directories, backs them up 
 ### What the script does:
 *   **Detects Environment:** Checks if you are on Arch, Debian/Ubuntu, and whether the chip is Intel/AMD (x64) or ARM.
 *   **Installs Dependencies:** Automates the installation of `curl`, `git`, build tools, and related packages using the correct package manager for the host (`pacman` on Arch, `apt` on Debian/Ubuntu). The installer only refreshes package databases before installs; it does not run a full system upgrade.
-*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Eza, Neovim, LazyGit, Yazi, Superfile, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, and Fabric. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
+*   **Installs Tools:** Sets up WezTerm when selected at startup, plus Oh My Posh, Zoxide, Atuin (history), Herdr (agent multiplexer and integrations), Eza, Neovim, LazyGit, Yazi, Superfile, Chafa, Ueberzugpp (conditionally if GUI is detected), AIChat, Fabric, and the Antigravity CLI/runtime tools. Re-running the installer refreshes the important CLI tools instead of only filling in missing ones.
 *   **Configures Environment:** Sets up useful aliases (like replacing `ls` with `eza`, `cat` with `bat`, and `rm` with `trash-cli`) to improve your workflow.
-*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, the tracked Superfile files under `~/.config/superfile`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, the tracked AIChat files under `~/.config/aichat`, and the Antigravity configuration files under `~/.gemini/config`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
+*   **Backups & Symlinks:** Automatically backs up and relinks managed shell files and config directories, including `.bashrc`, `.profile`, `.tmux.conf`, `~/.config/nvim`, `~/.config/yazi`, `~/.config/herdr`, the tracked Superfile files under `~/.config/superfile`, `~/.config/lazygit`, `~/.config/oh-my-posh`, `~/.config/starship.toml`, `~/.config/atuin/config.toml`, the tracked AIChat files under `~/.config/aichat`, and the Antigravity configuration files under `~/.gemini/config`. When WezTerm is enabled, it also manages `~/.config/wezterm`.
 *   **Plugin bootstrap:** After linking the tracked configs, the installer runs `Lazy! restore` for Neovim so new machines install the pinned plugin versions from `nvim/lazy-lock.json`, then loads `nvim-treesitter` and installs the tracked Treesitter parsers (`vim` and `vimdoc`) so the Vimscript highlighter stays valid. It also runs `ya pkg install` for Yazi so Git status, the rounded full border, and the Catppuccin Mocha flavor are present from the first install; video preview is native in current Yazi. The installer also bootstraps the lightweight `merodoc-preview` helper so the `:MeroDoc` workflow can render Word docs on demand without adding a heavy Neovim plugin stack.
 *   **Repo Path Awareness:** Uses the directory containing `install.sh` as the source of truth, so the script can migrate configs correctly even if the repo was moved from the old `~/dotfiles` path.
+
+The installer is intentionally unattended. Run `sudo -v` once before starting when using a normal user account; the script checks for a cached sudo session and exits with instructions instead of opening a password prompt halfway through setup.
 
 ### Yazi navigation
 

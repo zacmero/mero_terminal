@@ -110,6 +110,21 @@ run_sudo() {
     fi
 }
 
+require_privileged_install() {
+    if [ "$EUID" -eq 0 ]; then
+        return 0
+    fi
+
+    if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+        return 0
+    fi
+
+    echo "Error: this installer needs root or a non-interactive sudo session for system packages."
+    echo "Authenticate first with: sudo -v"
+    echo "Then rerun: MERO_INSTALL_WEZTERM=0 ./install.sh"
+    exit 1
+}
+
 log_optional_failure() {
     local label=$1
     echo "WARNING: Failed to install or configure $label. Continuing..."
@@ -130,7 +145,7 @@ install_packages() {
             run_sudo pacman -S --noconfirm --needed "$@"
             ;;
         "Debian")
-            run_sudo apt-get install -y "$@"
+            run_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
             ;;
     esac
 }
@@ -273,6 +288,31 @@ install_oh_my_posh() {
     fi
 
     curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
+}
+
+install_atuin() {
+    echo "Installing Atuin..."
+
+    # Keep the official per-user installation ahead of any stale system copy.
+    # A newer Atuin can create migrations that an older /usr/local/bin/atuin
+    # cannot resolve, which makes every command fail with a missing migration.
+    export ATUIN_BIN_DIR="${ATUIN_BIN_DIR:-$HOME/.atuin/bin}"
+    export PATH="$ATUIN_BIN_DIR:$PATH"
+
+    if ! curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh; then
+        return 1
+    fi
+
+    hash -r 2>/dev/null || true
+    if [ ! -x "$ATUIN_BIN_DIR/atuin" ]; then
+        echo "Atuin installer completed without creating $ATUIN_BIN_DIR/atuin."
+        return 1
+    fi
+
+    mkdir -p "$HOME/.local/bin"
+    ln -sfn "$ATUIN_BIN_DIR/atuin" "$HOME/.local/bin/atuin"
+    export PATH="$ATUIN_BIN_DIR:$PATH"
+    echo "Using Atuin $("$ATUIN_BIN_DIR/atuin" --version 2>/dev/null || echo unknown)"
 }
 
 install_aichat_release_fallback() {
@@ -788,6 +828,7 @@ has_gui() {
 
 # Check for essential tools
 echo "Checking prerequisites..."
+require_privileged_install
 if ! command -v git >/dev/null 2>&1; then
     echo "Git not found. Installing..."
     update_system_packages
@@ -851,8 +892,7 @@ echo "Installing Zoxide..."
 curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || log_optional_failure "Zoxide"
 
 # Atuin
-echo "Installing Atuin..."
-curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh || log_optional_failure "Atuin"
+install_atuin || log_optional_failure "Atuin"
 
 # FZF
 if [ ! -d "$HOME/.fzf" ]; then
@@ -1254,7 +1294,7 @@ install_herdr() {
         *) return 1 ;;
     esac
 
-    herdr_url="https://github.com/ogulcancelik/herdr/releases/latest/download/${herdr_asset}"
+    herdr_url="https://github.com/herdrdev/herdr/releases/latest/download/${herdr_asset}"
     temp_dir=$(mktemp -d)
     if ! curl -fL --retry 3 -o "$temp_dir/herdr" "$herdr_url"; then
         rm -rf "$temp_dir"
@@ -1284,29 +1324,40 @@ install_herdr_integrations() {
     fi
 
     skill_installed=0
-    if command -v npx >/dev/null 2>&1; then
-        npx --yes skills add ogulcancelik/herdr --skill herdr -g && skill_installed=1
-    fi
-
-    # The official installer currently requires Node 22.20+. Keep a raw-file
-    # fallback so older VMs still receive the same Herdr skill.
-    if [ "$skill_installed" -eq 0 ]; then
-        skill_tmp=$(mktemp -d)
-        if ! curl -fsSL https://raw.githubusercontent.com/ogulcancelik/herdr/master/SKILL.md \
-            -o "$skill_tmp/SKILL.md"; then
-            rm -rf "$skill_tmp"
-            return 1
-        fi
-
+    if command -v herdr >/dev/null 2>&1; then
         for skill_parent in "$HOME/.agents/skills" "$codex_home/skills" "$pi_home/agent/skills"; do
-            if [ -L "$skill_parent" ] && [ ! -e "$skill_parent" ]; then
-                mv "$skill_parent" "${skill_parent}.broken-$(date +%Y%m%d-%H%M%S)"
-            fi
             mkdir -p "$skill_parent/herdr"
-            install -m644 "$skill_tmp/SKILL.md" "$skill_parent/herdr/SKILL.md"
+            if herdr --skill | install -m644 /dev/stdin "$skill_parent/herdr/SKILL.md"; then
+                skill_installed=1
+            else
+                skill_installed=0
+                break
+            fi
         done
-        rm -rf "$skill_tmp"
     fi
+
+    # Keep the package installer as a fallback for older Herdr releases that
+    # do not expose `herdr --skill` yet.
+    if [ "$skill_installed" -eq 0 ]; then
+        if command -v npx >/dev/null 2>&1; then
+            npx --yes skills add herdrdev/herdr --skill herdr -g && skill_installed=1
+        fi
+    fi
+
+    if [ "$skill_installed" -eq 0 ]; then
+        skill_tmp=$(mktemp)
+        if curl -fsSL https://raw.githubusercontent.com/herdrdev/herdr/master/skills/herdr/SKILL.md \
+            -o "$skill_tmp"; then
+            for skill_parent in "$HOME/.agents/skills" "$codex_home/skills" "$pi_home/agent/skills"; do
+                mkdir -p "$skill_parent/herdr"
+                install -m644 "$skill_tmp" "$skill_parent/herdr/SKILL.md"
+            done
+            skill_installed=1
+        fi
+        rm -f "$skill_tmp"
+    fi
+
+    [ "$skill_installed" -eq 1 ]
 }
 
 install_antigravity_tools() {
@@ -1350,7 +1401,33 @@ install_antigravity_tools() {
     fi
 }
 
+install_antigravity_cli() {
+    echo "Installing Antigravity CLI (agy)..."
+
+    export PATH="$HOME/.local/bin:$PATH"
+    if command -v agy >/dev/null 2>&1 && agy --version >/dev/null 2>&1; then
+        echo "Antigravity CLI already installed: $(agy --version 2>/dev/null | head -n1)"
+        return 0
+    fi
+
+    # The official linux/amd64 binary currently requires PCLMULQDQ. Detect
+    # older x86_64 CPUs before downloading it so installation remains useful
+    # and does not leave a misleading illegal-instruction failure behind.
+    if [ "$ARCH_TYPE" = "x64" ] && ! grep -qm1 -w pclmulqdq /proc/cpuinfo 2>/dev/null; then
+        echo "WARNING: Antigravity CLI is unavailable on this x86_64 CPU (missing pclmulqdq)."
+        return 1
+    fi
+
+    if ! curl -fsSL https://antigravity.google/cli/install.sh | bash; then
+        return 1
+    fi
+
+    hash -r 2>/dev/null || true
+    command -v agy >/dev/null 2>&1 && agy --version >/dev/null 2>&1
+}
+
 install_antigravity_tools || log_optional_failure "Antigravity tools"
+install_antigravity_cli || log_optional_failure "Antigravity CLI (agy)"
 
 echo "Installing optional Yazi dependencies (file, ffmpeg, ripgrep, etc)..."
 install_package_group yazi-optional || log_optional_failure "Yazi optional dependencies"
