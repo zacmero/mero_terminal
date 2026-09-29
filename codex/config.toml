@@ -1,8 +1,9 @@
-model = "gpt-6-astra"
+model = "gpt-6-sol"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "max"
+model_reasoning_effort = "low"
 approvals_reviewer = "user"
+
 # service_tier = "fast"
 
 [projects."/home/zacmero"]
@@ -77,6 +78,18 @@ trust_level = "trusted"
 [projects."/home/zacmero/projects/mero-protocol/vex-steele"]
 trust_level = "trusted"
 
+[projects."/home/zacmero/projects/mero-monitor-#2"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-stb-lab"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-monitor-#3"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/maintenance"]
+trust_level = "trusted"
+
 [notice]
 "hide_gpt-5.1-codex-max_migration_prompt" = true
 hide_rate_limit_model_nudge = true
@@ -149,6 +162,7 @@ theme = "dracula"
 status_line = ["model-with-reasoning", "current-dir", "project-name", "git-branch", "weekly-limit", "five-hour-limit", "thread-title"]
 pet = "disabled"
 status_line_use_colors = true
+screen_reader_detection_done = true
 
 [tui.keymap.global]
 
