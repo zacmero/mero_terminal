@@ -1590,6 +1590,12 @@ else
 fi
 
 if [ -x "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]; then
+    # TPM names both dracula/tmux and rose-pine/tmux "tmux". Preserve the old
+    # checkout so TPM does not silently skip installing the replacement theme.
+    tmux_theme_dir="$HOME/.tmux/plugins/tmux"
+    if [ -d "$tmux_theme_dir" ] && [ ! -f "$tmux_theme_dir/rose-pine.tmux" ]; then
+        mv "$tmux_theme_dir" "${tmux_theme_dir}.backup.$(date +%s).$$" || log_optional_failure "tmux theme migration"
+    fi
     echo "Installing tmux plugins via TPM..."
     "$HOME/.tmux/plugins/tpm/bin/install_plugins" || log_optional_failure "tmux plugins"
 fi

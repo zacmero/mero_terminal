@@ -1,4 +1,4 @@
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "low"
@@ -170,6 +170,7 @@ screen_reader_detection_done = true
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4
 gpt-6-astra = 4
+"gpt-6.1-sol" = 4
 
 [[skills.config]]
 path = "/home/zacmero/.agents/skills/frontend-design/SKILL.md"

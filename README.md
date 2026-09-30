@@ -67,7 +67,7 @@ The installer uses Arch's official package on Arch Linux and the official static
 
 Herdr is installed from the official stable Linux release for x86_64 and ARM64. Its tracked configuration lives in `herdr/config.toml` and is linked to `~/.config/herdr/config.toml`.
 
-The Mero Terminal keymap uses `Ctrl+Space`, then `d` to detach, matching tmux. Multiplexer actions add `Ctrl+Alt+Shift`: `t` creates a tab, `/` splits vertically, `-` splits horizontally, and the arrow keys move pane focus. Tmux uses `PageUp`/`PageDown` for previous/next tab; Herdr uses the equivalent mnemonic `p`/`n` because its config parser does not expose PageUp/PageDown names. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and writes the official global Herdr agent skill from `herdr --skill` (with the package installer as a compatibility fallback).
+Herdr and tmux share the Mero Terminal keymap below. All actions follow `Ctrl+Space`; terminal-emulator shortcuts remain separate. The installer also installs Herdr's Codex and Pi integrations when those harness directories exist, and writes the official global Herdr agent skill from `herdr --skill` (with the package installer as a compatibility fallback).
 
 Herdr's generated hooks and extensions remain in the owning harness directories (`~/.codex` and `~/.pi`); they are app-managed runtime integration files, not secrets or repository configuration.
 
@@ -235,12 +235,32 @@ Tmux is configured for a robust multiplexing experience with plugins managed by 
 ### Features:
 *   **Prefix:** Set to `CTRL+Space` for better ergonomics.
 *   **Splits:** Use `prefix + /` for vertical splits and `prefix + -` for horizontal splits.
-*   **Theme:** Dracula theme for a clean aesthetic with True Color support.
+*   **Theme:** [Rose Pine Moon](https://github.com/rose-pine/tmux), installed through TPM with True Color support. Theme settings live in the tracked `tmux.conf`, symlinked to `~/.tmux.conf`; upstream plugin checkouts are generated, not repository configuration. Existing Dracula checkouts are backed up automatically before migration. No terminal colors, fonts, or WezTerm bindings are changed.
 *   **Navigation:** Seamless `vim-tmux-navigator` integration (use `CTRL+h/j/k/l` to move between Vim splits and Tmux panes).
 *   **Index & Mouse:** Windows and panes start at index `1`. Full mouse support enabled.
 *   **Yanking:** `tmux-yank` is set up with vi-mode keybindings, and tmux is configured to push copies into the host clipboard through `wl-copy`, `xclip`, or `xsel` when available. Neovim is also configured with `clipboard=unnamedplus`, so yanks inside Neovim sessions running under tmux follow the same system clipboard path by default.
 *   **Auto-Save & Restore:** Uses `tmux-resurrect` and `tmux-continuum` to continuously auto-save your environment every 15 minutes and automatically restore it on startup.
 *   **Plugins:** TPM is installed automatically, and the repo installer now installs the declared tmux plugins for you as part of setup.
+
+### Shared Tmux / Herdr Bindings
+
+The solid Moon status bar retains Rosé Pine's native layout, Nerd Font icons, and separators. It shows the session, active window and window list, plus user, short hostname, and active directory. Host identity and directory context stay visible while working inside Neovim; Git, language, and clock details remain in the prompt rather than being repeated. All single-cell pane dividers use the same subtle Moon gray, with no bright active-pane accent. These settings are repo-owned and apply to new installations automatically; no additional plugin or custom status script is required.
+
+Press `Ctrl+Space`, release it, then press the action below. Tmux windows correspond to Herdr tabs; tmux sessions correspond to Herdr workspaces.
+
+| Action | Key after prefix |
+| --- | --- |
+| Detach | `d` |
+| New tab / window | `Shift+t` |
+| New workspace / session | `Shift+w` |
+| Rename workspace / session | `.` |
+| Rename tab / window | `,` |
+| Vertical split (left/right) | `/` |
+| Horizontal split (top/bottom) | `-` |
+| Previous / next tab | `Shift+p` / `Shift+n` |
+| Focus pane | `Shift+Left/Down/Up/Right` |
+
+Reload tmux with `tmux source-file ~/.tmux.conf`. TPM also supports `prefix + I` to install plugins and `prefix + U` to update them. The installer handles installation automatically on both Arch and Debian/Ubuntu, including headless machines. Herdr's bindings are unchanged; tmux's obsolete direct `Ctrl+Alt+Shift` layer is removed on reload.
 
 ---
 
