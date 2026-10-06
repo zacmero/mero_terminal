@@ -236,6 +236,8 @@ Type a trigger, select its snippet with `Ctrl+n` or Down, and press Enter. Tab /
 
 OpenCode remains available with `<leader>oa` (Space, then `o`, then `a`) or `:Opencode`.
 
+OpenCode's non-secret defaults live in `opencode/opencode.json`, symlinked to `~/.config/opencode/opencode.json`; its Neovim agent pane uses a separate dark background without changing the editor theme. Credentials remain machine-local in `~/.local/share/opencode/auth.json` (mode `600`), never in this repository or an `.env` file. On each machine, launch `opencode`, run `/connect`, and choose OpenRouter to enter an API key or OpenAI → ChatGPT Plus/Pro for browser authentication. Use `/models` to choose a model afterwards. Authentication and free-model availability are provider-controlled; credentials are not copied by the installer. Existing Morph integration settings are preserved.
+
 ## Tmux
 
 Tmux is configured for a robust multiplexing experience with plugins managed by TPM.

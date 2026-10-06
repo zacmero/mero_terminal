@@ -1524,6 +1524,11 @@ link_path "$MERO_TERMINAL_DIR/fastfetch" "$HOME/.config/fastfetch" "Fastfetch co
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
 link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.config/aichat/roles"
+mkdir -p "$HOME/.config/opencode"
+link_path "$MERO_TERMINAL_DIR/opencode/opencode.json" "$HOME/.config/opencode/opencode.json" "OpenCode configuration"
+if [ -f "$HOME/.local/share/opencode/auth.json" ]; then
+    chmod 600 "$HOME/.local/share/opencode/auth.json" || log_optional_failure "OpenCode credential permissions"
+fi
 link_path "$MERO_TERMINAL_DIR/aichat/config.yaml" "$HOME/.config/aichat/config.yaml" "AIChat configuration"
 link_path "$MERO_TERMINAL_DIR/aichat/roles/coder.md" "$HOME/.config/aichat/roles/coder.md" "AIChat coder role"
 link_path "$MERO_TERMINAL_DIR/aichat/roles/suzy-brain.md" "$HOME/.config/aichat/roles/suzy-brain.md" "AIChat suzy-brain role"

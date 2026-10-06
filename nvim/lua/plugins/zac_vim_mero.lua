@@ -362,7 +362,21 @@ return {
       "MeanderingProgrammer/render-markdown.nvim",
     },
     cmd = { "Opencode" },
-    opts = {},
+    opts = function()
+      local function agent_background()
+        vim.api.nvim_set_hl(0, "MeroOpencodeBackground", { bg = "#0d1117" })
+      end
+      agent_background()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("MeroOpencodeTheme", { clear = true }),
+        callback = agent_background,
+      })
+      return {
+        ui = {
+          window_highlight = "Normal:MeroOpencodeBackground,NormalNC:MeroOpencodeBackground,FloatBorder:OpencodeBorder",
+        },
+      }
+    end,
     keys = {
       { "<leader>oa", "<cmd>Opencode<cr>", desc = "Opencode" },
     },
