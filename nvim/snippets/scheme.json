@@ -1,0 +1,32 @@
+{
+  "Define function": {
+    "prefix": "def",
+    "body": ["(define (${1:name} ${2:args})", "  ${0:body})"],
+    "description": "Scheme function definition"
+  },
+  "Define value": {
+    "prefix": "define",
+    "body": "(define ${1:name} ${0:value})",
+    "description": "Scheme value definition"
+  },
+  "Lambda": {
+    "prefix": "lambda",
+    "body": ["(lambda (${1:args})", "  ${0:body})"],
+    "description": "Scheme anonymous function"
+  },
+  "Let bindings": {
+    "prefix": "let",
+    "body": ["(let ((${1:name} ${2:value}))", "  ${0:body})"],
+    "description": "Scheme local bindings"
+  },
+  "Conditional": {
+    "prefix": "cond",
+    "body": ["(cond (${1:test} ${2:result})", "      (else ${0:alternative}))"],
+    "description": "Scheme conditional clauses"
+  },
+  "If expression": {
+    "prefix": "if",
+    "body": ["(if ${1:test}", "    ${2:consequent}", "    ${0:alternative})"],
+    "description": "Scheme if expression"
+  }
+}

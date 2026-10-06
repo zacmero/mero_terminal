@@ -228,6 +228,14 @@ FZF is deeply integrated into this terminal setup, utilizing `ripgrep` for blazi
 
 ---
 
+## Scheme And Clojure Snippets
+
+Blink completion automatically loads the tracked `nvim/snippets/scheme.json` and `nvim/snippets/clojure.json` through the existing Neovim config symlink. No language server, interpreter, or extra completion plugin is installed. Scheme (`.scm`) and Clojure (`.clj`, `.cljs`, `.cljc`) buffers receive their own snippets independently; use `:set filetype?` to inspect detection, or `:set filetype=scheme` / `:set filetype=clojure` for unnamed buffers.
+
+Type a trigger, select its snippet with `Ctrl+n` or Down, and press Enter. Tab / Shift+Tab move through placeholders. Scheme triggers include `def`, `define`, `lambda`, `let`, `cond`, and `if`; Clojure includes `defn`, `def`, `fn`, `let`, `ns`, `thread`, and `threadlast`. Restart Neovim after adding snippet files. These files are portable defaults for future installations.
+
+OpenCode remains available with `<leader>oa` (Space, then `o`, then `a`) or `:Opencode`.
+
 ## Tmux
 
 Tmux is configured for a robust multiplexing experience with plugins managed by TPM.
