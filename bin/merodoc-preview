@@ -15,7 +15,9 @@ fi
 
 case "${source_path,,}" in
   *.docx)
-    python3 - "$source_path" <<'PYDOCX'
+    preview_python="${HOME}/.local/share/mero-terminal/doc-preview/bin/python"
+    [[ -x "$preview_python" ]] || preview_python=python3
+    "$preview_python" - "$source_path" <<'PYDOCX'
 import html as html_module
 import re
 import sys

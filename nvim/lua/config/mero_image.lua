@@ -285,6 +285,7 @@ local function setup_video_preview()
 end
 
 function M.setup()
+  if vim.env.MERO_LITE == "1" then return end
   local backend = resolve_backend()
   local ok, image = pcall(require, "image")
 

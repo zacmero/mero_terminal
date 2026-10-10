@@ -5,7 +5,7 @@ set -euo pipefail
 self_real="$(readlink -f "$0" 2>/dev/null || printf '%s\n' "$0")"
 real_fastfetch=""
 
-for candidate in /usr/bin/fastfetch /usr/local/bin/fastfetch "$HOME/.local/bin/fastfetch"; do
+for candidate in "$HOME/.local/lib/mero-terminal/fastfetch" /usr/bin/fastfetch /usr/local/bin/fastfetch "$HOME/.local/bin/fastfetch"; do
   [[ -x "$candidate" ]] || continue
   candidate_real="$(readlink -f "$candidate" 2>/dev/null || printf '%s\n' "$candidate")"
   if [[ "$candidate_real" != "$self_real" ]]; then

@@ -8,13 +8,15 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
       { out, "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
-    vim.fn.getchar()
+    if #vim.api.nvim_list_uis() > 0 then vim.fn.getchar() end
     os.exit(1)
   end
 end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  concurrency = vim.env.MERO_LITE == "1" and 1 or nil,
+  git = { filter = vim.env.MERO_LITE ~= "1", timeout = 180 },
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },

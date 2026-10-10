@@ -1,3 +1,9 @@
+-- Honor the installed mode even when launched outside an interactive Bash shell.
+if vim.env.MERO_LITE == nil then
+  local mode = vim.fn.resolve(vim.fn.expand("~/.config/mero-terminal/session.sh"))
+  if mode:match("/lite%-session%.sh$") then vim.env.MERO_LITE = "1" end
+end
+
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 

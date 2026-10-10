@@ -90,6 +90,9 @@ trust_level = "trusted"
 [projects."/home/zacmero/projects/maintenance"]
 trust_level = "trusted"
 
+[projects."/home/ubuntu/projects/mero_terminal"]
+trust_level = "trusted"
+
 [notice]
 "hide_gpt-5.1-codex-max_migration_prompt" = true
 hide_rate_limit_model_nudge = true
@@ -263,6 +266,12 @@ trusted_hash = "sha256:989b0d289e03fa6eabdf71910b4213746007a747f90db8d7b4f130f09
 
 [hooks.state."/home/zacmero/.codex/hooks.json:stop:0:0"]
 trusted_hash = "sha256:4514fedf88b4a2986e97510a1f2ca1acca985cd16f8ea8626cdcf09ddac0cf72"
+
+[hooks.state."/home/ubuntu/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:fc87dbee1cb8a9be4f78ba094c4fa8d5e2fd38cb800854e3717f9b6a52fe2a47"
+
+[hooks.state."/home/ubuntu/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:ac371f260e4b23ba1d1b7a4ad68a44a323a8470b61f38471a47aceac1b7a5a7c"
 
 [desktop]
 followUpQueueMode = "steer"

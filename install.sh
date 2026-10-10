@@ -1,60 +1,43 @@
 #!/bin/bash
-set -e # Exit immediately if a command exits with a non-zero status
+# Independent failures must not abort later installs or configuration linking.
+set -E -o pipefail
+STATE_DIR="$HOME/.local/state/mero-terminal"
+mkdir -p "$STATE_DIR" || exit 1
+RUN_ID="$(date +%Y%m%d_%H%M%S)_$$"
+FAILURE_LOG="$STATE_DIR/full-$RUN_ID.failures"
+INSTALL_LOG="$STATE_DIR/full-$RUN_ID.log"
+: > "$FAILURE_LOG"
+exec > >(tee -a "$INSTALL_LOG") 2>&1
+record_command_failure() {
+    local status=$1 line=$2 command=$3
+    printf 'Command failed (%s), line %s: %s\n' "$status" "$line" "$command" >> "$FAILURE_LOG"
+    printf 'WARNING: command failed at line %s; continuing.\n' "$line" >&2
+}
+trap 'record_command_failure "$?" "$LINENO" "$BASH_COMMAND"' ERR
 
 INSTALL_WEZTERM="${MERO_INSTALL_WEZTERM:-}"
 WEZTERM_CHANNEL="${MERO_WEZTERM_CHANNEL:-auto}"
 NVIM_CHANNEL="${MERO_NVIM_CHANNEL:-nightly}"
-
-prompt_yes_no() {
-    local prompt_text=$1
-    local default_answer=${2:-y}
-    local answer=""
-
-    while true; do
-        if [ "$default_answer" = "y" ]; then
-            read -r -p "$prompt_text [Y/n] " answer
-            answer=${answer:-y}
-        else
-            read -r -p "$prompt_text [y/N] " answer
-            answer=${answer:-n}
-        fi
-
-        case "$answer" in
-            y|Y|yes|YES)
-                return 0
-                ;;
-            n|N|no|NO)
-                return 1
-                ;;
-            *)
-                echo "Please answer y or n."
-                ;;
-        esac
-    done
-}
+# Bound network stalls so optional downloads cannot block the rest of setup.
+curl() { command curl --retry 2 --connect-timeout 15 --max-time 180 "$@"; }
 
 # --- 1. PRE-FLIGHT CHECKS ---
 
 echo "--- Mero Terminal Setup ---"
 
+# Unattended default: terminal binaries only on an active GUI session.
 if [ -z "$INSTALL_WEZTERM" ]; then
-    if [ -t 0 ]; then
-        if prompt_yes_no "Install custom terminal (WezTerm)?" "y"; then
-            INSTALL_WEZTERM=1
-        else
-            INSTALL_WEZTERM=0
-        fi
-    else
-        INSTALL_WEZTERM=1
-    fi
+    if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then INSTALL_WEZTERM=1; else INSTALL_WEZTERM=0; fi
 fi
 
 echo "WezTerm installation: $([ "$INSTALL_WEZTERM" = "1" ] && echo enabled || echo skipped)"
 echo "WezTerm channel: $WEZTERM_CHANNEL"
 
-# Clear any previous failed installation logs
-rm -f "$HOME/failed-installations.txt"
-touch "$HOME/failed-installations.txt"
+# Preserve previous failure logs
+if [ -e "$HOME/failed-installations.txt" ] || [ -L "$HOME/failed-installations.txt" ]; then
+    mv "$HOME/failed-installations.txt" "$STATE_DIR/previous-failures-$RUN_ID.txt"
+fi
+ln -s "$FAILURE_LOG" "$HOME/failed-installations.txt"
 
 # 1.1 Detect Architecture (x86 vs ARM)
 ARCH=$(uname -m)
@@ -77,7 +60,7 @@ echo "Detected Architecture: $ARCH_TYPE"
 # 1.2 Detect Distribution (Ubuntu/Debian vs Arch)
 if [ -f /etc/arch-release ]; then
     DISTRO="Arch"
-    UPDATE_CMD=(pacman -Sy --noconfirm)
+    UPDATE_CMD=(pacman -Syu --noconfirm)
 elif [ -f /etc/debian_version ]; then
     DISTRO="Debian"
     UPDATE_CMD=(apt-get update)
@@ -101,11 +84,11 @@ run_sudo() {
         "$@"
     else
         if command -v sudo >/dev/null 2>&1; then
-            sudo "$@"
+            sudo -n "$@"
         else
             echo "Error: sudo is not installed and you are not root."
             echo "Please install sudo or run as root."
-            exit 1
+            return 1
         fi
     fi
 }
@@ -122,32 +105,32 @@ require_privileged_install() {
     echo "Error: this installer needs root or a non-interactive sudo session for system packages."
     echo "Authenticate first with: sudo -v"
     echo "Then rerun: MERO_INSTALL_WEZTERM=0 ./install.sh"
+    log_optional_failure "system package privileges (configs installed)"
     exit 1
 }
 
 log_optional_failure() {
     local label=$1
     echo "WARNING: Failed to install or configure $label. Continuing..."
-    echo "$label" >> "$HOME/failed-installations.txt"
+    echo "$label" >> "$FAILURE_LOG"
 }
 
 update_system_packages() {
+    require_install_memory 163840 || return 1
     run_sudo "${UPDATE_CMD[@]}"
 }
 
 install_packages() {
-    if [ "$#" -eq 0 ]; then
-        return
-    fi
-
-    case "$DISTRO" in
-        "Arch")
-            run_sudo pacman -S --noconfirm --needed "$@"
-            ;;
-        "Debian")
-            run_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
-            ;;
-    esac
+    local package failed=0
+    require_install_memory 163840 || { log_optional_failure "insufficient memory for package group"; return 1; }
+    # One unavailable package must not prevent independent packages in a group.
+    for package in "$@"; do
+        case "$DISTRO" in
+            Arch) run_sudo pacman -S --noconfirm --needed "$package" ;;
+            Debian) run_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$package" ;;
+        esac || { log_optional_failure "package: $package"; failed=1; }
+    done
+    return "$failed"
 }
 
 install_aur_package() {
@@ -230,23 +213,7 @@ install_package_group() {
             esac
             ;;
         fastfetch)
-            case "$DISTRO" in
-                "Arch")
-                    install_packages fastfetch
-                    ;;
-                "Debian")
-                    if run_sudo add-apt-repository --yes ppa:zhangsongcui3371/fastfetch; then
-                        update_system_packages
-                        run_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y fastfetch || {
-                            echo "WARNING: Failed to install fastfetch."
-                            echo "fastfetch (System Info)" >> "$HOME/failed-installations.txt"
-                        }
-                    else
-                        echo "PPA failed (likely Debian/WSL). Logging error and continuing..."
-                        echo "fastfetch (System Info)" >> "$HOME/failed-installations.txt"
-                    fi
-                    ;;
-            esac
+            install_packages fastfetch || return 1
             ;;
         eza)
             case "$DISTRO" in
@@ -257,7 +224,7 @@ install_package_group() {
                     update_system_packages
                     install_packages gpg
                     run_sudo mkdir -p /etc/apt/keyrings
-                    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+                    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/gierens.gpg
                     echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_sudo tee /etc/apt/sources.list.d/gierens.list
                     run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
                     update_system_packages
@@ -291,6 +258,7 @@ install_oh_my_posh() {
 }
 
 install_atuin() {
+    if command -v atuin >/dev/null 2>&1 && atuin --version >/dev/null 2>&1; then return 0; fi
     echo "Installing Atuin..."
 
     # Keep the official per-user installation ahead of any stale system copy.
@@ -299,7 +267,7 @@ install_atuin() {
     export ATUIN_BIN_DIR="${ATUIN_BIN_DIR:-$HOME/.atuin/bin}"
     export PATH="$ATUIN_BIN_DIR:$PATH"
 
-    if ! curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh; then
+    if ! curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh -s -- --non-interactive; then
         return 1
     fi
 
@@ -404,7 +372,7 @@ install_fabric() {
     fi
 
     case "$ARCH_TYPE" in
-        x64) arch_suffix="amd64" ;;
+        x64) arch_suffix="x86_64" ;;
         arm64) arch_suffix="arm64" ;;
         *) return 1 ;;
     esac
@@ -417,7 +385,7 @@ install_fabric() {
 
     asset_url=$(printf '%s\n' "$release_info" \
         | grep -oE 'https://[^"]+' \
-        | grep -E "/fabric-linux-${arch_suffix}$" \
+        | grep -E "/fabric_Linux_${arch_suffix}\.tar\.gz$" \
         | head -n1)
 
     if [ -z "$asset_url" ]; then
@@ -433,6 +401,9 @@ install_fabric() {
         return 1
     fi
 
+    tar -xzf "$download_path" -C "$temp_dir" || { rm -rf "$temp_dir"; return 1; }
+    download_path=$(find "$temp_dir" -type f -name fabric -print -quit)
+    [ -n "$download_path" ] || { rm -rf "$temp_dir"; return 1; }
     run_sudo install -Dm755 "$download_path" /usr/local/bin/fabric-ai || {
         rm -rf "$temp_dir"
         return 1
@@ -496,21 +467,11 @@ install_lazydocker() {
 }
 
 install_doc_preview_tools() {
-    echo "Installing DOC preview helper..."
-
-    if ! command -v python3 >/dev/null 2>&1; then
-        return 1
-    fi
-
-    if [ "$EUID" -eq 0 ]; then
-        if [ -n "${SUDO_USER:-}" ]; then
-            sudo -u "$SUDO_USER" python3 -m pip install --user --upgrade mammoth || return 1
-        else
-            return 1
-        fi
-    else
-        python3 -m pip install --user --upgrade mammoth || return 1
-    fi
+    # Modern Debian/Ubuntu protect system Python (PEP 668); use an isolated venv.
+    local venv="$HOME/.local/share/mero-terminal/doc-preview"
+    command -v python3 >/dev/null 2>&1 || return 1
+    python3 -m venv "$venv" || return 1
+    "$venv/bin/python" -m pip install --disable-pip-version-check mammoth
 }
 
 install_latex_rendering_tools() {
@@ -774,35 +735,11 @@ ensure_backup_dir() {
     fi
 }
 
+# Use the same path-preserving backup behavior as the lite installer.
+source "$MERO_TERMINAL_DIR/scripts/link-configs.sh" || exit 1
+source "$MERO_TERMINAL_DIR/scripts/resource-check.sh" || exit 1
 link_path() {
-    local source_path=$1
-    local dest_path=$2
-    local label=${3:-$(basename "$dest_path")}
-    local desired_target=""
-    local current_target=""
-
-    if [ ! -e "$source_path" ] && [ ! -L "$source_path" ]; then
-        echo "Warning: Source for $label not found at $source_path. Skipping."
-        return
-    fi
-
-    mkdir -p "$(dirname "$dest_path")"
-    desired_target=$(readlink -f "$source_path" 2>/dev/null || printf '%s' "$source_path")
-
-    if [ -L "$dest_path" ] || [ -e "$dest_path" ]; then
-        current_target=$(readlink -f "$dest_path" 2>/dev/null || true)
-        if [ -n "$current_target" ] && [ "$current_target" = "$desired_target" ]; then
-            echo "$label already linked correctly."
-            return
-        fi
-
-        ensure_backup_dir
-        echo "Backing up existing $label..."
-        mv "$dest_path" "$BACKUP_DIR/"
-    fi
-
-    echo "Linking $label -> $source_path"
-    ln -s "$source_path" "$dest_path"
+    link_config "$1" "$2" || log_optional_failure "configuration: ${3:-$2}"
 }
 
 # Function to detect if the machine has a GUI / Desktop Environment installed
@@ -825,6 +762,13 @@ has_gui() {
     
     return 1
 }
+
+# Link everything before any network/system operation. Tool availability is independent.
+link_all_configs "$MERO_TERMINAL_DIR" || log_optional_failure "managed configuration symlinks"
+# Switching from lite back to full keeps the mode file managed and backed up.
+link_config "$MERO_TERMINAL_DIR/full-session.sh" "$HOME/.config/mero-terminal/session.sh" || log_optional_failure "full session config"
+export MERO_LITE=0 MERO_INSTALLING=1
+export CMAKE_BUILD_PARALLEL_LEVEL=1 CARGO_BUILD_JOBS=1 MAKEFLAGS=-j1
 
 # Check for essential tools
 echo "Checking prerequisites..."
@@ -860,7 +804,7 @@ if [ ! -d "$HOME/.nvm" ]; then
     echo "Installing NVM..."
     mkdir -p "$HOME/.nvm"
     export NVM_DIR="$HOME/.nvm"
-    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash || log_optional_failure "NVM"
+    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | PROFILE=/dev/null bash || log_optional_failure "NVM"
 fi
 
 # PNPM
@@ -872,13 +816,13 @@ fi
 # Bun
 if [ ! -d "$HOME/.bun" ]; then
     echo "Installing Bun..."
-    curl -fsSL https://bun.sh/install | bash || log_optional_failure "Bun"
+    curl -fsSL https://bun.sh/install | SHELL=/bin/sh bash || log_optional_failure "Bun"
 fi
 
 # UV (Python package & tool manager)
 if [ ! -f "$HOME/.local/bin/uv" ] && ! command -v uv >/dev/null 2>&1; then
     echo "Installing uv..."
-    curl -fsSL https://astral.sh/uv/install.sh | sh || log_optional_failure "uv"
+    curl -fsSL https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh || log_optional_failure "uv"
 fi
 
 
@@ -1141,7 +1085,8 @@ install_yazi() {
     esac
 
     local github_api_url="https://api.github.com/repos/sxyazi/yazi/releases/latest"
-    local release_info=$(curl -s "$github_api_url")
+    local release_info
+    release_info=$(curl -fsSL "$github_api_url") || { rm -rf "$TEMP_DIR"; return 1; }
     local YAZI_ZIP_URL=""
     local BUILD_TYPE="gnu"
 
@@ -1166,21 +1111,22 @@ install_yazi() {
     fi
 
     echo "Downloading Yazi from $YAZI_ZIP_URL..."
-    curl -L -o "$TEMP_DIR/yazi.zip" "$YAZI_ZIP_URL"
+    curl -fL --retry 2 --connect-timeout 15 --max-time 180 -o "$TEMP_DIR/yazi.zip" "$YAZI_ZIP_URL" || { rm -rf "$TEMP_DIR"; return 1; }
 
     echo "Extracting Yazi..."
-    unzip -q "$TEMP_DIR/yazi.zip" -d "$TEMP_DIR"
+    unzip -q "$TEMP_DIR/yazi.zip" -d "$TEMP_DIR" || { rm -rf "$TEMP_DIR"; return 1; }
     local EXTRACTED_DIR="$TEMP_DIR/yazi-${YAZI_ARCH_DL}-unknown-linux-${BUILD_TYPE}"
 
     echo "Moving yazi and ya binaries to $YAZI_INSTALL_DIR..."
-    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi"
-    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi.real"
-    run_sudo install -Dm755 "$EXTRACTED_DIR/ya" "$YAZI_INSTALL_DIR/ya"
+    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi" || { rm -rf "$TEMP_DIR"; return 1; }
+    run_sudo install -Dm755 "$EXTRACTED_DIR/yazi" "$YAZI_INSTALL_DIR/yazi.real" || { rm -rf "$TEMP_DIR"; return 1; }
+    run_sudo install -Dm755 "$EXTRACTED_DIR/ya" "$YAZI_INSTALL_DIR/ya" || { rm -rf "$TEMP_DIR"; return 1; }
 
     echo "Cleaning up temporary Yazi files..."
     rm -rf "$TEMP_DIR"
     echo "Yazi installed."
 }
+
 
 # Call Yazi installation function
 install_yazi || log_optional_failure "Yazi"
@@ -1459,7 +1405,7 @@ if [ ! -f "$FONT_DIR/CaskaydiaCoveNerdFont-Regular.ttf" ]; then
 fi
 
 # Fastfetch
-if ! command -v fastfetch >/dev/null 2>&1; then
+if ! fastfetch --version >/dev/null 2>&1; then
     echo "Installing Fastfetch..."
     install_package_group fastfetch || log_optional_failure "Fastfetch"
 fi
@@ -1482,19 +1428,20 @@ elif [ "$ARCH_TYPE" = "arm64" ]; then
 fi
 
 if [ -n "$NVIM_TAR" ]; then
-    echo "Downloading Neovim ($NVIM_CHANNEL, $NVIM_TAR)..."
-    if curl -fLO "https://github.com/neovim/neovim/releases/download/$NVIM_CHANNEL/$NVIM_TAR" \
-        && run_sudo rm -rf "$NVIM_DIR" \
-        && run_sudo tar -C /opt -xzf "$NVIM_TAR" \
-        && run_sudo mv "/opt/${NVIM_TAR%.tar.gz}" "$NVIM_DIR"; then
-        rm "$NVIM_TAR"
-    else
-        rm -f "$NVIM_TAR"
-        echo "WARNING: Failed to download Neovim. Check your internet connection or GitHub status."
-        echo "Neovim (Editor)" >> "$HOME/failed-installations.txt"
-    fi
+    nvim_stage=$(mktemp -d)
+    nvim_asset=${NVIM_TAR%.tar.gz}
+    # Extract and validate before touching the working editor. Keep old releases.
+    if curl -fL --retry 2 --connect-timeout 15 --max-time 180 \
+        "https://github.com/neovim/neovim/releases/download/$NVIM_CHANNEL/$NVIM_TAR" -o "$nvim_stage/$NVIM_TAR" \
+        && tar -xzf "$nvim_stage/$NVIM_TAR" -C "$nvim_stage" \
+        && "$nvim_stage/$nvim_asset/bin/nvim" --version >/dev/null; then
+        nvim_release="/opt/mero-nvim-$RUN_ID"
+        if run_sudo mv "$nvim_stage/$nvim_asset" "$nvim_release"; then
+            NVIM_DIR="$nvim_release"
+        else log_optional_failure "Neovim installation"; fi
+    else log_optional_failure "Neovim download/extraction (existing editor preserved)"; fi
+    rm -rf -- "$nvim_stage"
 else
-    echo "ARM or Unknown Detected without binary. Using system package for Neovim (Warning: might be older)."
     install_packages neovim || log_optional_failure "Neovim (package fallback)"
 fi
 
@@ -1553,14 +1500,15 @@ link_path "$MERO_TERMINAL_DIR/antigravity/plugins" "$HOME/.gemini/config/plugins
 
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/yazi-select" /usr/local/bin/yazi-select || true
 run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/lazydocker-select" /usr/local/bin/lazydocker-select || true
-run_sudo install -Dm755 "$MERO_TERMINAL_DIR/bin/fastfetch" /usr/local/bin/fastfetch || true
+# The shared linker installs the wrapper without overwriting a real binary.
 if command -v nvim >/dev/null 2>&1; then
+    export MERO_NVIM_CHECK="$MERO_TERMINAL_DIR/scripts/check-nvim-install.lua"
     echo "Syncing Neovim plugins..."
     # This also restores the tracked Neovim image stack (3rd/image.nvim plus the
     # chafa fallback bridge), so fresh machines get image previews immediately.
-    nvim --headless "+Lazy! restore" +qa || log_optional_failure "Neovim plugins"
+    timeout 600 nvim --headless "+Lazy! restore" '+lua dofile(vim.env.MERO_NVIM_CHECK)' +qa || log_optional_failure "Neovim plugins"
     echo "Installing Neovim Treesitter parsers..."
-    nvim --headless "+Lazy load nvim-treesitter" "+lua local ts=require('nvim-treesitter'); if ts.install then ts.install({'latex', 'vim', 'vimdoc'}):wait(300000) else vim.cmd('TSInstall! latex vim vimdoc') end" +qa || log_optional_failure "Neovim Treesitter parsers"
+    timeout 600 nvim --headless "+Lazy load nvim-treesitter" "+lua local ts=require('nvim-treesitter'); if ts.install then ts.install({'latex', 'vim', 'vimdoc'}, {max_jobs=1}):wait(300000) else vim.cmd('TSInstall! latex vim vimdoc') end" +qa || log_optional_failure "Neovim Treesitter parsers"
     VIM_TS_QUERY="$HOME/.local/share/nvim/lazy/nvim-treesitter/runtime/queries/vim/highlights.scm"
     if [ -f "$VIM_TS_QUERY" ]; then
         sed -i '/^[[:space:]]*"tab"$/d' "$VIM_TS_QUERY"
@@ -1610,7 +1558,9 @@ if [ -f "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh" ]; then
     sed -i '/display_message "Tmux resurrect file not found!"/d' "$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
 fi
 
-echo "--- Setup Complete! Restart your terminal. ---"
+# Always retry links even after failed tool downloads/configuration.
+link_all_configs "$MERO_TERMINAL_DIR" || log_optional_failure "final configuration verification"
+echo "--- Setup finished. Log: $INSTALL_LOG ---"
 
 if [ -s "$HOME/failed-installations.txt" ]; then
     echo ""
@@ -1618,3 +1568,6 @@ if [ -s "$HOME/failed-installations.txt" ]; then
     cat "$HOME/failed-installations.txt"
     echo "Check your network or mirrors and try installing them manually later."
 fi
+
+if [ -s "$FAILURE_LOG" ]; then exit 1; fi
+echo "All installation steps completed successfully. Restart your terminal."

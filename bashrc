@@ -1,6 +1,11 @@
 # Ensure user binaries and system binaries are in PATH early
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
 
+# Per-machine mode is tracked separately so all dotfiles remain shared.
+[[ -r "$HOME/.config/mero-terminal/session.sh" ]] && source "$HOME/.config/mero-terminal/session.sh"
+
+export EDITOR=nvim VISUAL=nvim
+
 # Mero Precision — selective completion gate
 export MERO_PRECISION_MODE=selective
 export MERO_PRECISION_THRESHOLD=6
@@ -141,6 +146,13 @@ alias l='eza -l -h --icons --git'
 # 'lt' -> Tree view
 # -T: tree
 alias lt='eza -T'
+if ! command -v eza >/dev/null 2>&1; then
+  alias ls='ls --color=auto'
+  alias ll='ls -alh'
+  alias la='ls -A'
+  alias l='ls -lh'
+  unalias lt 2>/dev/null || true
+fi
 
 # Superfile launcher that returns the shell to the directory saved by its
 # cd_quit action. This keeps Superfile on the native terminal so its preview
@@ -464,6 +476,12 @@ export FZF_ALT_C_COMMAND="find . -mindepth 1 -maxdepth 5 -type d \( -name .git -
 export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}' --preview-window=right:60% --bind 'ctrl-/:change-preview-window(down|hidden|)'"
 # Press ALT-C to see directory tree previews with eza
 export FZF_ALT_C_OPTS="--preview 'eza -T -L 2 --icons {}' --preview-window=right:40% --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+if ! command -v bat >/dev/null 2>&1 && ! command -v batcat >/dev/null 2>&1; then
+  export FZF_CTRL_T_OPTS="--preview 'head -n 100 -- {}' --preview-window=right:60%"
+fi
+if ! command -v eza >/dev/null 2>&1; then
+  export FZF_ALT_C_OPTS="--preview 'ls -alh -- {}' --preview-window=right:40%"
+fi
 
 # 3. Fuzzy Autocompletion (**<TAB>) Overrides
 # Make **<TAB> use ripgrep for path completions
@@ -542,7 +560,7 @@ elif command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
 
-eval "$(zoxide init bash)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"
 if command -v fastfetch >/dev/null 2>&1 && [ -t 1 ] && [ -z "${MERO_FASTFETCH_SHOWN:-}" ]; then
   export MERO_FASTFETCH_SHOWN=1
   fastfetch
@@ -575,7 +593,7 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 # --- Safety and Utility Aliases ---
 
 # Use trash-cli instead of permanently deleting files with rm
-alias rm='trash -v'
+if command -v trash >/dev/null 2>&1; then alias rm='trash -v'; fi
 
 # Quick navigation aliases
 alias ..='cd ..'
@@ -668,14 +686,9 @@ cpp() {
 
 # --- Command Overrides ---
 
-# Automatically do an 'ls' after each 'cd'
-cd() {
-  if [ -n "$1" ]; then
-    builtin cd "$@" && ls
-  else
-    builtin cd ~ && ls
-  fi
-}
+# Directory changes use Bash's builtin cd without printing a listing.
+# Remove the old override when this file is sourced in an existing session.
+unset -f cd 2>/dev/null || true
 
 # Alias 'cat' to whichever bat binary exists on the current distro.
 if command -v bat >/dev/null 2>&1; then
@@ -712,7 +725,7 @@ fi
 # bash-preexec must be loaded after tools that rewrite PROMPT_COMMAND, and
 # before Atuin registers its preexec/precmd hooks.
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-eval "$(atuin init bash)"
+command -v atuin >/dev/null 2>&1 && eval "$(atuin init bash)"
 
 # >>> Codex installer >>>
 export PATH="$HOME/.local/bin:$PATH"

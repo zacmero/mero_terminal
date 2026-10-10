@@ -2,6 +2,80 @@
 
 This repository contains my personal dotfiles for a portable, universal terminal environment. It is designed to work across **Ubuntu, Debian, Arch Linux, and WSL**, automatically detecting the architecture (x86 or ARM) and distribution to install the correct tools.
 
+## Lightweight / headless installation
+
+Run `./install_lite.sh` as your normal login user, with non-interactive sudo available.
+It installs **zoxide, Atuin, Neovim (0.12+ nightly by default), the existing LazyVim
+configuration, Oh My Posh with the custom Bash prompt, ripgrep (`rg`), fastfetch,
+croc, GitHub CLI (`gh`), tmux with TPM/plugins, and Herdr**. Git, curl, archive
+utilities, Python (for release metadata), and `fd` provide
+editor/install support. Prebuilt release binaries avoid Rust/Go builds. No
+WezTerm, image/video renderers, desktop fonts, AI runtimes, or language/toolchain
+managers are installed by this path. LSP servers requested by your existing
+LazyVim config may still need their language runtimes when you use them.
+
+```bash
+./install_lite.sh
+# Install/repair every managed dotfile without downloading tools:
+./install_lite.sh --configs-only
+```
+
+**Both installers link all managed configurations before tool installation**, even
+for tools that are skipped or fail: Bash/profile, tmux, Neovim, Atuin, prompt,
+fastfetch, WezTerm, Yazi, Superfile, Herdr, LazyGit, AIChat, OpenCode, Codex,
+Antigravity, desktop entries, and repository helper scripts. Existing configs
+are backed up under `~/mero_terminal_backup/<timestamp>/`, preserving their
+relative paths. Histories, credentials, and application databases stay local.
+Do not move this checkout after installation, because these are symlinks.
+
+Lite mode links the tracked `lite-session.sh` to
+`~/.config/mero-terminal/session.sh`; the full installer links `full-session.sh`.
+Lite mode disables Neovim image/video rendering and limits plugin/build
+concurrency to one. Lite mode uses Neovim’s bundled parsers and disables
+automatic parser downloads, compilation, and bulk updates. No compiler is
+installed. If you later choose to add a parser with `:TSInstall <language>`,
+install a C compiler and the Tree-sitter CLI first; Tree-sitter’s separate job pool is capped at one,
+but large grammars can still exceed this machine’s memory. The shared Bash config guards absent navigation/history
+commands and falls back to standard `ls`/`rm` when eza/trash are absent. Directory
+changes no longer print automatic listings in either mode. Nerd Font
+icons use the font on your connecting terminal; no server fonts are required.
+
+Installers preserve timestamped output and failure logs under
+`~/.local/state/mero-terminal/`. Tool failures continue to independent steps and
+configuration verification; a run with recorded failures exits **1**, so it is
+never reported as fully successful. `install.sh` also exposes its latest failure
+log at `~/failed-installations.txt` and preserves the previous log. Invalid OS,
+architecture, or missing package privileges still stop tool setup, with configs
+already linked where possible. Rerun the same installer to retry failed steps.
+The full installer defaults to skipping WezTerm without an active display;
+`MERO_INSTALL_WEZTERM=1` explicitly enables it. Arch refreshes use a full
+`pacman -Syu` rather than a partial upgrade. Fastfetch uses the distro package,
+and the DOC preview helper uses an isolated Python venv rather than system pip.
+Neovim downloads are validated before replacing the active executable. Full-suite
+Fabric downloads use the current architecture-specific tarball asset names.
+Packages within a full-suite group are attempted independently.
+
+Package setup checks for at least 160 MiB available RAM and records a failure
+instead of starting when memory is already too tight.
+
+On a machine with about 1 GB RAM and no swap, avoid running several agent/editor
+processes or bulk language-server installs at once. Lite mode reduces installation
+work but cannot prevent unrelated processes from exhausting memory.
+
+### Diagnosis of this machine (2026-10-10)
+
+The original failure file recorded **Fabric** and **DOC preview helper**. Fabric's
+installer searched for `fabric-linux-amd64`, but the upstream release now ships
+`fabric_Linux_x86_64.tar.gz` (and an ARM64 tarball); the full installer now handles
+those assets. The DOC helper attempted `pip install --user` against Ubuntu
+26.04's externally managed Python, making PEP 668 the likely cause; it now uses a
+venv. The original file contained labels only, so the exact DOC error was not
+retained. Bash/profile and editor symlinks were absent because linking happened
+late in the original script. Disk capacity was adequate (41 GB free).
+Separately, the kernel recorded an out-of-memory kill of Codex at 21:02 on this
+951 MiB/no-swap machine; that confirms RAM pressure, but does not establish why
+the installer stopped. New logs retain actual command output for diagnosis.
+
 ## Features
 
 -   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
