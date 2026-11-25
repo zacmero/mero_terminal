@@ -572,20 +572,36 @@ Watch the first sync for service errors before moving to the next batch.
 
 #### Find and continue sessions
 
+Open the interactive picker with `atuin resume`. Press Ctrl+T **inside the
+picker** until the desired agent is selected, then press Space and type your
+search. The picker searches as you type and matches a prefix on the last
+unfinished word. Use Ctrl+O to inspect the selected thread, Enter to open the
+resume chooser, and Esc to leave. At the Bash prompt, Ctrl+T still opens FZF.
+
+To start with a specific agent, include the space after the filter so you
+can type your search right away.
+
+```bash
+atuin resume 'agent:codex '
+atuin resume 'agent:pi '
+atuin resume 'agent:opencode '
+atuin resume --filter-mode workspace 'agent:codex '
+```
+
+Use the CLI when you want a bounded text search or already know the thread ID.
+
 ```bash
 atuin sync
-atuin threads list
-atuin threads search --limit 10 'search words'
+atuin threads search --harness codex --limit 10 'search words'
 thread_id='paste-thread-id-here'
 atuin threads show "$thread_id"
-atuin resume
 atuin resume "$thread_id"
 atuin resume --fork "$thread_id"
 atuin resume --in pi "$thread_id"
 atuin threads tail --style ndjson
 ```
 
-Set `thread_id` to the ID from `list` or `search`. On the destination
+Set `thread_id` to the ID from `search`. On the destination
 host, enter the intended repo checkout before resuming and confirm the original
 path or local checkout it resolves to. Atuin prefers the original path if it
 exists, can match a differently located checkout by repo directory name, and
@@ -603,7 +619,7 @@ To verify a second host, sync and inspect representative oldest and newest
 sessions from the import. Resume a harmless session in the local checkout,
 continue it, and verify the new turn on the source host. Keep `tail` open
 while syncing to observe new messages. Latency depends on sync frequency and
-`[daemon].sync_frequency` controls daemon scheduling. Ctrl+T still opens FZF.
+`[daemon].sync_frequency` controls daemon scheduling.
 [Atuin cross-machine resume guide](https://atuin.sh/guides/resume-agent-sessions/)
 
 #### Enable MCP for one invocation
