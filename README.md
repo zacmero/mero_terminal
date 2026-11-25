@@ -78,7 +78,7 @@ the installer stopped. New logs retain actual command output for diagnosis.
 
 ## Features
 
--   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and `atuin` shell history. The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
+-   **Shell:** Bash with a tracked `oh-my-posh` lean rainbow prompt, `zoxide` navigation, and Atuin shell history and [agent sessions](#atuin-threads). The prompt is shell-level, so it applies in any Bash session, not just WezTerm.
 -   **Terminal:** WezTerm with a tracked config and best-effort default-terminal handoff.
 -   **Editor:** Neovim nightly (0.12+) with LazyVim configuration (fully tracked in this repo).
 -   **Tools:** `eza` (ls replacement), `bat` (cat replacement), `fzf`, `tmux`, `lazygit`, `lazydocker`, `trash-cli`, `yazi` and `superfile` (`spf`) as independent terminal file managers, `croc` (secure file transfer), `mise` (environment manager), `atuin` (shell history), `herdr` (agent multiplexer), `aichat` (LLM CLI), `fabric` (AI prompt/pattern toolkit), `rtk` (Rust token killer CLI proxy), `antigravity`/`agy` (agent CLI, configs, MCPs, skills, and plugins), and `merodoc-preview` (lightweight Word document preview helper).
@@ -461,9 +461,11 @@ directly change its parent shell's working directory.
 
 ### Install or update Atuin
 
-Both setup scripts install Atuin from the official release into `~/.atuin/bin`
-and links it from `~/.local/bin`. On Arch, Debian, and Ubuntu (x86_64 and
-ARM64), run this from the repository to install or update Atuin on its own:
+Both setup scripts install Atuin from the official v18.25.1 release into
+`~/.atuin/bin` and link it from `~/.local/bin`. The updater keeps a newer
+managed client to protect its local database and checks for the Threads CLI.
+On Arch, Debian, and Ubuntu (x86_64 and ARM64), run this from the repository to
+install or update Atuin on its own:
 
 ```bash
 bash install.sh --update-atuin
@@ -476,6 +478,149 @@ Run it as your regular user. It uses the same installer as both setup scripts
 and works even when a system package is already installed or a system upgrade
 is blocked. If your shell still finds `/usr/bin/atuin`, put `~/.local/bin`
 ahead of `/usr/bin` on `PATH` and open a new shell.
+
+### Atuin Threads
+
+Threads captures new conversations from supported agents and can sync them
+through your existing Atuin account. On an existing Mero Terminal host, update
+the checkout and run these commands as the user who runs the agents. The
+configuration-only installer works over SSH and keeps an existing local Atuin
+config if it belongs to another checkout or contains machine-specific settings.
+
+```bash
+git pull --ff-only
+bash install.sh --update-atuin
+bash install_lite.sh --configs-only
+hash -r
+atuin info
+atuin config check
+atuin config get --resolved threads.enabled
+atuin config get --resolved threads.capture_tools
+atuin doctor
+atuin status
+```
+
+Atuin 18.25 defaults to `~/.atuin/config.toml` on fresh installs and can
+continue using an existing `~/.config/atuin/config.toml`. The configuration
+link follows Atuin's path selection, including `ATUIN_CONFIG_DIR` and `ATUIN_HOME`.
+
+If the installer keeps a local config, use the path shown by `atuin info` and
+merge `[threads]` and `[security]` from `atuin/config.toml` into the existing
+tables. Preserve the sync address, data paths, account, encryption key, and
+local filters. The old `[sync].records` setting can be removed on 18.25.1,
+which uses record sync. The expected settings are `threads.enabled = true`
+and `threads.capture_tools = true`. Use `atuin daemon restart` and check
+`atuin daemon status` after changing policy or upgrading the client. For
+a systemd-managed daemon, restart its existing user service instead. Start
+the daemon with the same `CODEX_HOME`, `PI_CODING_AGENT_DIR`, XDG directories,
+and other agent path overrides that your sessions use.
+
+The default keeps conversation text, tool arguments and results, and diffs
+that supported agents record. Atuin filters sensitive data and limits captured
+tool details. In 18.25.1, a patch with more than 64 KiB of hunk text retains
+file metadata and drops the hunks. Built-in `secrets_filter` and `[security]`
+patterns redact recognized values in conversation text and tool details.
+Sensitive files include AIChat's environment files and `codex-secrets.toml`.
+Review your `history_filter`, `cwd_filter`, `[output].command_filter`, and
+`[security]` rules together. Leading-space history exclusions cover commands.
+A matching Threads `cwd_filter` restricts detail while conversation text remains. An
+unrecognized value pasted into a conversation may still sync. Policy changes
+apply to subsequent capture and import. Existing Threads records retain the
+content they already stored. Reimporting a recorded message skips it, so
+earlier messages captured with tool details disabled keep that limited detail.
+[Atuin filtering documentation](https://docs.atuin.sh/18.25/guide/excluding-commands/)
+
+#### Migrate an archive
+
+Run `mero-threads-inventory` on each source host to count candidate files
+before importing. SQLite entries are database files. Keep the native
+archives until samples are recoverable elsewhere.
+Gemini CLI and Antigravity need separate preservation while native Atuin
+support is pending. Run `mero-threads-inventory --help` for custom roots and
+the optional private local backup. Inventory and backup run offline. To
+preserve the additional Antigravity full transcripts, pass
+`--include-antigravity-full` alongside `--backup` and keep the archive private.
+[Upstream Gemini and Antigravity support](https://github.com/atuinsh/atuin/issues/4728)
+
+Test your policy with synthetic secrets in a disposable profile before
+importing old conversations. Starting or continuing a supported native
+session captures it automatically, including earlier messages in a continued
+session. An explicit import covers the rest of the local archive. Import can
+feed automatic daemon sync, so review the archive before running it on a
+profile connected to your account.
+
+```bash
+harness=codex
+log=$(mktemp "${TMPDIR:-/tmp}/atuin-import-$harness.XXXXXX")
+atuin threads import --harness "$harness" --style ndjson >"$log"
+tail -n 1 "$log"
+```
+
+Repeat with `pi`, `claude-code`, `opencode`, or `omp` as applicable on each
+source host with distinct archives. Check the command's exit status and the
+final `summary` event. A `failed` count above zero indicates a partial import,
+even if Atuin exits successfully. After checking the summary, run `time atuin sync`.
+Record the import summary, message counts, data directory growth, and sync
+duration. A repeat import skips messages
+already captured. `atuin threads import` scans all default supported stores,
+including active and archived Codex rollouts. Amp needs its authenticated CLI
+and an explicit `--harness amp`. Deleted transcripts and unsupported remote
+agent sessions require their original backups or exports. Atuin's published
+docs give no numeric hosted archive quota or fixed retention for Threads.
+Watch the first sync for service errors before moving to the next batch.
+[Atuin Threads documentation](https://docs.atuin.sh/18.25/ai/threads/)
+
+#### Find and continue sessions
+
+```bash
+atuin sync
+atuin threads list
+atuin threads search --limit 10 'search words'
+thread_id='paste-thread-id-here'
+atuin threads show "$thread_id"
+atuin resume
+atuin resume "$thread_id"
+atuin resume --fork "$thread_id"
+atuin resume --in pi "$thread_id"
+atuin threads tail --style ndjson
+```
+
+Set `thread_id` to the ID from `list` or `search`. On the destination
+host, enter the intended repo checkout before resuming and confirm the original
+path or local checkout it resolves to. Atuin prefers the original path if it
+exists, can match a differently located checkout by repo directory name, and
+can fall back to the current directory. Keep project files, dependencies, and
+credentials available through their usual setup. Use `--fork` to continue
+independently and `--branch` to choose among diverged hosts. Cross-agent
+continuation reconstructs a new native session using the stored messages and
+supported tool mappings. The destination agent determines which tool details
+it can reconstruct. `--print` can restore files while printing the launch command.
+`atuin threads show "$thread_id" | less` shows the conversation and captured
+unified diffs. For shell command history, press Ctrl+R in Bash or run
+`atuin history list`.
+
+To verify a second host, sync and inspect representative oldest and newest
+sessions from the import. Resume a harmless session in the local checkout,
+continue it, and verify the new turn on the source host. Keep `tail` open
+while syncing to observe new messages. Latency depends on sync frequency and
+`[daemon].sync_frequency` controls daemon scheduling. Ctrl+T still opens FZF.
+[Atuin cross-machine resume guide](https://atuin.sh/guides/resume-agent-sessions/)
+
+#### Enable MCP for one invocation
+
+```bash
+codex -c 'mcp_servers.atuin.enabled=true'
+pi -e "$HOME/.config/mero/pi-atuin-mcp.mjs"
+```
+
+These launch options expose read-only Threads access. Keep a persistent
+`atuin` server entry out of Pi's config so ordinary sessions leave it off
+and the opt-in extension can register its own settings. Native Pi exposes
+the tools through codemode. Mero Pi's MCP adapter uses its existing proxy.
+Use bounded search results and read the specific thread you need. Text
+returned by MCP can enter requests to the configured model provider even with
+encrypted Atuin sync. Regular capture, sync and the `atuin threads` CLI work
+independently of MCP. [Atuin MCP documentation](https://docs.atuin.sh/18.25/ai/mcp/)
 
 ### Shell hook maintenance
 

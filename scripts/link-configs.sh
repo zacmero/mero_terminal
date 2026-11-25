@@ -15,9 +15,33 @@ link_config() {
     ln -s -- "$source" "$destination"
 }
 
+# Match Atuin 18.25's Linux config path precedence, including legacy installs.
+atuin_config_path() {
+    local modern="$HOME/.atuin/config.toml" legacy_base="$HOME/.config" legacy
+    [[ ${XDG_CONFIG_HOME:-} = /* ]] && legacy_base=$XDG_CONFIG_HOME
+    legacy="$legacy_base/atuin/config.toml"
+    if [[ -n ${ATUIN_CONFIG_DIR:-} ]]; then
+        printf '%s\n' "$ATUIN_CONFIG_DIR/config.toml"
+    elif [[ ${ATUIN_HOME:-} = /* ]]; then
+        printf '%s\n' "$ATUIN_HOME/config.toml"
+    elif [[ ! -e "$modern" && ( -e "$legacy" || -e "$HOME/.config/atuin/config.toml" ) ]]; then
+        printf '%s\n' "$legacy"
+    else
+        printf '%s\n' "$modern"
+    fi
+}
+
 link_all_configs() {
-    local repo=$1 entry source target failed=0
+    local repo=$1 entry source target failed=0 atuin_config
     CONFIG_BACKUP="${CONFIG_BACKUP:-$HOME/mero_terminal_backup/$(date +%Y%m%d_%H%M%S)_$$}"
+    atuin_config=$(atuin_config_path)
+    # Existing local settings can include custom sync addresses, data paths and filters.
+    if [[ -e "$atuin_config" || -L "$atuin_config" ]] &&
+        [[ $(readlink -f -- "$atuin_config") != "$(readlink -f -- "$repo/atuin/config.toml")" ]]; then
+        printf 'Keeping local Atuin config at %s. See README.md for the Threads policy.\n' "$atuin_config"
+    else
+        link_config "$repo/atuin/config.toml" "$atuin_config" || failed=1
+    fi
     while IFS='|' read -r source target; do
         [[ -n "$source" ]] || continue
         link_config "$repo/$source" "$HOME/$target" || failed=1
@@ -37,7 +61,7 @@ lazygit|.config/lazygit
 oh-my-posh|.config/oh-my-posh
 fastfetch|.config/fastfetch
 starship.toml|.config/starship.toml
-atuin/config.toml|.config/atuin/config.toml
+pi/atuin-mcp.mjs|.config/mero/pi-atuin-mcp.mjs
 opencode/opencode.json|.config/opencode/opencode.json
 aichat/config.yaml|.config/aichat/config.yaml
 aichat/roles/coder.md|.config/aichat/roles/coder.md

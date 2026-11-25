@@ -17,13 +17,19 @@ trap 'record_command_failure "$?" "$LINENO" "$BASH_COMMAND"' ERR
 
 install_atuin() {
     local atuin_dir="$HOME/.atuin/bin"
-    local installer
+    local release=18.25.1 installer installed version=
 
-    echo "Installing or updating Atuin..."
-    installer=$(curl --proto '=https' --tlsv1.2 -fsSL \
-        https://github.com/atuinsh/atuin/releases/latest/download/atuin-installer.sh) || return 1
-    ATUIN_INSTALL_DIR="$atuin_dir" ATUIN_NO_MODIFY_PATH=1 sh <<< "$installer" || return 1
-    "$atuin_dir/atuin" --version || return 1
+    if [[ -x "$atuin_dir/atuin" ]] && installed=$("$atuin_dir/atuin" --version); then
+        read -r _ version _ <<< "$installed"
+    fi
+    # Keep newer installations to avoid opening their databases with an older client.
+    if [[ -z $version || $(printf '%s\n' "$release" "$version" | sort -V | head -n1) != "$release" ]]; then
+        echo "Installing Atuin $release..."
+        installer=$(curl --proto '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 180 \
+            "https://github.com/atuinsh/atuin/releases/download/v$release/atuin-installer.sh") || return 1
+        ATUIN_INSTALL_DIR="$atuin_dir" ATUIN_NO_MODIFY_PATH=1 sh <<< "$installer" || return 1
+    fi
+    "$atuin_dir/atuin" --version && "$atuin_dir/atuin" threads --help >/dev/null || return 1
     mkdir -p "$HOME/.local/bin" || return 1
     ln -sfnT "$atuin_dir/atuin" "$HOME/.local/bin/atuin" || return 1
 }
@@ -1461,7 +1467,6 @@ link_path "$MERO_TERMINAL_DIR/lazygit" "$HOME/.config/lazygit" "LazyGit configur
 link_path "$MERO_TERMINAL_DIR/oh-my-posh" "$HOME/.config/oh-my-posh" "Oh My Posh configuration"
 link_path "$MERO_TERMINAL_DIR/fastfetch" "$HOME/.config/fastfetch" "Fastfetch configuration"
 link_path "$MERO_TERMINAL_DIR/starship.toml" "$HOME/.config/starship.toml" "Starship configuration"
-link_path "$MERO_TERMINAL_DIR/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin configuration"
 mkdir -p "$HOME/.config/aichat/roles"
 mkdir -p "$HOME/.config/opencode"
 link_path "$MERO_TERMINAL_DIR/opencode/opencode.json" "$HOME/.config/opencode/opencode.json" "OpenCode configuration"

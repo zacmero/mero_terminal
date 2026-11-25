@@ -4,7 +4,10 @@ This directory is the source of truth for the shared Codex configuration and
 the MCP launchers. `~/.codex/config.toml` is a symlink to `config.toml` here.
 
 The rest of `~/.codex` stays machine-local. Never sync its sessions, SQLite
-files, history, credentials, or logs.
+files, history, credentials, or logs. Atuin Threads supports encrypted handoff
+of captured conversation records to another machine, using Atuin's filters and
+existing sync account. See the [Mero Terminal README](../README.md) for the
+capture policy, migration, and resume workflow.
 
 ## Install on another machine
 
@@ -41,3 +44,24 @@ writable runtime home because Codex sandboxes may make `$HOME` read-only.
 
 Install the `mero-headroom` repository and its existing `codexh` symlinks
 separately. Restart Codex after changing this configuration.
+
+## Atuin Threads MCP
+
+Atuin captures and syncs threads independently of MCP. The managed Codex
+configuration leaves Atuin MCP disabled on ordinary launches. Enable it for a
+single invocation when an agent needs to read a previous conversation.
+
+```bash
+rtk codex -c 'mcp_servers.atuin.enabled=true'
+```
+
+The opt-in exposes `atuin_threads_search`, `atuin_threads_list`, and
+`atuin_threads_read`. Ask Codex to search for a specific topic and read the
+relevant messages in small pages. In the interactive CLI, `/mcp` shows the
+server status. A new `rtk codex` launch uses the disabled default again. Use
+`rtk atuin threads search` and `rtk atuin threads show` to inspect a conversation
+from the shell.
+
+The server's tools are read-only. The agent can include retrieved text in a
+request to its model provider, so only opt in when the conversation is suitable
+for that use.

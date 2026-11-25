@@ -152,6 +152,22 @@ command = "mero-mcp-playwright"
 args = []
 startup_timeout_sec = 90.0
 
+# Start only when explicitly enabled for this invocation.
+[mcp_servers.atuin]
+command = "atuin"
+args = ["mcp"]
+enabled = false
+enabled_tools = ["atuin_threads_search", "atuin_threads_list", "atuin_threads_read"]
+env_vars = [
+  "ATUIN_HOME",
+  "ATUIN_CONFIG_DIR",
+  "ATUIN_DB_PATH",
+  "ATUIN_DAEMON__SOCKET_PATH",
+  "XDG_CONFIG_HOME",
+  "XDG_DATA_HOME",
+  "XDG_RUNTIME_DIR",
+]
+
 # Headroom is exposed as an MCP tool only. Raw Codex never uses its local proxy.
 [mcp_servers.headroom]
 command = "headroom"

@@ -722,14 +722,15 @@ elif [ -f "$HOME/.local/bin/mise" ]; then
   eval "$("$HOME/.local/bin/mise" activate bash)"
 fi
 
+# >>> Codex installer >>>
+export PATH="$HOME/.local/bin:$PATH"
+# <<< Codex installer <<<
+
 # bash-preexec must be loaded after tools that rewrite PROMPT_COMMAND, and
 # before Atuin registers its preexec/precmd hooks.
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 command -v atuin >/dev/null 2>&1 && eval "$(atuin init bash)"
 
-# >>> Codex installer >>>
-export PATH="$HOME/.local/bin:$PATH"
-# <<< Codex installer <<<
 codexh() {
   if [ "${1:-}" = "savings" ]; then
     local port stats mode failures log_file failure found=0
