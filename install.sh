@@ -15,6 +15,24 @@ record_command_failure() {
 }
 trap 'record_command_failure "$?" "$LINENO" "$BASH_COMMAND"' ERR
 
+install_atuin() {
+    local atuin_dir="$HOME/.atuin/bin"
+    local installer
+
+    echo "Installing or updating Atuin..."
+    installer=$(curl --proto '=https' --tlsv1.2 -fsSL \
+        https://github.com/atuinsh/atuin/releases/latest/download/atuin-installer.sh) || return 1
+    ATUIN_INSTALL_DIR="$atuin_dir" ATUIN_NO_MODIFY_PATH=1 sh <<< "$installer" || return 1
+    "$atuin_dir/atuin" --version || return 1
+    mkdir -p "$HOME/.local/bin" || return 1
+    ln -sfnT "$atuin_dir/atuin" "$HOME/.local/bin/atuin" || return 1
+}
+
+if [[ ${1:-} == --update-atuin ]]; then
+    install_atuin
+    exit
+fi
+
 INSTALL_WEZTERM="${MERO_INSTALL_WEZTERM:-}"
 WEZTERM_CHANNEL="${MERO_WEZTERM_CHANNEL:-auto}"
 NVIM_CHANNEL="${MERO_NVIM_CHANNEL:-nightly}"
@@ -255,32 +273,6 @@ install_oh_my_posh() {
     fi
 
     curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
-}
-
-install_atuin() {
-    if command -v atuin >/dev/null 2>&1 && atuin --version >/dev/null 2>&1; then return 0; fi
-    echo "Installing Atuin..."
-
-    # Keep the official per-user installation ahead of any stale system copy.
-    # A newer Atuin can create migrations that an older /usr/local/bin/atuin
-    # cannot resolve, which makes every command fail with a missing migration.
-    export ATUIN_BIN_DIR="${ATUIN_BIN_DIR:-$HOME/.atuin/bin}"
-    export PATH="$ATUIN_BIN_DIR:$PATH"
-
-    if ! curl --proto '=https' --tlsv1.2 -lsSf https://setup.atuin.sh | sh -s -- --non-interactive; then
-        return 1
-    fi
-
-    hash -r 2>/dev/null || true
-    if [ ! -x "$ATUIN_BIN_DIR/atuin" ]; then
-        echo "Atuin installer completed without creating $ATUIN_BIN_DIR/atuin."
-        return 1
-    fi
-
-    mkdir -p "$HOME/.local/bin"
-    ln -sfn "$ATUIN_BIN_DIR/atuin" "$HOME/.local/bin/atuin"
-    export PATH="$ATUIN_BIN_DIR:$PATH"
-    echo "Using Atuin $("$ATUIN_BIN_DIR/atuin" --version 2>/dev/null || echo unknown)"
 }
 
 install_aichat_release_fallback() {

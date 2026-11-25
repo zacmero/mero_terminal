@@ -459,6 +459,24 @@ or `y`; leaving with `Ctrl+C` returns Bash in the directory where Yazi was
 closed. The tracked Bash function is required because a child process cannot
 directly change its parent shell's working directory.
 
+### Install or update Atuin
+
+Both setup scripts install Atuin from the official release into `~/.atuin/bin`
+and links it from `~/.local/bin`. On Arch, Debian, and Ubuntu (x86_64 and
+ARM64), run this from the repository to install or update Atuin on its own:
+
+```bash
+bash install.sh --update-atuin
+hash -r
+command -v atuin
+atuin --version
+```
+
+Run it as your regular user. It uses the same installer as both setup scripts
+and works even when a system package is already installed or a system upgrade
+is blocked. If your shell still finds `/usr/bin/atuin`, put `~/.local/bin`
+ahead of `/usr/bin` on `PATH` and open a new shell.
+
 ### Shell hook maintenance
 
 Atuin command capture depends on `bash-preexec.sh` owning the Bash `DEBUG` trap after prompt integrations have finished editing `PROMPT_COMMAND`. Keep `bash-preexec.sh` and `atuin init bash` at the end of `bashrc`, after tools such as Oh My Posh, zoxide, and mise. The tracked `bash-preexec.sh` is intentionally patched to tolerate prompt integrations that use array-style `PROMPT_COMMAND`; do not replace it with a pristine upstream copy without preserving that compatibility.

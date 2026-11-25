@@ -71,11 +71,6 @@ release_binary() {
     install -m755 "$path" "$destination" || return 1
     "$destination" --version >/dev/null 2>&1
 }
-install_atuin() {
-    # Preserve the newer per-user version and its existing history/database.
-    command -v atuin >/dev/null 2>&1 && atuin --version >/dev/null 2>&1 && return 0
-    release_binary atuinsh/atuin "atuin-$ARCH-unknown-linux-musl.tar.gz" atuin
-}
 install_posh() {
     command -v oh-my-posh >/dev/null 2>&1 && return 0
     fetch "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-$POSH_ARCH" "$WORK/posh" &&
@@ -140,7 +135,7 @@ if [[ $DISTRO == arch ]]; then
 else
     step 'TLS certificates' ensure_package update-ca-certificates ca-certificates || true
 fi
-step Atuin install_atuin || true
+step Atuin bash "$REPO/install.sh" --update-atuin || true
 step 'Oh My Posh prompt' install_posh || true
 step fastfetch install_fastfetch || true
 step croc install_croc || true
