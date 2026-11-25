@@ -8,6 +8,8 @@ grex --> create regex on demand.
 wezterm ricing pass --> add a more intentional visual design, keymaps, and workflow polish after the base install path is stable.
 Tmux-Floax --> floating terminal pane over the current one, with persistent memory.
 
+Atuin Threads: Recheck [native Gemini CLI and Antigravity support](https://github.com/atuinsh/atuin/issues/4728) before migrating their preserved archives. If support is delayed, validate a provenance-preserving conversion using disposable profiles and synthetic fixtures. [Mero Terminal issue #3](https://github.com/zacmero/mero_terminal/issues/3)
+
 OBS: all of these msut be installed in a portable way0 and described on the README.md after installed.
 
 

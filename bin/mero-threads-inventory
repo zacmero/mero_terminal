@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Inventory local Atuin Threads inputs without reading transcript text."""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import shutil
+import socket
+import stat
+import sys
+import tempfile
+
+
+def env_path(name, default):
+    return Path(os.environ.get(name) or default).expanduser()
+
+
+def pi_sessions(home, errors):
+    agent = env_path("PI_CODING_AGENT_DIR", home / "agent")
+    override = os.environ.get("PI_CODING_AGENT_SESSION_DIR")
+    if override:
+        return Path(override).expanduser()
+    settings = agent / "settings.json"
+    try:
+        value = json.loads(settings.read_text(encoding="utf-8-sig")).get("sessionDir")
+        if isinstance(value, str) and Path(value).expanduser().is_absolute():
+            return Path(value).expanduser()
+    except FileNotFoundError:
+        pass
+    except (OSError, UnicodeError, ValueError, AttributeError):
+        errors.append(f"Could not read Pi sessionDir from {settings}")
+    return agent / "sessions"
+
+
+def scan_roots(args, errors):
+    home = Path.home()
+    codex = env_path("CODEX_HOME", home / ".codex")
+    claude = env_path("CLAUDE_CONFIG_DIR", home / ".claude")
+    copilot = env_path("COPILOT_HOME", home / ".copilot")
+    grok = env_path("GROK_HOME", home / ".grok")
+    kiro = env_path("KIRO_HOME", home / ".kiro")
+    hermes = env_path("HERMES_HOME", home / ".hermes")
+    vibe = env_path("VIBE_HOME", home / ".vibe")
+    opencode = env_path("XDG_DATA_HOME", home / ".local/share") / "opencode"
+    db = os.environ.get("OPENCODE_DB")
+    pi = pi_sessions(home / ".pi", errors)
+    omp = pi_sessions(home / ".omp", errors)
+    roots = [
+        ("codex", codex / "sessions", ("rollout-*.jsonl", "rollout-*.jsonl.zst")),
+        ("codex-archived", codex / "archived_sessions", ("rollout-*.jsonl", "rollout-*.jsonl.zst")),
+        ("claude-code", claude / "projects", ("*/*.jsonl", "*/subagents/agent-*.jsonl")),
+        ("copilot", copilot / "session-state", ("*/events.jsonl",)),
+        ("grok", grok / "sessions", ("*/chat_history.jsonl",)),
+        ("kiro", kiro / "sessions", ("sess_*/messages.jsonl", "sub-executions/*.jsonl")),
+        ("hermes-db", hermes, ("state.db",)),
+        ("vibe", vibe / "logs/session", ("unified/*/CURRENT", "*/messages.jsonl")),
+    ]
+    if db != ":memory:":
+        if db:
+            override = opencode / db
+            roots.append(("opencode-db", override.parent, (override.name,)))
+        else:
+            roots.append(("opencode-db", opencode, ("opencode.db", "opencode-*.db")))
+    roots.append(("pi/omp" if pi.resolve() == omp.resolve() else "pi", pi, ("*.jsonl",)))
+    if pi.resolve() != omp.resolve():
+        roots.append(("omp", omp, ("*.jsonl",)))
+
+    for root in (home / ".gemini/tmp", env_path("GEMINI_CLI_HOME", home) / ".gemini/tmp", *args.gemini_root):
+        roots.append(("gemini", root, ("chats/session-*.json", "chats/session-*.jsonl")))
+    agy_patterns = (".system_generated/logs/transcript.jsonl", ".system_generated/logs/transcript_full.jsonl")
+    for root in (*(home / ".gemini" / name / "brain" for name in ("antigravity-cli", "antigravity", "antigravity-ide")), *args.antigravity_root):
+        roots.append(("antigravity", root, agy_patterns))
+    return list(dict.fromkeys((name, root.expanduser().resolve(), patterns) for name, root, patterns in roots))
+
+
+def scan(root, patterns, errors):
+    files = {}
+    present = False
+    try:
+        present = stat.S_ISDIR(root.stat().st_mode)
+    except FileNotFoundError:
+        return present, files
+    except OSError as error:
+        errors.append(str(error))
+    if not present:
+        errors.append(f"Session root is not a directory: {root}")
+        return present, files
+    for directory, _, names in os.walk(root, onerror=lambda error: errors.append(str(error))):
+        for name in names:
+            path = Path(directory) / name
+            if not any(path.relative_to(root).match(pattern) for pattern in patterns):
+                continue
+            try:
+                metadata = path.lstat()
+                if stat.S_ISREG(metadata.st_mode):
+                    files[path] = metadata
+            except OSError as error:
+                errors.append(str(error))
+    return present, files
+
+
+def utc(timestamp):
+    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat(timespec="seconds")
+
+
+def summarize(harness, root, present, files):
+    times = [metadata.st_mtime for metadata in files.values()]
+    return {
+        "harness": harness,
+        "root": str(root),
+        "present": present,
+        "files": len(files),
+        "bytes": sum(metadata.st_size for metadata in files.values()),
+        "oldest_mtime": utc(min(times)) if times else None,
+        "newest_mtime": utc(max(times)) if times else None,
+        "formats": dict(Counter(path.name if harness == "antigravity" else path.suffix for path in files)),
+    }
+
+
+def copy_private(source, destination):
+    with os.fdopen(os.open(source, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK), "rb") as original:
+        before = os.fstat(original.fileno())
+        if not stat.S_ISREG(before.st_mode):
+            raise OSError(f"Source is no longer a regular file: {source}")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        staged = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=destination.parent, prefix=".partial-", delete=False) as copy:
+                staged = Path(copy.name)
+                shutil.copyfileobj(original, copy)
+            after = os.fstat(original.fileno())
+            if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+                raise OSError(f"Source changed during copy: {source}")
+            os.utime(staged, ns=(before.st_atime_ns, before.st_mtime_ns))
+            staged.rename(destination)
+        finally:
+            if staged is not None:
+                staged.unlink(missing_ok=True)
+
+
+def backup_root(harness, root, files, destination, include_full, errors):
+    paths = {path for path in files if include_full or path.name != "transcript_full.jsonl"}
+    source = root
+    if harness == "gemini":
+        if root.name == "tmp" and root.parent.name == ".gemini":
+            source = root.parent
+        for chat in tuple(paths):
+            project = chat.parent.parent
+            paths.add(project / ".project_root")
+            if project.parent.name == "tmp":
+                paths.add(project.parent.parent / "projects.json")
+    copied = 0
+    for path in sorted(paths):
+        if source not in path.parents:
+            continue
+        try:
+            if path not in files and not stat.S_ISREG(path.lstat().st_mode):
+                continue
+            copy_private(path, destination / path.relative_to(source))
+            copied += 1
+        except FileNotFoundError as error:
+            if path in files:
+                errors.append(str(error))
+        except OSError as error:
+            errors.append(str(error))
+    return {"harness": harness, "source": str(source), "directory": destination.name, "files": copied}
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog="Counts are candidate files. SQLite stores are counted as files, and Amp requires its own authenticated CLI.",
+    )
+    parser.add_argument("--gemini-root", action="append", default=[], type=Path, metavar="DIR",
+                        help="also scan this Gemini data or backup directory (repeatable)")
+    parser.add_argument("--antigravity-root", action="append", default=[], type=Path, metavar="DIR",
+                        help="also scan this Antigravity data or backup directory (repeatable)")
+    parser.add_argument("--backup", type=Path, metavar="NEW_DIRECTORY",
+                        help="privately copy Gemini and Antigravity transcripts into a new local directory")
+    parser.add_argument("--include-antigravity-full", action="store_true",
+                        help="also back up transcript_full.jsonl, which can contain more sensitive data")
+    args = parser.parse_args()
+    if args.include_antigravity_full and args.backup is None:
+        parser.error("--include-antigravity-full requires --backup")
+
+    errors = []
+    roots = scan_roots(args, errors)
+    report = {"host": socket.gethostname(), "inventory": [], "errors": errors}
+    archives = []
+    for harness, root, patterns in roots:
+        present, files = scan(root, patterns, errors)
+        report["inventory"].append(summarize(harness, root, present, files))
+        if args.backup and harness in ("gemini", "antigravity") and files:
+            archives.append((harness, root, files))
+
+    if args.backup:
+        os.umask(0o077)
+        destination = args.backup.expanduser().absolute()
+        try:
+            destination.mkdir(mode=0o700)
+            copies = [backup_root(harness, root, files, destination / f"{harness}-{index}",
+                                  args.include_antigravity_full, errors)
+                      for index, (harness, root, files) in enumerate(archives, start=1)]
+            report["backup"] = {"directory": str(destination), "copies": copies}
+            with (destination / "manifest.json").open("x", encoding="utf-8") as manifest:
+                json.dump(report, manifest, indent=2)
+                manifest.write("\n")
+        except OSError as error:
+            errors.append(str(error))
+    print(json.dumps(report, indent=2))
+    return bool(errors)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
