@@ -1,8 +1,10 @@
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "low"
+model_reasoning_effort = "medium"
 approvals_reviewer = "user"
+service_tier = "default"
+
 
 # service_tier = "fast"
 
@@ -91,6 +93,35 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/ubuntu/projects/mero_terminal"]
+
+[projects."/home/zacmero/projects/mero-mitrastar"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-mobile-1"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-watch"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-xperia"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-askey"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/mero-monitor"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-tv"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-telephony"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-esp"]
+trust_level = "trusted"
+
+[projects."/home/zacmero/projects/mero-pi"]
 trust_level = "trusted"
 
 [notice]
