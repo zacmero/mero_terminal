@@ -40,6 +40,10 @@ commands and falls back to standard `ls`/`rm` when eza/trash are absent. Directo
 changes no longer print automatic listings in either mode. Nerd Font
 icons use the font on your connecting terminal; no server fonts are required.
 
+Create `~/.config/mero-terminal/disable-nvm` on a host to skip automatic NVM
+activation and completion when opening Bash. Remove the file to restore startup
+loading.
+
 Installers preserve timestamped output and failure logs under
 `~/.local/state/mero-terminal/`. Tool failures continue to independent steps and
 configuration verification; a run with recorded failures exits **1**, so it is
