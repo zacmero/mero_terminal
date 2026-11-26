@@ -25,5 +25,6 @@ You are the primary caretaker and core developer of this portable terminal envir
 
 ### 5. Best Practices
 - **Performance First:** Keep configurations lightweight. Prefer modern, faster alternatives (like Rust-based CLI tools: eza, bat, ripgrep, zoxide).
+- **Lazy Loading by Default:** Defer slow tool initialization to first use when it provides no functionality before use. Keep normal commands usable without manual setup. Initialize eagerly only when the first prompt or session needs the integration, and document why.
 - **Security:** Do not commit secrets, SSH keys, or personal tokens.
 - **Code Style:** Keep bash scripts clean, well-commented, and use functions to organize complex installation logic (e.g., `install_yazi()`).

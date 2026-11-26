@@ -441,11 +441,17 @@ fi
 
 # --- PATHS & EXPORTS (Universal) ---
 
-# NVM
+# Load NVM and its completion on the first nvm command.
 if [ ! -e "$HOME/.config/mero-terminal/disable-nvm" ]; then
   export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  if [ -s "$NVM_DIR/nvm.sh" ] && ! declare -F nvm >/dev/null; then
+    nvm() {
+      unset -f nvm
+      \. "$NVM_DIR/nvm.sh" || return
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+      nvm "$@"
+    }
+  fi
 fi
 
 # Default Browser (WSL Friendly)

@@ -40,9 +40,14 @@ commands and falls back to standard `ls`/`rm` when eza/trash are absent. Directo
 changes no longer print automatic listings in either mode. Nerd Font
 icons use the font on your connecting terminal; no server fonts are required.
 
-Create `~/.config/mero-terminal/disable-nvm` on a host to skip automatic NVM
-activation and completion when opening Bash. Remove the file to restore startup
-loading.
+**Lazy loading is the default** for slow shell integrations that provide
+functionality only when used. Their normal commands initialize them on first use.
+
+If NVM is installed, your first `nvm` command loads it and enables completion
+for the rest of the Bash session. Run `nvm use default` to select the default
+version, or `nvm use` in a project with an `.nvmrc`. Before activation,
+`node` and `npm` resolve from your existing `PATH`.
+Create `~/.config/mero-terminal/disable-nvm` to opt out of lazy loading on a host.
 
 Installers preserve timestamped output and failure logs under
 `~/.local/state/mero-terminal/`. Tool failures continue to independent steps and
