@@ -1,7 +1,7 @@
 model = "gpt-6.2-sol"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "max"
 approvals_reviewer = "user"
 service_tier = "default"
 
