@@ -545,7 +545,9 @@ Run `mero-threads-inventory` on each source host to count candidate files
 before importing. SQLite entries are database files. Keep the native
 archives until samples are recoverable elsewhere.
 Gemini CLI and Antigravity need separate preservation while native Atuin
-support is pending. Run `mero-threads-inventory --help` for custom roots and
+support is pending. The [Gemini CLI archive](#find-migrated-gemini-cli-sessions)
+documents the sessions already migrated to Pi and synced. Run
+`mero-threads-inventory --help` for custom roots and
 the optional private local backup. Inventory and backup run offline. To
 preserve the additional Antigravity full transcripts, pass
 `--include-antigravity-full` alongside `--backup` and keep the archive private.
@@ -581,9 +583,12 @@ Watch the first sync for service errors before moving to the next batch.
 
 #### Find and continue sessions
 
-Open the interactive picker with `atuin resume`. Press Ctrl+T **inside the
-picker** until the desired agent is selected, then press Space and type your
-search. The picker searches as you type and matches a prefix on the last
+**Run `rtk atuin resume`** and type a project name or words from the
+conversation. Inside Pi, choose `/resume`, press **Tab** for **All**, then
+type your search and press **Enter**.
+
+In the Atuin picker, press Ctrl+T until the desired agent is selected, then
+press Space and type your search. The picker matches a prefix on the last
 unfinished word. Use Ctrl+O to inspect the selected thread, Enter to open the
 resume chooser, and Esc to leave. At the Bash prompt, Ctrl+T still opens FZF.
 
@@ -630,6 +635,55 @@ continue it, and verify the new turn on the source host. Keep `tail` open
 while syncing to observe new messages. Latency depends on sync frequency and
 `[daemon].sync_frequency` controls daemon scheduling.
 [Atuin cross-machine resume guide](https://atuin.sh/guides/resume-agent-sessions/)
+
+#### Find migrated Gemini CLI sessions
+
+The Gemini CLI migration on the archive host synced **173 transcript versions
+from 164 sessions** to Atuin Cloud as Pi sessions. Titles start with
+`[Gemini CLI]` and include the saved project labels.
+
+```bash
+rtk atuin resume ElizaOS
+rtk atuin threads search --harness pi --limit 0 'Gemini CLI'
+rtk atuin threads search --harness pi --limit 0 ElizaOS
+```
+
+The first command opens the picker for Eliza. Use **Ctrl+O** inside the
+picker to read a thread or **Enter** to open the resume chooser. The search
+commands list matching thread IDs. Use `rtk atuin threads show "$thread_id"`
+to read one or `rtk atuin resume "$thread_id"` to continue it.
+
+In Pi, enter `/resume` and press **Tab** to search all local sessions.
+Type `Gemini CLI`, `ElizaOS`, `Mero Protocol`, or `Suzy Mero Steele`.
+On a second host with Pi installed and the same Atuin account, run
+`rtk atuin sync` and open the Atuin picker to recover the thread into Pi.
+
+Eliza originally lived at `~/workspace2/eliza`. It has 26 transcript
+versions, including two from a legacy folder named by its hash. The ElizaOS
+project label in the title distinguishes those versions from sessions that
+mention ElizaOS in the conversation. Other archived projects include Suzy Mero
+Steele, Mero Protocol, Stock Bubble, Content Factory Stack, Veritas Trader,
+Diespar Trader, Mero Terminal, Mero Vault, Mero 2nd Brain, Dotfiles, and
+Obsidian Migration. The archive index also lists the home and workspace
+folders and five legacy folders with unresolved project names.
+
+##### Gemini CLI originals and local index
+
+On the archive host, open
+`~/.local/share/gemini-cli-archive/snapshot/index.md` for the project indexes,
+Markdown transcripts, Pi JSONL files, and the map from Atuin IDs to original
+Gemini IDs. Atuin keeps the original event timestamps. In 11 transcript
+versions, events extend beyond the original session header dates, so Atuin
+displays the bounds of those events. The local index links to the original
+date ranges.
+
+The source sessions are still in `~/.gemini/tmp/<project>/chats/`. To back up
+the originals, copy the entire
+`~/.local/share/gemini-cli-archive/snapshot/raw/` folder. It contains the raw
+transcripts, checkpoints, saved tool outputs, images, project mappings,
+source paths, and checksums. Run `rtk sha256sum -c SHA256SUMS` from inside the
+copied `raw` folder to verify it. Use the raw archive for tool payloads and
+attachments beyond Atuin's capture limits.
 
 #### Enable MCP for one invocation
 
